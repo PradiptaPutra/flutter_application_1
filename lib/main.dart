@@ -5,18 +5,24 @@ import 'data_entry_form.dart';
 import 'profile_screen.dart';
 import 'splash_screen.dart';
 import 'data_summary_view.dart';
+import 'logreg_screen.dart';
 
 void main() {
   runApp(MaterialApp(
     title: 'Health Application',
     initialRoute: '/splash',
     routes: {
-      '/': (context) => LoginScreen(),
+      '/splash': (context) => SplashScreen(),
+      '/logreg': (context) => LogregScreen(),
+      '/login': (context) => LoginScreen(),
       '/register': (context) => RegistrationScreen(),
       '/profile': (context) => ProfileScreen(),
       '/splash': (context) => SplashScreen(),
       '/data_summary': (context) => DataSummaryView(entries: []), // Default route for the DataSummaryView
     },
+      onUnknownRoute: (settings) {
+    return MaterialPageRoute(builder: (context) => LogregScreen());
+  },
     onGenerateRoute: (settings) {
       if (settings.name == '/data_entry') {
         final args = settings.arguments as Map<String, dynamic>;
