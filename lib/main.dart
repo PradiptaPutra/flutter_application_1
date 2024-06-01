@@ -4,7 +4,7 @@ import 'registration_screen.dart';
 import 'data_entry_form.dart';
 import 'profile_screen.dart';
 import 'splash_screen.dart';
-import 'summary_view.dart';
+import 'data_summary_view.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -15,6 +15,7 @@ void main() {
       '/register': (context) => RegistrationScreen(),
       '/profile': (context) => ProfileScreen(),
       '/splash': (context) => SplashScreen(),
+      '/data_summary': (context) => DataSummaryView(entries: []), // Default route for the DataSummaryView
     },
     onGenerateRoute: (settings) {
       if (settings.name == '/data_entry') {
@@ -22,17 +23,15 @@ void main() {
         final userId = args['userId'];
         return MaterialPageRoute(
           builder: (context) => DataEntryForm(userId: userId),
-                  );
-      } else if (settings.name == '/summary') {
+        );
+      } else if (settings.name == '/data_summary') {
         final args = settings.arguments as Map<String, dynamic>;
-        final entries = args['entries'] as List<Map<String, dynamic>>;
+        final entries = args['entries'];
         return MaterialPageRoute(
-          builder: (context) => SummaryView(entries: entries),
+          builder: (context) => DataSummaryView(entries: entries),
         );
       }
       return null;
     },
   ));
 }
-
-       

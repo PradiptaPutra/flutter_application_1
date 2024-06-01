@@ -82,7 +82,7 @@ packages:
     source: hosted
     version: "2.0.5"
   excel:
-    dependency: "direct dev"
+    dependency: "direct main"
     description:
       name: excel
       sha256: f6a76fff6ac14f48fd44a6528e72705965e02cbc593e00427ab1d9a9f5d3bffa
@@ -438,7 +438,7 @@ packages:
     source: hosted
     version: "20.4.54"
   syncfusion_flutter_xlsio:
-    dependency: "direct dev"
+    dependency: "direct main"
     description:
       name: syncfusion_flutter_xlsio
       sha256: a73bb379ab01f37a764038667d1e3636a46cc55a4bfa573e98475a35659b7bff

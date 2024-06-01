@@ -1,6 +1,5 @@
-import 'package:flutter/services.dart' show rootBundle;
+import 'package:flutter/services.dart';
 import 'package:excel/excel.dart';
-import 'dart:typed_data';
 
 class Question {
   final String no;
@@ -18,24 +17,26 @@ class Question {
 
 Future<List<Question>> loadQuestionsFromExcel() async {
   final ByteData data = await rootBundle.load('assets/Form Penilaian.xlsx');
-  final Uint8List bytes = data.buffer.asUint8List();
+  final List<int> bytes = data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
+  final Excel excel = Excel.decodeBytes(bytes);
   
-  var excel = Excel.decodeBytes(bytes);
+  final List<Question> questions = [];
+  final Sheet? sheet = excel.tables[excel.tables.keys.first];
+  if (sheet != null) {
+    for (int row = 1; row < sheet.maxRows; row++) {
+      final List<Data?> rowData = sheet.row(row);
+      final String no = rowData[0]?.value.toString() ?? '';
+      final String indikator = rowData[1]?.value.toString() ?? '';
+      final String subIndikator = rowData[2]?.value.toString() ?? '';
+      final String kriteria = rowData[3]?.value.toString() ?? '';
 
-  List<Question> questions = [];
-
-  for (var table in excel.tables.keys) {
-    if (excel.tables[table] != null) {
-      for (var row in excel.tables[table]!.rows.skip(1)) { // Skip header row
-        questions.add(Question(
-          no: row[0]?.value.toString() ?? '',
-          indikator: row[1]?.value.toString() ?? '',
-          subIndikator: row[2]?.value.toString() ?? '',
-          kriteria: row[3]?.value.toString() ?? '',
-        ));
-      }
+      questions.add(Question(
+        no: no,
+        indikator: indikator,
+        subIndikator: subIndikator,
+        kriteria: kriteria,
+      ));
     }
   }
-
   return questions;
 }

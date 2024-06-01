@@ -20,6 +20,8 @@ class _DataEntryFormState extends State<DataEntryForm> {
   final Map<String, TextEditingController> _sesudahControllers = {};
   final Map<String, TextEditingController> _keteranganControllers = {};
   List<Question> questions = [];
+  bool _isLoading = true;
+  String? _error;
 
   @override
   void initState() {
@@ -28,15 +30,23 @@ class _DataEntryFormState extends State<DataEntryForm> {
   }
 
   Future<void> _loadQuestions() async {
-    List<Question> loadedQuestions = await loadQuestionsFromExcel();
-    setState(() {
-      questions = loadedQuestions;
-      for (var question in questions) {
-        _sebelumControllers[question.no] = TextEditingController();
-        _sesudahControllers[question.no] = TextEditingController();
-        _keteranganControllers[question.no] = TextEditingController();
-      }
-    });
+    try {
+      List<Question> loadedQuestions = await loadQuestionsFromExcel();
+      setState(() {
+        questions = loadedQuestions;
+        for (var question in questions) {
+          _sebelumControllers[question.no] = TextEditingController();
+          _sesudahControllers[question.no] = TextEditingController();
+          _keteranganControllers[question.no] = TextEditingController();
+        }
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _error = e.toString();
+        _isLoading = false;
+      });
+    }
   }
 
   Future<void> _submitData() async {
@@ -99,70 +109,72 @@ class _DataEntryFormState extends State<DataEntryForm> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: questions.isEmpty
+        child: _isLoading
             ? Center(child: CircularProgressIndicator())
-            : Column(
-                children: [
-                  TextFormField(
-                    controller: _puskesmasController,
-                    decoration: InputDecoration(labelText: 'Puskesmas'),
-                  ),
-                  Expanded(
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: DataTable(
-                        columnSpacing: 20,
-                        columns: [
-                          DataColumn(label: Text('No')),
-                          DataColumn(label: Text('Indikator')),
-                          DataColumn(label: Text('Sub Indikator')),
-                          DataColumn(label: Text('Kriteria')),
-                          DataColumn(label: Text('Sebelum')),
-                          DataColumn(label: Text('Sesudah')),
-                          DataColumn(label: Text('Keterangan')),
-                        ],
-                        rows: questions.map((question) {
-                          return DataRow(cells: [
-                            DataCell(Container(width: 30, child: Text(question.no))),
-                            DataCell(Container(width: 150, child: Text(question.indikator))),
-                            DataCell(Container(width: 150, child: Text(question.subIndikator))),
-                            DataCell(Container(width: 300, child: Text(question.kriteria, overflow: TextOverflow.ellipsis))),
-                            DataCell(Container(width: 60, child: TextFormField(controller: _sebelumControllers[question.no]))),
-                            DataCell(Container(width: 60, child: TextFormField(controller: _sesudahControllers[question.no]))),
-                            DataCell(Container(width: 100, child: TextFormField(controller: _keteranganControllers[question.no]))),
-                          ]);
-                        }).toList(),
-                      ),
-                    ),
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            : _error != null
+                ? Center(child: Text('Error: $_error'))
+                : Column(
                     children: [
-                      ElevatedButton(
-                        onPressed: _submitData,
-                        child: Text('Submit'),
+                      TextFormField(
+                        controller: _puskesmasController,
+                        decoration: InputDecoration(labelText: 'Puskesmas'),
                       ),
-                      ElevatedButton(
-                        onPressed: _viewData,
-                        child: Text('View Saved Data'),
+                      Expanded(
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: DataTable(
+                            columnSpacing: 20,
+                            columns: [
+                              DataColumn(label: Text('No')),
+                              DataColumn(label: Text('Indikator')),
+                              DataColumn(label: Text('Sub Indikator')),
+                              DataColumn(label: Text('Kriteria')),
+                              DataColumn(label: Text('Sebelum')),
+                              DataColumn(label: Text('Sesudah')),
+                              DataColumn(label: Text('Keterangan')),
+                            ],
+                            rows: questions.map((question) {
+                              return DataRow(cells: [
+                                DataCell(Container(width: 30, child: Text(question.no))),
+                                DataCell(Container(width: 150, child: Text(question.indikator))),
+                                DataCell(Container(width: 150, child: Text(question.subIndikator))),
+                                DataCell(Container(width: 300, child: Text(question.kriteria, overflow: TextOverflow.ellipsis))),
+                                DataCell(Container(width: 60, child: TextFormField(controller: _sebelumControllers[question.no]))),
+                                DataCell(Container(width: 60, child: TextFormField(controller: _sesudahControllers[question.no]))),
+                                DataCell(Container(width: 100, child: TextFormField(controller: _keteranganControllers[question.no]))),
+                              ]);
+                            }).toList(),
+                          ),
+                        ),
                       ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          ElevatedButton(
+                            onPressed: _submitData,
+                            child: Text('Submit'),
+                          ),
+                          ElevatedButton(
+                            onPressed: _viewData,
+                            child: Text('View Saved Data'),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 16),
+                      Text(
+                        "Total Skor",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      Text(
+                        "(Total Skor x 4.15)",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      Text("Interpretasi Akhir Indikator Bangunan Fasyankes Memasuki Masa Pemulihan"),
+                      Text("Tinggi / Aman: >65"),
+                      Text("Sedang / Kurang Aman: 20 - 65"),
+                      Text("Rendah / Tidak Aman: <20"),
                     ],
                   ),
-                  SizedBox(height: 16),
-                  Text(
-                    "Total Skor",
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  Text(
-                    "(Total Skor x 4.15)",
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  Text("Interpretasi Akhir Indikator Bangunan Fasyankes Memasuki Masa Pemulihan"),
-                  Text("Tinggi / Aman: >65"),
-                  Text("Sedang / Kurang Aman: 20 - 65"),
-                  Text("Rendah / Tidak Aman: <20"),
-                ],
-              ),
       ),
     );
   }
