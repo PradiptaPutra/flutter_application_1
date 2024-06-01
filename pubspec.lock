@@ -73,6 +73,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.8"
+  equatable:
+    dependency: transitive
+    description:
+      name: equatable
+      sha256: c2b87cb7756efdf69892005af546c56c0b5037f54d2a88269b4f347a505e3ca2
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.5"
+  excel:
+    dependency: "direct dev"
+    description:
+      name: excel
+      sha256: f6a76fff6ac14f48fd44a6528e72705965e02cbc593e00427ab1d9a9f5d3bffa
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.1.0"
   fake_async:
     dependency: transitive
     description:
@@ -144,6 +160,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.17.0"
+  jiffy:
+    dependency: transitive
+    description:
+      name: jiffy
+      sha256: "85172c4fc975a50224521c05bf43abc845288863b19d91bd3c221a96a8785dd3"
+      url: "https://pub.dev"
+    source: hosted
+    version: "5.0.0"
   leak_tracker:
     dependency: transitive
     description:
@@ -409,26 +433,26 @@ packages:
     dependency: transitive
     description:
       name: syncfusion_flutter_core
-      sha256: "9be1bb9bbdb42823439a18da71484f1964c14dbe1c255ab1b931932b12fa96e8"
+      sha256: "3979f0b1c5a97422cadae52d476c21fa3e0fb671ef51de6cae1d646d8b99fe1f"
       url: "https://pub.dev"
     source: hosted
-    version: "19.4.56"
+    version: "20.4.54"
   syncfusion_flutter_xlsio:
     dependency: "direct dev"
     description:
       name: syncfusion_flutter_xlsio
-      sha256: "9b350f2590507d2d5f0468c2fca6af60b4b1d85b24bc5740476cf116b3138300"
+      sha256: a73bb379ab01f37a764038667d1e3636a46cc55a4bfa573e98475a35659b7bff
       url: "https://pub.dev"
     source: hosted
-    version: "19.4.56-beta"
+    version: "20.4.54-beta"
   syncfusion_officecore:
     dependency: transitive
     description:
       name: syncfusion_officecore
-      sha256: a23a9c995edb1238b94aaa875402cb91521e1a5f6e09e35302d5ae50e1ecfff0
+      sha256: "2ca66b01fb903bb8444d02c122078917d34edf2e5ad640cb41e3f07076c3b677"
       url: "https://pub.dev"
     source: hosted
-    version: "19.4.56-beta"
+    version: "20.4.54-beta"
   synchronized:
     dependency: transitive
     description:

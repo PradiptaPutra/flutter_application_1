@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'database_helper.dart';
-import 'questions.dart';
+import 'questions.dart';  // Import the questions list
 import 'data_list_view.dart';
 import 'summary_view.dart';
 
@@ -19,15 +19,24 @@ class _DataEntryFormState extends State<DataEntryForm> {
   final Map<String, TextEditingController> _sebelumControllers = {};
   final Map<String, TextEditingController> _sesudahControllers = {};
   final Map<String, TextEditingController> _keteranganControllers = {};
+  List<Question> questions = [];
 
   @override
   void initState() {
     super.initState();
-    for (var question in questions) {
-      _sebelumControllers[question.no] = TextEditingController();
-      _sesudahControllers[question.no] = TextEditingController();
-      _keteranganControllers[question.no] = TextEditingController();
-    }
+    _loadQuestions();
+  }
+
+  Future<void> _loadQuestions() async {
+    List<Question> loadedQuestions = await loadQuestionsFromExcel();
+    setState(() {
+      questions = loadedQuestions;
+      for (var question in questions) {
+        _sebelumControllers[question.no] = TextEditingController();
+        _sesudahControllers[question.no] = TextEditingController();
+        _keteranganControllers[question.no] = TextEditingController();
+      }
+    });
   }
 
   Future<void> _submitData() async {
@@ -43,9 +52,7 @@ class _DataEntryFormState extends State<DataEntryForm> {
         'keterangan': _keteranganControllers[question.no]?.text ?? '',
       };
       await _dbHelper.insertDataEntry(data);
-      print('Inserted entry: $data');
     }
-    print('All data submitted');
     _clearFormFields();
   }
 
@@ -64,7 +71,6 @@ class _DataEntryFormState extends State<DataEntryForm> {
 
   void _viewData() async {
     List<Map<String, dynamic>> entries = await _dbHelper.getDataEntriesForUser(widget.userId);
-    print('Entries retrieved: $entries');  // Debug statement to print entries
     Navigator.push(context, MaterialPageRoute(builder: (context) => DataListView(entries: entries)));
   }
 
@@ -93,47 +99,70 @@ class _DataEntryFormState extends State<DataEntryForm> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: ListView(
-          children: [
-            TextFormField(
-              controller: _puskesmasController,
-              decoration: InputDecoration(labelText: 'Puskesmas'),
-            ),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: DataTable(
-                columns: [
-                  DataColumn(label: Text('No')),
-                  DataColumn(label: Text('Indikator')),
-                  DataColumn(label: Text('Sub Indikator')),
-                  DataColumn(label: Text('Kriteria')),
-                  DataColumn(label: Text('Sebelum')),
-                  DataColumn(label: Text('Sesudah')),
-                  DataColumn(label: Text('Keterangan')),
+        child: questions.isEmpty
+            ? Center(child: CircularProgressIndicator())
+            : Column(
+                children: [
+                  TextFormField(
+                    controller: _puskesmasController,
+                    decoration: InputDecoration(labelText: 'Puskesmas'),
+                  ),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: DataTable(
+                        columnSpacing: 20,
+                        columns: [
+                          DataColumn(label: Text('No')),
+                          DataColumn(label: Text('Indikator')),
+                          DataColumn(label: Text('Sub Indikator')),
+                          DataColumn(label: Text('Kriteria')),
+                          DataColumn(label: Text('Sebelum')),
+                          DataColumn(label: Text('Sesudah')),
+                          DataColumn(label: Text('Keterangan')),
+                        ],
+                        rows: questions.map((question) {
+                          return DataRow(cells: [
+                            DataCell(Container(width: 30, child: Text(question.no))),
+                            DataCell(Container(width: 150, child: Text(question.indikator))),
+                            DataCell(Container(width: 150, child: Text(question.subIndikator))),
+                            DataCell(Container(width: 300, child: Text(question.kriteria, overflow: TextOverflow.ellipsis))),
+                            DataCell(Container(width: 60, child: TextFormField(controller: _sebelumControllers[question.no]))),
+                            DataCell(Container(width: 60, child: TextFormField(controller: _sesudahControllers[question.no]))),
+                            DataCell(Container(width: 100, child: TextFormField(controller: _keteranganControllers[question.no]))),
+                          ]);
+                        }).toList(),
+                      ),
+                    ),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      ElevatedButton(
+                        onPressed: _submitData,
+                        child: Text('Submit'),
+                      ),
+                      ElevatedButton(
+                        onPressed: _viewData,
+                        child: Text('View Saved Data'),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 16),
+                  Text(
+                    "Total Skor",
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  Text(
+                    "(Total Skor x 4.15)",
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  Text("Interpretasi Akhir Indikator Bangunan Fasyankes Memasuki Masa Pemulihan"),
+                  Text("Tinggi / Aman: >65"),
+                  Text("Sedang / Kurang Aman: 20 - 65"),
+                  Text("Rendah / Tidak Aman: <20"),
                 ],
-                rows: questions.map((question) {
-                  return DataRow(cells: [
-                    DataCell(Text(question.no)),
-                    DataCell(Text(question.indikator)),
-                    DataCell(Text(question.subIndikator)),
-                    DataCell(Text(question.kriteria)),
-                    DataCell(TextFormField(controller: _sebelumControllers[question.no], decoration: InputDecoration())),
-                    DataCell(TextFormField(controller: _sesudahControllers[question.no], decoration: InputDecoration())),
-                    DataCell(TextFormField(controller: _keteranganControllers[question.no], decoration: InputDecoration())),
-                  ]);
-                }).toList(),
               ),
-            ),
-            ElevatedButton(
-              onPressed: _submitData,
-              child: Text('Submit'),
-            ),
-            ElevatedButton(
-              onPressed: _viewData,
-              child: Text('View Saved Data'),
-            ),
-          ],
-        ),
       ),
     );
   }

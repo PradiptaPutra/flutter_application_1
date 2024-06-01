@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'database_helper.dart';
 import 'package:syncfusion_flutter_xlsio/xlsio.dart' as xlsio;
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
@@ -12,7 +11,7 @@ class SummaryView extends StatelessWidget {
   int _calculateTotalScore(List<Map<String, dynamic>> entries) {
     int totalScore = 0;
     for (var entry in entries) {
-      final score = entry['skor'];
+      final score = entry['sebelum'];
       if (score != null && score is String && int.tryParse(score) != null) {
         totalScore += int.parse(score);
       }
@@ -74,35 +73,30 @@ class SummaryView extends StatelessWidget {
             Text('Total Score: $totalScore', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
             SizedBox(height: 20),
             Expanded(
-              child: ListView.builder(
-                itemCount: entries.length,
-                itemBuilder: (context, index) {
-                  final entry = entries[index];
-                  return Card(
-                    margin: EdgeInsets.symmetric(vertical: 10.0),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Puskesmas: ${entry['puskesmas'] ?? ''}', style: TextStyle(fontWeight: FontWeight.bold)),
-                          SizedBox(height: 8),
-                          Text('Indikator: ${entry['indikator'] ?? ''}', style: TextStyle(fontWeight: FontWeight.bold)),
-                          SizedBox(height: 8),
-                          Text('Sub Indikator: ${entry['sub_indikator'] ?? ''}', style: TextStyle(fontWeight: FontWeight.bold)),
-                          SizedBox(height: 8),
-                          Text('Kriteria: ${entry['kriteria'] ?? ''}'),
-                          SizedBox(height: 8),
-                          Text('Sebelum: ${entry['sebelum'] ?? ''}'),
-                          SizedBox(height: 8),
-                          Text('Sesudah: ${entry['sesudah'] ?? ''}'),
-                          SizedBox(height: 8),
-                          Text('Keterangan: ${entry['keterangan'] ?? ''}'),
-                        ],
-                      ),
-                    ),
-                  );
-                },
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: DataTable(
+                  columns: [
+                    DataColumn(label: Text('Puskesmas')),
+                    DataColumn(label: Text('Indikator')),
+                    DataColumn(label: Text('Sub Indikator')),
+                    DataColumn(label: Text('Kriteria')),
+                    DataColumn(label: Text('Sebelum')),
+                    DataColumn(label: Text('Sesudah')),
+                    DataColumn(label: Text('Keterangan')),
+                  ],
+                  rows: entries.map((entry) {
+                    return DataRow(cells: [
+                      DataCell(Text(entry['puskesmas'] ?? '')),
+                      DataCell(Text(entry['indikator'] ?? '')),
+                      DataCell(Text(entry['sub_indikator'] ?? '')),
+                      DataCell(Text(entry['kriteria'] ?? '')),
+                      DataCell(Text(entry['sebelum'] ?? '')),
+                      DataCell(Text(entry['sesudah'] ?? '')),
+                      DataCell(Text(entry['keterangan'] ?? '')),
+                    ]);
+                  }).toList(),
+                ),
               ),
             ),
           ],
