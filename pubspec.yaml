@@ -76,6 +76,7 @@ flutter:
     - assets/Form Penilaian.xlsx
     - assets/images/bgsplash.png
     - assets/images/logokemenkes.png
+    - assets/images/logopuskesmas.png
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

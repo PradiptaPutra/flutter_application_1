@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/puskesmas_screen.dart';
 import 'login_screen.dart';
 import 'registration_screen.dart';
 import 'data_entry_form.dart';
@@ -6,6 +7,8 @@ import 'profile_screen.dart';
 import 'splash_screen.dart';
 import 'data_summary_view.dart';
 import 'logreg_screen.dart';
+import 'dashboard_screen.dart';
+import 'puskesmas_screen.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -18,6 +21,8 @@ void main() {
       '/register': (context) => RegistrationScreen(),
       '/profile': (context) => ProfileScreen(),
       '/splash': (context) => SplashScreen(),
+      '/dashboard': (context) => DashboardScreen(),
+      '/puskesmas': (context) => PuskesmasScreen(),
       '/data_summary': (context) => DataSummaryView(entries: []), // Default route for the DataSummaryView
     },
       onUnknownRoute: (settings) {
