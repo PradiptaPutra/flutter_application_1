@@ -37,34 +37,75 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final bottomPadding = MediaQuery.of(context).viewInsets.bottom;
+
     return Scaffold(
       appBar: AppBar(title: Text("Registration")),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
+      body: SingleChildScrollView(
+        padding: EdgeInsets.only(bottom: bottomPadding), // Adjust the padding to ensure visibility
+        child: Padding(
+          padding: const EdgeInsets.all(15.0),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            TextFormField(
+            Container(
+               margin: EdgeInsets.fromLTRB(0, 10, 0, 10),
+               
+            child: TextFormField(
               controller: _usernameController,
-              decoration: InputDecoration(labelText: 'Username'),
-              keyboardType: TextInputType.text,
+              decoration: InputDecoration(
+                labelText: 'Username',border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(15.0),
+                borderSide: BorderSide(color: const Color.fromARGB(255, 0, 0, 0), width: 1),
+                ),
+              filled: true,
+              fillColor: Colors.white,
+              ),
             ),
-            TextFormField(
+            ),
+            Container(
+               margin: EdgeInsets.only(bottom: 10.0),
+            child :TextFormField(
               controller: _emailController,
-              decoration: InputDecoration(labelText: 'Email'),
-              keyboardType: TextInputType.emailAddress,
+             decoration: InputDecoration(
+                labelText: 'Email',border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(15.0),
+                borderSide: BorderSide(color: const Color.fromARGB(255, 0, 0, 0), width: 1),
+                ),
+              filled: true,
+              fillColor: Colors.white,
+              ),
             ),
-            TextFormField(
+            ),
+            Container(
+               margin: EdgeInsets.fromLTRB(0, 0, 0, 280),
+            child :TextFormField(
               controller: _passwordController,
-              decoration: InputDecoration(labelText: 'Password'),
-              obscureText: true,
+              decoration: InputDecoration(
+                labelText: 'Password',border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(15.0),
+                borderSide: BorderSide(color: const Color.fromARGB(255, 0, 0, 0), width: 1),
+                ),
+              filled: true,
+              fillColor: Colors.white,
+              ),
+            ),
             ),
             ElevatedButton(
               onPressed: _register,
               child: Text('Register'),
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  minimumSize: Size(380, 50),
+                ),
             ),
           ],
         ),
+      ),
       ),
     );
   }

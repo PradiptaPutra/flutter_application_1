@@ -36,41 +36,79 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Get the screen height excluding the keyboard height
+    final bottomPadding = MediaQuery.of(context).viewInsets.bottom;
+
     return Scaffold(
       appBar: AppBar(title: Text("Login")),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            TextFormField(
-              controller: _usernameController,
-              decoration: InputDecoration(labelText: 'Username'),
-              keyboardType: TextInputType.text,
-            ),
-            TextFormField(
-              controller: _passwordController,
-              decoration: InputDecoration(labelText: 'Password'),
-              obscureText: true,
-            ),
-            ElevatedButton(
-              onPressed: _login,
-              child: Text('Login'),
-            ),
-            SizedBox(height: 20),
-            TextButton(
-              onPressed: () {
-                Navigator.pushNamed(context, '/register');
-              },
-              child: Text(
-                "Don't have an account? Sign up",
-                style: TextStyle(
-                  color: Colors.blue,
-                  decoration: TextDecoration.underline,
+      body: SingleChildScrollView(
+        padding: EdgeInsets.only(bottom: bottomPadding), // Adjust the padding to ensure visibility
+        child: Padding(
+          padding: const EdgeInsets.all(15.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Container(
+                margin: EdgeInsets.only(top: 20.0),
+                child: TextFormField(
+                  controller: _usernameController,
+                  decoration: InputDecoration(
+                    labelText: 'Username',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(15.0),
+                      borderSide: BorderSide(color: const Color.fromARGB(255, 0, 0, 0), width: 1),
+                    ),
+                    filled: true,
+                    fillColor: Colors.white,
+                  ),
+                  keyboardType: TextInputType.text,
                 ),
               ),
-            ),
-          ],
+              SizedBox(height: 10),
+              Container(
+                 margin: EdgeInsets.only(bottom: 280.0),
+               child: TextFormField(
+                controller: _passwordController,
+                decoration: InputDecoration(
+                  labelText: 'Password',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15.0),
+                    borderSide: BorderSide(color: const Color.fromARGB(255, 0, 0, 0), width: 1),
+                  ),
+                  filled: true,
+                  fillColor: Colors.white,
+                ),
+                obscureText: true,
+              ),
+              ),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: _login,
+                child: Text('Login'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  minimumSize: Size(380, 50),
+                ),
+              ),
+              SizedBox(height: 20),
+              TextButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, '/register');
+                },
+                child: Text(
+                  "Don't have an account? Sign up",
+                  style: TextStyle(
+                    color: Colors.blue,
+                    decoration: TextDecoration.underline,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
