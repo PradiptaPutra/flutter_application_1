@@ -18,8 +18,14 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: Text('Welcome to Health Application', style: TextStyle(fontSize: 24)),
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          Image.asset(
+            'assets/images/bgsplash.png',
+            fit: BoxFit.cover,
+          ),
+        ],
       ),
     );
   }
