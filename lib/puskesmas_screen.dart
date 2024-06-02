@@ -7,9 +7,10 @@ class PuskesmasScreen extends StatelessWidget {
       body: Center(
         child: GestureDetector(
           onTap: () {
-            // Logika yang dijalankan ketika icon ditekan
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Icon Puskesmas ditekan!')),
+            Navigator.pushNamed(
+              context,
+              '/data_entry',
+              arguments: {'userId': 1}, // Pass the userId or any other required arguments here
             );
           },
           child: Column(
