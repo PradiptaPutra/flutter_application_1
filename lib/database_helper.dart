@@ -8,14 +8,14 @@ class DatabaseHelper {
     if (_database != null) return _database!;
     _database = await initializeDatabase();
     return _database!;
-  }
+  } 
 
   Future<Database> initializeDatabase() async {
     String path = join(await getDatabasesPath(), 'health_app.db');
-      print('Database initialized at path: $path'); // Menambahkan print path database
+    print('Database initialized at path: $path');
     return openDatabase(
       path,
-      version: 3,
+      version: 5, // Increment the version number
       onCreate: _createDb,
       onUpgrade: _upgradeDb,
     );
@@ -23,7 +23,7 @@ class DatabaseHelper {
 
   Future _createDb(Database db, int version) async {
     await db.execute('''
-      CREATE TABLE Pengguna (
+      CREATE TABLE IF NOT EXISTS Pengguna (
         user_id INTEGER PRIMARY KEY AUTOINCREMENT, 
         username TEXT, 
         password_hash TEXT, 
@@ -46,27 +46,30 @@ class DatabaseHelper {
         sesudah TEXT,
         keterangan TEXT,
         FOREIGN KEY(user_id) REFERENCES Pengguna(user_id)
-      );
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS Kegiatan (
+        kegiatan_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER,
+        nama_puskesmas TEXT,
+        dropdown_option TEXT,
+        provinsi TEXT,
+        kabupaten_kota TEXT,
+        tanggal_kegiatan TEXT,
+        nama TEXT,
+        jabatan TEXT,
+        notelepon TEXT,
+        FOREIGN KEY(user_id) REFERENCES Pengguna(user_id)
+      )
     ''');
   }
 
   Future _upgradeDb(Database db, int oldVersion, int newVersion) async {
-    if (oldVersion < 3) {
-      await db.execute('DROP TABLE IF EXISTS DataEntry');
-      await db.execute('''
-        CREATE TABLE IF NOT EXISTS DataEntry (
-          entry_id INTEGER PRIMARY KEY AUTOINCREMENT,
-          user_id INTEGER,
-          puskesmas TEXT,
-          indikator TEXT,
-          sub_indikator TEXT,
-          kriteria TEXT,
-          sebelum TEXT,
-          sesudah TEXT,
-          keterangan TEXT,
-          FOREIGN KEY(user_id) REFERENCES Pengguna(user_id)
-        );
-      ''');
+    if (oldVersion < 5) {
+      await db.execute('DROP TABLE IF EXISTS Kegiatan');
+      await _createDb(db, newVersion);
     }
   }
 
@@ -127,4 +130,20 @@ class DatabaseHelper {
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
+
+  Future<void> insertKegiatan(Map<String, dynamic> kegiatan) async {
+    final db = await database;
+    await db.insert('Kegiatan', kegiatan, conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+  Future<List<Map<String, dynamic>>> getKegiatanForUser(int userId) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'Kegiatan',
+      where: 'user_id = ?',
+      whereArgs: [userId],
+    );
+    return maps;
+  }
+  
 }

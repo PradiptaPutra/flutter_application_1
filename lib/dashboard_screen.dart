@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/puskesmas_screen.dart';
 import 'home_content.dart';
 import 'profile_screen.dart';
+import 'history_screen.dart';  // Import the history screen
 import 'database_helper.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -34,6 +35,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   static List<Widget> _widgetOptions(int userId) => <Widget>[
     HomeContent(),
     PuskesmasScreen(userId: userId),
+    HistoryScreen(userId: userId),  // Assuming you have a HistoryScreen
     ProfileScreen(userId: userId),
   ];
 
@@ -47,7 +49,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-      automaticallyImplyLeading: false, // Menambahkan baris ini
+        automaticallyImplyLeading: false,
         title: Row(
           children: [
             Text(
@@ -72,14 +74,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
         children: _widgetOptions(widget.userId),
       ),
       bottomNavigationBar: BottomNavigationBar(
-        items: [
+        items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
             label: 'Beranda',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.edit),
-            label: 'Lakukan Penilaian',
+            label: 'Penilaian',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.history),
+            label: 'Histori',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
@@ -88,6 +94,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ],
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
+        type: BottomNavigationBarType.fixed,  // Ensures the bar can show multiple items
       ),
     );
   }

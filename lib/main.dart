@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_application_1/puskesmas_screen.dart';
+import 'puskesmas_screen.dart';
 import 'home_content.dart';
 import 'login_screen.dart';
 import 'registration_screen.dart';
@@ -12,68 +12,52 @@ import 'logreg_screen.dart';
 import 'dashboard_screen.dart';
 import 'category_selection_screen.dart';
 import 'facility_selection_screen.dart';
+import 'indikator_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  final prefs = await SharedPreferences.getInstance();
-  final userId = prefs.getInt('userId');
-
-  runApp(MyApp(userId: userId));
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  final int? userId;
-
-  MyApp({this.userId});
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Health Application',
-      initialRoute: userId == null ? '/logreg' : '/dashboard',
+      initialRoute: '/splash',
       routes: {
         '/splash': (context) => SplashScreen(),
         '/logreg': (context) => LogregScreen(),
         '/login': (context) => LoginScreen(),
         '/register': (context) => RegistrationScreen(),
-        '/profile': (context) => ProfileScreen(userId: userId ?? 1),
-        '/dashboard': (context) => DashboardScreen(userId: userId ?? 1),
-        '/data_entry': (context) => DataEntryForm(userId: userId ?? 1),
+        '/profile': (context) => ProfileScreen(userId: ModalRoute.of(context)!.settings.arguments as int),
+        '/dashboard': (context) => DashboardScreen(userId: ModalRoute.of(context)!.settings.arguments as int),
+        '/data_entry': (context) => DataEntryForm(userId: ModalRoute.of(context)!.settings.arguments as int),
         '/data_summary': (context) => DataSummaryView(entries: []),
-        '/category_selection': (context) => CategorySelectionScreen(userId: userId ?? 1),
-        '/facility_selection': (context) => FacilitySelectionScreen(userId: userId ?? 1),
-      },
-      onUnknownRoute: (settings) {
-        return MaterialPageRoute(builder: (context) => LogregScreen());
+        '/facility_selection': (context) => FacilitySelectionScreen(userId: ModalRoute.of(context)!.settings.arguments as int),
       },
       onGenerateRoute: (settings) {
-        if (settings.name == '/data_entry') {
+        if (settings.name == '/category_selection') {
           final args = settings.arguments as Map<String, dynamic>;
-          final userId = args['userId'];
           return MaterialPageRoute(
-            builder: (context) => DataEntryForm(userId: userId),
+            builder: (context) => CategorySelectionScreen(
+              userId: args['userId'],
+              kegiatanId: args['kegiatanId'] ?? null,
+            ),
           );
-        } else if (settings.name == '/data_summary') {
+        } else if (settings.name == '/indikator') {
           final args = settings.arguments as Map<String, dynamic>;
-          final entries = args['entries'];
           return MaterialPageRoute(
-            builder: (context) => DataSummaryView(entries: entries),
-          );
-        } else if (settings.name == '/category_selection') {
-          final args = settings.arguments as Map<String, dynamic>;
-          final userId = args['userId'];
-          return MaterialPageRoute(
-            builder: (context) => CategorySelectionScreen(userId: userId),
-          );
-        } else if (settings.name == '/facility_selection') {
-          final args = settings.arguments as Map<String, dynamic>;
-          final userId = args['userId'];
-          return MaterialPageRoute(
-            builder: (context) => FacilitySelectionScreen(userId: userId),
+            builder: (context) => IndikatorScreen(
+              userId: args['userId'],
+              kegiatanId: args['kegiatanId'] ?? null,
+            ),
           );
         }
         return null;
+      },
+      onUnknownRoute: (settings) {
+        return MaterialPageRoute(builder: (context) => LogregScreen());
       },
     );
   }
