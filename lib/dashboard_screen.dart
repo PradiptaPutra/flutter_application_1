@@ -47,6 +47,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+      automaticallyImplyLeading: false, // Menambahkan baris ini
         title: Row(
           children: [
             Text(

@@ -12,6 +12,7 @@ class DatabaseHelper {
 
   Future<Database> initializeDatabase() async {
     String path = join(await getDatabasesPath(), 'health_app.db');
+      print('Database initialized at path: $path'); // Menambahkan print path database
     return openDatabase(
       path,
       version: 3,
