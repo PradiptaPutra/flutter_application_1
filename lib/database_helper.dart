@@ -15,7 +15,7 @@ class DatabaseHelper {
     print('Database Path: $path');
     return openDatabase(
       path,
-      version: 3,
+      version: 4,
       onCreate: _createDb,
       onUpgrade: _upgradeDb,
     );
@@ -28,6 +28,9 @@ class DatabaseHelper {
         username TEXT, 
         password_hash TEXT, 
         email TEXT, 
+        name TEXT,
+        position TEXT,
+        phone TEXT,
         created_at TEXT
       )
     ''');
@@ -48,22 +51,10 @@ class DatabaseHelper {
   }
 
   Future _upgradeDb(Database db, int oldVersion, int newVersion) async {
-    if (oldVersion < 3) {
-      await db.execute('DROP TABLE IF EXISTS DataEntry');
-      await db.execute('''
-        CREATE TABLE IF NOT EXISTS DataEntry (
-          entry_id INTEGER PRIMARY KEY AUTOINCREMENT,
-          user_id INTEGER,
-          puskesmas TEXT,
-          indikator TEXT,
-          sub_indikator TEXT,
-          kriteria TEXT,
-          sebelum TEXT,
-          sesudah TEXT,
-          keterangan TEXT,
-          FOREIGN KEY(user_id) REFERENCES Pengguna(user_id)
-        );
-      ''');
+    if (oldVersion < 4) {
+      await db.execute('ALTER TABLE Pengguna ADD COLUMN name TEXT');
+      await db.execute('ALTER TABLE Pengguna ADD COLUMN position TEXT');
+      await db.execute('ALTER TABLE Pengguna ADD COLUMN phone TEXT');
     }
   }
 
@@ -99,5 +90,29 @@ class DatabaseHelper {
       whereArgs: [userId],
     );
     return maps;
+  }
+
+  Future<Map<String, dynamic>?> getUserData(int userId) async {
+    final db = await database;
+    List<Map<String, dynamic>> results = await db.query(
+      'Pengguna',
+      where: 'user_id = ?',
+      whereArgs: [userId],
+    );
+    if (results.isNotEmpty) {
+      return results.first;
+    }
+    return null;
+  }
+
+  Future<void> updateUserProfile(int userId, Map<String, dynamic> userData) async {
+    final db = await database;
+    await db.update(
+      'Pengguna',
+      userData,
+      where: 'user_id = ?',
+      whereArgs: [userId],
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
   }
 }

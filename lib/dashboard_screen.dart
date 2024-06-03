@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/puskesmas_screen.dart';
-import 'home_content.dart'; // Import file HomeContent.dart
-import 'puskesmas_screen.dart'; // Import file HomeContent.dart
+import 'home_content.dart';
+import 'profile_screen.dart'; // Import ProfileScreen
+import 'database_helper.dart';
 
 class DashboardScreen extends StatefulWidget {
   final int userId;
@@ -19,22 +20,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   void initState() {
     super.initState();
-    // Load the user data based on userId
     _loadUserData();
   }
 
   void _loadUserData() async {
-    // Fetch user data from the database or any other source using widget.userId
-    // For this example, we're setting it statically
+    final dbHelper = DatabaseHelper();
+    final data = await dbHelper.getUserData(widget.userId);
     setState(() {
-      userName = "ALBER DERRY ASHER"; // Replace with actual user data fetching logic
+      userName = data?['name'] ?? "User";
     });
   }
 
   static List<Widget> _widgetOptions = <Widget>[
-    HomeContent(), // Panggil HomeContent disini
+    HomeContent(),
     PuskesmasScreen(),
-    Text('Profil'),
+    ProfileScreen(userId: 1), // Placeholder userId, replace in build method
   ];
 
   void _onItemTapped(int index) {
@@ -66,7 +66,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),
-      body: _widgetOptions.elementAt(_selectedIndex),
+      body: IndexedStack(
+        index: _selectedIndex,
+        children: [
+          HomeContent(),
+          PuskesmasScreen(),
+          ProfileScreen(userId: widget.userId), // Pass the actual userId here
+        ],
+      ),
       bottomNavigationBar: BottomNavigationBar(
         items: [
           BottomNavigationBarItem(
