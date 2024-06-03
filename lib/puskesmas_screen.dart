@@ -49,6 +49,13 @@ class _PuskesmasScreenState extends State<PuskesmasScreen> {
                         image: AssetImage('assets/images/logopuskesmas.png'),
                         fit: BoxFit.cover,
                       ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black26,
+                          offset: Offset(0, 10),
+                          blurRadius: 10.0,
+                        ),
+                      ],
                     ),
                   ),
                   SizedBox(height: 10),
@@ -73,6 +80,13 @@ class _PuskesmasScreenState extends State<PuskesmasScreen> {
                         image: AssetImage('assets/images/logors.jpg'),
                         fit: BoxFit.cover,
                       ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black26,
+                         offset: Offset(0, 10),
+                          blurRadius: 10.0,
+                        ),
+                      ],
                     ),
                   ),
                   SizedBox(height: 10),
@@ -97,6 +111,13 @@ class _PuskesmasScreenState extends State<PuskesmasScreen> {
                         image: AssetImage('assets/images/logodinkes.jpg'),
                         fit: BoxFit.cover,
                       ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black26,
+                          offset: Offset(0, 10),
+                          blurRadius: 10.0,
+                        ),
+                      ],
                     ),
                   ),
                   SizedBox(height: 10),
@@ -112,9 +133,12 @@ class _PuskesmasScreenState extends State<PuskesmasScreen> {
           padding: EdgeInsets.zero,
           children: <Widget>[
             DrawerHeader(
-              child: Text('Tambah Kegiatan Puskesmas'),
-              decoration: BoxDecoration(
-                color: Colors.blue,
+              padding: EdgeInsets.zero,
+              child: Image.asset(
+                'assets/images/puskesmasheader.jpeg',
+                fit: BoxFit.cover,
+                width: double.infinity,
+                height: double.infinity,
               ),
             ),
             ListTile(
@@ -186,48 +210,48 @@ class _PuskesmasScreenState extends State<PuskesmasScreen> {
   }
 
   void _insertKegiatan() async {
-  String namaPuskesmas = namaPuskesmasController.text;
-  String tanggalKegiatan =
-      selectedDate != null ? DateFormat('dd-MM-yyyy').format(selectedDate!) : '';
+    String namaPuskesmas = namaPuskesmasController.text;
+    String tanggalKegiatan =
+        selectedDate != null ? DateFormat('dd-MM-yyyy').format(selectedDate!) : '';
 
-  // Mendapatkan data pengguna yang sedang login
-  Map<String, dynamic>? userData = await DatabaseHelper().getUserData(widget.userId);
+    // Mendapatkan data pengguna yang sedang login
+    Map<String, dynamic>? userData = await DatabaseHelper().getUserData(widget.userId);
 
-  // Jika data pengguna ditemukan
-  if (userData != null) {
-    // Mengisi kolom nama, jabatan, dan nomor telepon dari data pengguna
-    String nama = userData['name'];
-    String jabatan = userData['position'];
-    String notelp = userData['phone'];
+    // Jika data pengguna ditemukan
+    if (userData != null) {
+      // Mengisi kolom nama, jabatan, dan nomor telepon dari data pengguna
+      String nama = userData['name'];
+      String jabatan = userData['position'];
+      String notelp = userData['phone'];
 
-    // Membuat objek data kegiatan
-    Map<String, dynamic> kegiatanData = {
-      'user_id': widget.userId,
-      'nama_puskesmas': namaPuskesmas,
-      'dropdown_option': dropdownValue,
-      'tanggal_kegiatan': tanggalKegiatan,
-      'nama': nama, // Mengisi kolom nama dengan data pengguna
-      'jabatan': jabatan, // Mengisi kolom jabatan dengan data pengguna
-      'notelepon': notelp, // Mengisi kolom nomor telepon dengan data pengguna
-    };
+      // Membuat objek data kegiatan
+      Map<String, dynamic> kegiatanData = {
+        'user_id': widget.userId,
+        'nama_puskesmas': namaPuskesmas,
+        'dropdown_option': dropdownValue,
+        'tanggal_kegiatan': tanggalKegiatan,
+        'nama': nama, // Mengisi kolom nama dengan data pengguna
+        'jabatan': jabatan, // Mengisi kolom jabatan dengan data pengguna
+        'notelepon': notelp, // Mengisi kolom nomor telepon dengan data pengguna
+      };
 
-    // Memasukkan data kegiatan ke dalam database
-    await DatabaseHelper().insertKegiatan(kegiatanData);
+      // Memasukkan data kegiatan ke dalam database
+      await DatabaseHelper().insertKegiatan(kegiatanData);
 
-    // Mengosongkan input setelah data disimpan
-    namaPuskesmasController.clear();
-    setState(() {
-      selectedDate = null;
-    });
+      // Mengosongkan input setelah data disimpan
+      namaPuskesmasController.clear();
+      setState(() {
+        selectedDate = null;
+      });
 
-    // Pindah ke halaman selanjutnya
-    Navigator.pushNamed(context, '/category_selection',
-        arguments: {'userId': widget.userId});
-  } else {
-    // Jika data pengguna tidak ditemukan, tampilkan pesan kesalahan
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text('Data pengguna tidak ditemukan.'),
-    ));
+      // Pindah ke halaman selanjutnya
+      Navigator.pushNamed(context, '/category_selection',
+          arguments: {'userId': widget.userId});
+    } else {
+      // Jika data pengguna tidak ditemukan, tampilkan pesan kesalahan
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Data pengguna tidak ditemukan.'),
+      ));
+    }
   }
-}
 }

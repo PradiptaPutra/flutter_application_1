@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'penilaian_screen.dart'; // Pastikan Anda telah mengimport screen yang dituju
 
 class IndikatorScreen extends StatelessWidget {
   final int userId;
-  final int? kegiatanId;  // Tambahkan parameter kegiatanId
-   IndikatorScreen({required this.userId, this.kegiatanId});
+  final int? kegiatanId;
+
+  IndikatorScreen({required this.userId, this.kegiatanId});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -36,35 +39,37 @@ class IndikatorScreen extends StatelessWidget {
             ),
           ),
           Expanded(
-            child: GridView.builder(
-              padding: EdgeInsets.all(8.0),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10,
-                childAspectRatio: 0.75,
-              ),
-              itemCount: 6,  // The number of items in the grid
+            child: ListView.separated(
+              itemCount: 6, // Number of items
               itemBuilder: (context, index) {
-                return Card(
-                  elevation: 2,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Image.asset('assets/images/logors.jpg', fit: BoxFit.contain, height: 120),
-                      Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text(
-                          "ACARBOSE",
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                      Text("Acarbose 50 mg Tablet"),
-                      SizedBox(height: 8),
-                    ],
+                // Replace with your actual data
+                var indikatorData = [
+                  {"name": "Sistem Vertikal Bangunan Lebih dari Satu Lantai"},
+                  {"name": "Sistem Sanitasi"},
+                  {"name": "Sistem Kelistrikan"},
+                  {"name": "Sistem Komunikasi"},
+                  {"name": "Sistem Gas Medik"},
+                  {"name": "Sistem K3 Fasyankes"},
+                ];
+
+                return ListTile(
+                  leading: CircleAvatar(
+                    backgroundColor: Colors.blue, // Customize as needed
+                    child: Icon(Icons.local_hospital, color: Colors.white),
                   ),
+                  title: Text(indikatorData[index]["name"]!),
+                  trailing: Icon(Icons.arrow_forward_ios),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => PenilaianScreen(kegiatanId: kegiatanId),
+                      ),
+                    );
+                  },
                 );
               },
+              separatorBuilder: (context, index) => Divider(),
             ),
           ),
         ],

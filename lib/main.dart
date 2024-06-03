@@ -13,6 +13,7 @@ import 'dashboard_screen.dart';
 import 'category_selection_screen.dart';
 import 'facility_selection_screen.dart';
 import 'indikator_screen.dart';
+import 'penilaian_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
