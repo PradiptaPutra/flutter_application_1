@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/puskesmas_screen.dart';
 import 'home_content.dart';
-import 'profile_screen.dart'; // Import ProfileScreen
+import 'profile_screen.dart';
 import 'database_helper.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -31,10 +31,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
     });
   }
 
-  static List<Widget> _widgetOptions = <Widget>[
+  static List<Widget> _widgetOptions(int userId) => <Widget>[
     HomeContent(),
-    PuskesmasScreen(),
-    ProfileScreen(userId: 1), // Placeholder userId, replace in build method
+    PuskesmasScreen(userId: userId),
+    ProfileScreen(userId: userId),
   ];
 
   void _onItemTapped(int index) {
@@ -68,11 +68,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ),
       body: IndexedStack(
         index: _selectedIndex,
-        children: [
-          HomeContent(),
-          PuskesmasScreen(),
-          ProfileScreen(userId: widget.userId), // Pass the actual userId here
-        ],
+        children: _widgetOptions(widget.userId),
       ),
       bottomNavigationBar: BottomNavigationBar(
         items: [

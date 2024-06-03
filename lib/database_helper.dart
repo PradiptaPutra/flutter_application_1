@@ -12,10 +12,9 @@ class DatabaseHelper {
 
   Future<Database> initializeDatabase() async {
     String path = join(await getDatabasesPath(), 'health_app.db');
-    print('Database Path: $path');
     return openDatabase(
       path,
-      version: 4,
+      version: 3,
       onCreate: _createDb,
       onUpgrade: _upgradeDb,
     );
@@ -51,10 +50,22 @@ class DatabaseHelper {
   }
 
   Future _upgradeDb(Database db, int oldVersion, int newVersion) async {
-    if (oldVersion < 4) {
-      await db.execute('ALTER TABLE Pengguna ADD COLUMN name TEXT');
-      await db.execute('ALTER TABLE Pengguna ADD COLUMN position TEXT');
-      await db.execute('ALTER TABLE Pengguna ADD COLUMN phone TEXT');
+    if (oldVersion < 3) {
+      await db.execute('DROP TABLE IF EXISTS DataEntry');
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS DataEntry (
+          entry_id INTEGER PRIMARY KEY AUTOINCREMENT,
+          user_id INTEGER,
+          puskesmas TEXT,
+          indikator TEXT,
+          sub_indikator TEXT,
+          kriteria TEXT,
+          sebelum TEXT,
+          sesudah TEXT,
+          keterangan TEXT,
+          FOREIGN KEY(user_id) REFERENCES Pengguna(user_id)
+        );
+      ''');
     }
   }
 
@@ -94,24 +105,24 @@ class DatabaseHelper {
 
   Future<Map<String, dynamic>?> getUserData(int userId) async {
     final db = await database;
-    List<Map<String, dynamic>> results = await db.query(
+    final List<Map<String, dynamic>> maps = await db.query(
       'Pengguna',
       where: 'user_id = ?',
       whereArgs: [userId],
     );
-    if (results.isNotEmpty) {
-      return results.first;
+    if (maps.isNotEmpty) {
+      return maps.first;
     }
     return null;
   }
 
-  Future<void> updateUserProfile(int userId, Map<String, dynamic> userData) async {
+  Future<void> updateUserData(Map<String, dynamic> userData) async {
     final db = await database;
     await db.update(
       'Pengguna',
       userData,
       where: 'user_id = ?',
-      whereArgs: [userId],
+      whereArgs: [userData['user_id']],
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }

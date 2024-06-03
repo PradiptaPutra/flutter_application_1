@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 
 class PuskesmasScreen extends StatelessWidget {
+  final int userId;
+
+  PuskesmasScreen({required this.userId});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
         child: GestureDetector(
           onTap: () {
-            Navigator.pushNamed(context, '/data_entry', arguments: {'userId': 1}); // Pass the actual userId
+            Navigator.pushNamed(context, '/category_selection', arguments: {'userId': userId});
           },
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,

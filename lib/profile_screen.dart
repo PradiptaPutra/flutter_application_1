@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'database_helper.dart';
 import 'edit_profile_screen.dart';
 
@@ -41,6 +42,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     });
   }
 
+  Future<void> _logout() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('userId');
+    Navigator.pushReplacementNamed(context, '/logreg');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -52,86 +59,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
           : Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  CircleAvatar(
-                    radius: 50,
-                    backgroundImage: AssetImage('assets/images/profile_placeholder.png'),
+                  Text('User Profile', style: TextStyle(fontSize: 24)),
+                  SizedBox(height: 20),
+                  Text('Name: ${userData!['name'] ?? ''}', style: TextStyle(fontSize: 18)),
+                  Text('Position: ${userData!['position'] ?? ''}', style: TextStyle(fontSize: 18)),
+                  Text('Phone: ${userData!['phone'] ?? ''}', style: TextStyle(fontSize: 18)),
+                  Text('Username: ${userData!['username'] ?? ''}', style: TextStyle(fontSize: 18)),
+                  Text('Email: ${userData!['email'] ?? ''}', style: TextStyle(fontSize: 18)),
+                  SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: _navigateToEditProfile,
+                    child: Text('Edit Profile'),
                   ),
-                  SizedBox(height: 20),
-                  Text(
-                    'User Profile',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  SizedBox(height: 20),
-                  _buildProfileRow('Name', userData!['name']),
-                  _buildProfileRow('Position', userData!['position']),
-                  _buildProfileRow('Phone', userData!['phone']),
-                  _buildProfileRow('Username', userData!['username']),
-                  _buildProfileRow('Email', userData!['email']),
-                  SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      ElevatedButton(
-                        onPressed: _navigateToEditProfile,
-                        child: Text('Edit Profile'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue,
-                          padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                          textStyle: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      ElevatedButton(
-                        onPressed: () {
-                          Navigator.pushReplacementNamed(context, '/');
-                        },
-                        child: Text('Logout'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red,
-                          padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                          textStyle: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ],
+                  ElevatedButton(
+                    onPressed: _logout,
+                    child: Text('Logout'),
                   ),
                 ],
               ),
             ),
-    );
-  }
-
-  Widget _buildProfileRow(String label, String? value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
-        children: [
-          Text(
-            '$label: ',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          Expanded(
-            child: Text(
-              value ?? '',
-              style: TextStyle(
-                fontSize: 18,
-              ),
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

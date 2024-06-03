@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'database_helper.dart';
+import 'dashboard_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -11,22 +13,28 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passwordController = TextEditingController();
   final DatabaseHelper _dbHelper = DatabaseHelper();
 
-  void _login() async {
-    int? userId = await _dbHelper.verifyLogin(
-      _usernameController.text,
-      _passwordController.text,
-    );
+  Future<void> _login() async {
+    final username = _usernameController.text;
+    final password = _passwordController.text;
+
+    final userId = await _dbHelper.verifyLogin(username, password);
     if (userId != null) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Login Successful'),
-        backgroundColor: Colors.green,
-      ));
-      Navigator.pushReplacementNamed(context, '/dashboard', arguments: userId);
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt('userId', userId);
+      
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => DashboardScreen(userId: userId),
+        ),
+      );
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Invalid Username or Password'),
-        backgroundColor: Colors.red,
-      ));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Login failed'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
@@ -35,36 +43,23 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       appBar: AppBar(title: Text("Login")),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(15.0),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             TextFormField(
               controller: _usernameController,
               decoration: InputDecoration(labelText: 'Username'),
-              keyboardType: TextInputType.text,
             ),
             TextFormField(
               controller: _passwordController,
               decoration: InputDecoration(labelText: 'Password'),
               obscureText: true,
             ),
+            SizedBox(height: 20),
             ElevatedButton(
               onPressed: _login,
               child: Text('Login'),
-            ),
-            SizedBox(height: 20),
-            TextButton(
-              onPressed: () {
-                Navigator.pushNamed(context, '/register'); // Route for the registration page
-              },
-              child: Text(
-                "Don't have an account? Sign up",
-                style: TextStyle(
-                  color: Colors.blue,
-                  decoration: TextDecoration.underline,
-                ),
-              ),
             ),
           ],
         ),

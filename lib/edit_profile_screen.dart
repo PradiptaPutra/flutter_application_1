@@ -12,90 +12,82 @@ class EditProfileScreen extends StatefulWidget {
 }
 
 class _EditProfileScreenState extends State<EditProfileScreen> {
+  final _nameController = TextEditingController();
+  final _positionController = TextEditingController();
+  final _phoneController = TextEditingController();
+  final _usernameController = TextEditingController();
+  final _emailController = TextEditingController();
   final DatabaseHelper _dbHelper = DatabaseHelper();
-  late TextEditingController _nameController;
-  late TextEditingController _positionController;
-  late TextEditingController _phoneController;
-  late TextEditingController _emailController;
-  late TextEditingController _usernameController;
 
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController(text: widget.userData['name']);
-    _positionController = TextEditingController(text: widget.userData['position']);
-    _phoneController = TextEditingController(text: widget.userData['phone']);
-    _emailController = TextEditingController(text: widget.userData['email']);
-    _usernameController = TextEditingController(text: widget.userData['username']);
+    _nameController.text = widget.userData['name'] ?? '';
+    _positionController.text = widget.userData['position'] ?? '';
+    _phoneController.text = widget.userData['phone'] ?? '';
+    _usernameController.text = widget.userData['username'] ?? '';
+    _emailController.text = widget.userData['email'] ?? '';
   }
 
-  void _updateProfile() async {
+  void _saveProfile() async {
     Map<String, dynamic> updatedData = {
+      'user_id': widget.userId,
       'name': _nameController.text,
       'position': _positionController.text,
       'phone': _phoneController.text,
-      'email': _emailController.text,
       'username': _usernameController.text,
+      'email': _emailController.text,
     };
 
-    try {
-      await _dbHelper.updateUserProfile(widget.userId, updatedData);
-      Navigator.pop(context, true); // Return true to indicate profile was updated
-    } catch (e) {
-      print('Update profile error: $e');
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Update profile failed'),
-        backgroundColor: Colors.red,
-      ));
-    }
+    await _dbHelper.updateUserData(updatedData);
+    Navigator.pop(context, true); // Return true to indicate successful update
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Edit Profile")),
+      appBar: AppBar(
+        title: Text('Edit Profile'),
+      ),
       body: Padding(
-        padding: const EdgeInsets.all(15.0),
+        padding: const EdgeInsets.all(16.0),
         child: ListView(
-          children: <Widget>[
-            TextFormField(
+          children: [
+            TextField(
               controller: _nameController,
               decoration: InputDecoration(labelText: 'Name'),
             ),
-            TextFormField(
+            TextField(
               controller: _positionController,
               decoration: InputDecoration(labelText: 'Position'),
             ),
-            TextFormField(
+            TextField(
               controller: _phoneController,
               decoration: InputDecoration(labelText: 'Phone'),
             ),
-            TextFormField(
-              controller: _emailController,
-              decoration: InputDecoration(labelText: 'Email'),
-            ),
-            TextFormField(
+            TextField(
               controller: _usernameController,
               decoration: InputDecoration(labelText: 'Username'),
             ),
+            TextField(
+              controller: _emailController,
+              decoration: InputDecoration(labelText: 'Email'),
+            ),
             SizedBox(height: 20),
             ElevatedButton(
-              onPressed: _updateProfile,
+              onPressed: _saveProfile,
               child: Text('Save'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                minimumSize: Size(380, 50),
+              ),
             ),
           ],
         ),
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _positionController.dispose();
-    _phoneController.dispose();
-    _emailController.dispose();
-    _usernameController.dispose();
-    super.dispose();
   }
 }
