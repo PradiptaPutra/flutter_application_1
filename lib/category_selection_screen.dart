@@ -10,6 +10,8 @@ class CategorySelectionScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+     print('kegiatanId: $kegiatanId');
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Select Category'),

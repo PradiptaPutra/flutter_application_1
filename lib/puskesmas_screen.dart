@@ -236,7 +236,7 @@ class _PuskesmasScreenState extends State<PuskesmasScreen> {
       };
 
       // Memasukkan data kegiatan ke dalam database
-      await DatabaseHelper().insertKegiatan(kegiatanData);
+      int kegiatanId = await DatabaseHelper().insertKegiatan(kegiatanData);
 
       // Mengosongkan input setelah data disimpan
       namaPuskesmasController.clear();
@@ -246,7 +246,7 @@ class _PuskesmasScreenState extends State<PuskesmasScreen> {
 
       // Pindah ke halaman selanjutnya
       Navigator.pushNamed(context, '/category_selection',
-          arguments: {'userId': widget.userId});
+          arguments: {'userId': widget.userId, 'kegiatanId': kegiatanId});
     } else {
       // Jika data pengguna tidak ditemukan, tampilkan pesan kesalahan
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(

@@ -175,9 +175,9 @@ class DatabaseHelper {
     );
   }
 
-  Future<void> insertKegiatan(Map<String, dynamic> kegiatan) async {
+  Future<int> insertKegiatan(Map<String, dynamic> kegiatan) async {
     final db = await database;
-    await db.insert('Kegiatan', kegiatan, conflictAlgorithm: ConflictAlgorithm.replace);
+    return await db.insert('Kegiatan', kegiatan, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   Future<List<Map<String, dynamic>>> getKegiatanForUser(int userId) async {

@@ -11,6 +11,7 @@ class IndikatorScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+     print('kegiatanId: $kegiatanId');
     return Scaffold(
       appBar: AppBar(
         title: Text("Indikator Penilaian"),
