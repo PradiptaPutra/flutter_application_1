@@ -15,7 +15,7 @@ class DatabaseHelper {
     print('Database initialized at path: $path');
     return openDatabase(
       path,
-      version: 7, // Increment the version number
+      version: 8, // Increment the version number to 8
       onCreate: _createDb,
       onUpgrade: _upgradeDb,
     );
@@ -84,11 +84,37 @@ class DatabaseHelper {
       ('Program kesehatan', 'non_fisik'),
       ('Pembiayaan kesehatan', 'non_fisik')
     ''');
+
+    // Create tblbangunan table
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS tblbangunan (
+        id_tbl INTEGER PRIMARY KEY AUTOINCREMENT,
+        panduan_pertanyaan TEXT,
+        nama_indikator TEXT,
+        sub_indikator TEXT,
+        kriteria TEXT,
+        id_sebelum TEXT,
+        id_sesudah TEXT
+      )
+    ''');
   }
 
   Future _upgradeDb(Database db, int oldVersion, int newVersion) async {
     if (oldVersion < 7) {
       await db.execute('ALTER TABLE DataEntry ADD COLUMN kegiatan_id INTEGER REFERENCES Kegiatan(kegiatan_id)');
+    }
+    if (oldVersion < 8) {
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS tblbangunan (
+          id_tbl INTEGER PRIMARY KEY AUTOINCREMENT,
+          panduan_pertanyaan TEXT,
+          nama_indikator TEXT,
+          sub_indikator TEXT,
+          kriteria TEXT,
+          id_sebelum TEXT,
+          id_sesudah TEXT
+        )
+      ''');
     }
   }
 

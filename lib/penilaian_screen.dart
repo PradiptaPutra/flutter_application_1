@@ -19,15 +19,15 @@ class _PenilaianScreenState extends State<PenilaianScreen> {
   final List<TextEditingController> sesudahControllers = [];
   final List<Map<String, dynamic>> data = [
     {
-      "title": "1.1 Tangga",
-      "subtitle": "Dokter • 9 Tahun",
+      "title": "",
+      "subtitle": "",
       "image": 'assets/images/logors.jpg',
       "hintTextSebelum": "Sebelum",
       "hintTextSesudah": "Sesudah"
     },
     {
-      "title": "2.2 Sistem Sanitasi",
-      "subtitle": "Sanitasi • 5 Tahun",
+      "title": "",
+      "subtitle": "",
       "image": 'assets/images/logors.jpg',
       "hintTextSebelum": "Sebelum",
       "hintTextSesudah": "Sesudah"
@@ -50,7 +50,6 @@ class _PenilaianScreenState extends State<PenilaianScreen> {
   Future<void> _loadDataEntry(int entryId) async {
     List<Map<String, dynamic>> entries = await _dbHelper.getEntriesByEntryId(entryId);
     if (entries.isNotEmpty) {
-      // Assuming the entry has 'sebelum' and 'sesudah' columns for each sub-indikator
       setState(() {
         for (var entry in entries) {
           for (var i = 0; i < data.length; i++) {
