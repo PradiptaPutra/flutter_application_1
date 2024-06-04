@@ -3,10 +3,10 @@ import 'indikator_screen.dart';
 
 class CategorySelectionScreen extends StatelessWidget {
   final int userId;
-  final int? kegiatanId;  // Tambahkan tanda tanya untuk nullable
+  final int? kegiatanId;
+  final List<int>? entryIds;  // Tambahkan entryIds sebagai parameter nullable
 
-  // Sesuaikan konstruktor untuk menerima kegiatanId
-  CategorySelectionScreen({required this.userId, this.kegiatanId});
+  CategorySelectionScreen({required this.userId, this.kegiatanId, this.entryIds});
 
   @override
   Widget build(BuildContext context) {
@@ -27,20 +27,43 @@ class CategorySelectionScreen extends StatelessWidget {
                   Navigator.pushNamed(
                     context,
                     '/indikator',
-                    arguments: {'userId': userId, 'kegiatanId': kegiatanId},
+                    arguments: {
+                      'userId': userId,
+                      'kegiatanId': kegiatanId,
+                      'entryIds': entryIds, // Pass the list of entry IDs, can be null
+                      'id_indikator': 1, // id_indikator for Fasilitas Pelayanan Kesehatan
+                    },
                   );
                 },
               ),
               ListTile(
                 title: Text('Alat Kesehatan'),
                 onTap: () {
-                  // Implementasikan navigasi atau aksi lain
+                  Navigator.pushNamed(
+                    context,
+                    '/indikator',
+                    arguments: {
+                      'userId': userId,
+                      'kegiatanId': kegiatanId,
+                      'entryIds': entryIds, // Pass the list of entry IDs, can be null
+                      'id_indikator': 1, // id_indikator for Fasilitas Pelayanan Kesehatan
+                    },
+                  );
                 },
               ),
               ListTile(
                 title: Text('Kendaraan'),
                 onTap: () {
-                  // Implementasikan navigasi atau aksi lain
+                  Navigator.pushNamed(
+                    context,
+                    '/indikator',
+                    arguments: {
+                      'userId': userId,
+                      'kegiatanId': kegiatanId,
+                      'entryIds': entryIds, // Pass the list of entry IDs, can be null
+                      'id_indikator': 1, // id_indikator for Fasilitas Pelayanan Kesehatan
+                    },
+                  );
                 },
               ),
             ],
@@ -51,7 +74,16 @@ class CategorySelectionScreen extends StatelessWidget {
             subtitle: Text('Deskripsi singkat'),
             trailing: Icon(Icons.arrow_forward_ios),
             onTap: () {
-              // Navigasi ke layar lain
+              Navigator.pushNamed(
+                context,
+                '/indikator',
+                arguments: {
+                  'userId': userId,
+                  'kegiatanId': kegiatanId,
+                  'entryIds': entryIds, // Pass the list of entry IDs, can be null
+                  'id_indikator': 2, // id_indikator for SDM Kesehatan
+                },
+              );
             },
           ),
           ListTile(
@@ -60,7 +92,16 @@ class CategorySelectionScreen extends StatelessWidget {
             subtitle: Text('Deskripsi singkat'),
             trailing: Icon(Icons.arrow_forward_ios),
             onTap: () {
-              // Navigasi ke layar lain
+              Navigator.pushNamed(
+                context,
+                '/indikator',
+                arguments: {
+                  'userId': userId,
+                  'kegiatanId': kegiatanId,
+                  'entryIds': entryIds, // Pass the list of entry IDs, can be null
+                  'id_indikator': 3, // id_indikator for Program Kesehatan
+                },
+              );
             },
           ),
           ListTile(
@@ -69,7 +110,16 @@ class CategorySelectionScreen extends StatelessWidget {
             subtitle: Text('Deskripsi singkat'),
             trailing: Icon(Icons.arrow_forward_ios),
             onTap: () {
-              // Navigasi ke layar lain
+              Navigator.pushNamed(
+                context,
+                '/indikator',
+                arguments: {
+                  'userId': userId,
+                  'kegiatanId': kegiatanId,
+                  'entryIds': entryIds, // Pass the list of entry IDs, can be null
+                  'id_indikator': 4, // id_indikator for Pembiayaan Kesehatan
+                },
+              );
             },
           ),
         ],

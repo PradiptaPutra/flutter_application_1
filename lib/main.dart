@@ -43,7 +43,8 @@ class MyApp extends StatelessWidget {
           return MaterialPageRoute(
             builder: (context) => CategorySelectionScreen(
               userId: args['userId'],
-              kegiatanId: args['kegiatanId'] ?? null,
+              kegiatanId: args['kegiatanId'],
+              entryIds: args['entryIds'], // Tambahkan entryIds sebagai nullable
             ),
           );
         } else if (settings.name == '/indikator') {
@@ -51,7 +52,9 @@ class MyApp extends StatelessWidget {
           return MaterialPageRoute(
             builder: (context) => IndikatorScreen(
               userId: args['userId'],
-              kegiatanId: args['kegiatanId'] ?? null,
+              kegiatanId: args['kegiatanId'],
+              id_indikator: args['id_indikator'],
+              entryIds: args['entryIds'], // Tambahkan entryIds sebagai nullable
             ),
           );
         }

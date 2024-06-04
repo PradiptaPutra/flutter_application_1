@@ -4,8 +4,10 @@ import 'penilaian_screen.dart'; // Pastikan Anda telah mengimport screen yang di
 class IndikatorScreen extends StatelessWidget {
   final int userId;
   final int? kegiatanId;
+  final int id_indikator;
+  final List<int>? entryIds;  // Tambahkan entryIds sebagai parameter nullable
 
-  IndikatorScreen({required this.userId, this.kegiatanId});
+  IndikatorScreen({required this.userId, this.kegiatanId, required this.id_indikator, this.entryIds});
 
   @override
   Widget build(BuildContext context) {
@@ -63,7 +65,12 @@ class IndikatorScreen extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => PenilaianScreen(kegiatanId: kegiatanId),
+                        builder: (context) => PenilaianScreen(
+                          kegiatanId: kegiatanId,
+                          id_indikator: id_indikator,
+                          userId: userId,
+                          entryId: entryIds != null && entryIds!.isNotEmpty ? entryIds![index] : null, // Pass entryId if available
+                        ),
                       ),
                     );
                   },

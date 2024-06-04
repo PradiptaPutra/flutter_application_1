@@ -12,6 +12,15 @@ class HistoryScreen extends StatelessWidget {
     return await dbHelper.getKegiatanForUser(userId);
   }
 
+  Future<List<int>> _fetchEntryIdsForKegiatan(int kegiatanId) async {
+    DatabaseHelper dbHelper = DatabaseHelper();
+    final dataEntries = await dbHelper.getDataEntriesForUser(userId);
+    return dataEntries
+        .where((entry) => entry['kegiatan_id'] == kegiatanId)
+        .map<int>((entry) => entry['entry_id'])
+        .toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -49,13 +58,15 @@ class HistoryScreen extends StatelessWidget {
                   title: Text(kegiatan['nama_puskesmas'] ?? 'Unknown'),
                   subtitle: Text("${kegiatan['tanggal_kegiatan']} - ${kegiatan['dropdown_option']}"),
                   trailing: Icon(Icons.arrow_forward_ios),
-                  onTap: () {
+                  onTap: () async {
+                    final entryIds = await _fetchEntryIdsForKegiatan(kegiatan['kegiatan_id']);
                     Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (context) => CategorySelectionScreen(
                           userId: userId,
                           kegiatanId: kegiatan['kegiatan_id'],
+                          entryIds: entryIds.isNotEmpty ? entryIds : null, // Pass entryIds or null
                         ),
                       ),
                     );
