@@ -57,38 +57,18 @@ class _PenilaianScreenState extends State<PenilaianScreen> {
   }
 
   Future<void> _saveDataEntry() async {
-    // Get nama_puskesmas from Kegiatan table
-    List<Map<String, dynamic>> kegiatanResult = await _dbHelper.getKegiatanForUser(widget.userId);
-
-    String namaPuskesmas = '';
-    if (kegiatanResult.isNotEmpty) {
-      var kegiatan = kegiatanResult.firstWhere((k) => k['kegiatan_id'] == widget.kegiatanId, orElse: () => {});
-      if (kegiatan.isNotEmpty) {
-        namaPuskesmas = kegiatan['nama_puskesmas'] ?? '';
-      }
-    }
-
-    // Get nama_indikator from Indikator table
-    List<Map<String, dynamic>> indikatorResult = await _dbHelper.getIndikators();
-    String namaIndikator = '';
-    if (indikatorResult.isNotEmpty) {
-      var indikator = indikatorResult.firstWhere((i) => i['id_indikator'] == widget.id_indikator, orElse: () => {});
-      if (indikator.isNotEmpty) {
-        namaIndikator = indikator['nama_indikator'] ?? '';
-      }
-    }
-
+    // Prepare data to be saved
     for (var i = 0; i < data.length; i++) {
       Map<String, dynamic> entry = {
         'user_id': widget.userId,
         'kegiatan_id': widget.kegiatanId,
-        'puskesmas': namaPuskesmas,
-        'indikator': namaIndikator,
+        'puskesmas': '', // This can be set according to your logic
+        'indikator': data[i]['nama_indikator'],
         'sub_indikator': data[i]['sub_indikator'],
-        'kriteria': '',
+        'kriteria': '', // This can be set according to your logic
         'sebelum': sebelumControllers[i].text,
         'sesudah': sesudahControllers[i].text,
-        'keterangan': '',
+        'keterangan': '', // This can be set according to your logic
       };
 
       if (widget.entryId != null) {

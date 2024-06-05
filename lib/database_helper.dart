@@ -254,8 +254,8 @@ class DatabaseHelper {
         if (sheet != null) {
           for (var row in sheet.rows.skip(1)) { // Skip header row
             var rowData = {
-              'nama_indikator': row[1]?.toString(),
-              'sub_indikator': row[2]?.toString(),
+              'nama_indikator': row[1]?.value.toString(),  // Extract the value
+              'sub_indikator': row[2]?.value.toString(),  // Extract the value
             };
             excelData.add(rowData);
           }
