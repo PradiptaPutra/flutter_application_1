@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'database_helper.dart';
-import 'penilaian_screen.dart'; // Ensure you import PenilaianScreen
+import 'penilaian_screen.dart';
 
 class HistoryScreen extends StatelessWidget {
   final int userId;
@@ -43,7 +43,7 @@ class HistoryScreen extends StatelessWidget {
             return Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
             return Center(child: Text("Error fetching data"));
-          } else if (snapshot.data!.isEmpty) {
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return Center(child: Text("No data found"));
           } else {
             return ListView.separated(
@@ -66,7 +66,7 @@ class HistoryScreen extends StatelessWidget {
                         builder: (context) => PenilaianScreen(
                           userId: userId,
                           kegiatanId: kegiatan['kegiatan_id'],
-                          id_indikator: 1, // You may need to adjust this based on your logic
+                          id_indikator: 1, // Adjust this based on your logic
                           entryId: entryIds.isNotEmpty ? entryIds.first : null,
                         ),
                       ),

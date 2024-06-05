@@ -242,6 +242,15 @@ class DatabaseHelper {
     );
   }
 
+  Future<List<Map<String, dynamic>>> getEntriesByKegiatanId(int kegiatanId) async {
+    final db = await database;
+    return await db.query(
+      'DataEntry',
+      where: 'kegiatan_id = ?',
+      whereArgs: [kegiatanId],
+    );
+  }
+
   Future<List<Map<String, dynamic>>> loadExcelDataDirectly(String assetPath) async {
     List<Map<String, dynamic>> excelData = [];
     try {

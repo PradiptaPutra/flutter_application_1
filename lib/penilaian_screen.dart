@@ -18,13 +18,14 @@ class _PenilaianScreenState extends State<PenilaianScreen> {
   final List<TextEditingController> sebelumControllers = [];
   final List<TextEditingController> sesudahControllers = [];
   List<Map<String, dynamic>> data = [];
+  List<Map<String, dynamic>> existingEntries = [];
 
   @override
   void initState() {
     super.initState();
     _loadExcelData();
-    if (widget.entryId != null) {
-      _loadDataEntry(widget.entryId!);
+    if (widget.kegiatanId != null) {
+      _loadDataEntriesByKegiatan(widget.kegiatanId!);
     }
   }
 
@@ -39,15 +40,17 @@ class _PenilaianScreenState extends State<PenilaianScreen> {
     });
   }
 
-  Future<void> _loadDataEntry(int entryId) async {
-    List<Map<String, dynamic>> entries = await _dbHelper.getEntriesByEntryId(entryId);
+  Future<void> _loadDataEntriesByKegiatan(int kegiatanId) async {
+    List<Map<String, dynamic>> entries = await _dbHelper.getEntriesByKegiatanId(kegiatanId);
     if (entries.isNotEmpty) {
       setState(() {
+        existingEntries = entries;
         for (var entry in entries) {
           for (var i = 0; i < data.length; i++) {
             if (entry['sub_indikator'] == data[i]['sub_indikator']) {
               sebelumControllers[i].text = entry['sebelum'] ?? '';
               sesudahControllers[i].text = entry['sesudah'] ?? '';
+              data[i]['entry_id'] = entry['entry_id'].toString();  // Ensure entry_id is stored as String
             }
           }
         }
@@ -69,10 +72,10 @@ class _PenilaianScreenState extends State<PenilaianScreen> {
         'keterangan': '', // Set according to your logic
       };
 
-      if (widget.entryId != null) {
-        entry['entry_id'] = widget.entryId;
+      if (data[i].containsKey('entry_id')) {
+        entry['entry_id'] = int.parse(data[i]['entry_id']);  // Convert entry_id back to int
       }
-      
+
       await _dbHelper.saveDataEntry(entry);
     }
 
