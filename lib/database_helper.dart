@@ -1,7 +1,10 @@
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+import 'package:excel/excel.dart';
 
 class DatabaseHelper {
   static Database? _database;
@@ -17,7 +20,7 @@ class DatabaseHelper {
     print('Database initialized at path: $path');
     return openDatabase(
       path,
-      version: 8, // Increment the version number to 8
+      version: 8,
       onCreate: _createDb,
       onUpgrade: _upgradeDb,
     );
@@ -32,7 +35,7 @@ class DatabaseHelper {
         email TEXT, 
         name TEXT,
         position TEXT,
-        phone INTEGER,
+        phone TEXT,
         created_at TEXT
       )
     ''');
@@ -85,19 +88,6 @@ class DatabaseHelper {
       ('SDM kesehatan', 'non_fisik'),
       ('Program kesehatan', 'non_fisik'),
       ('Pembiayaan kesehatan', 'non_fisik')
-    ''');
-
-    // Create tblbangunan table
-    await db.execute('''
-      CREATE TABLE IF NOT EXISTS tblbangunan (
-        id_tbl INTEGER PRIMARY KEY AUTOINCREMENT,
-        panduan_pertanyaan TEXT,
-        nama_indikator TEXT,
-        sub_indikator TEXT,
-        kriteria TEXT,
-        id_sebelum TEXT,
-        id_sesudah TEXT
-      )
     ''');
   }
 
@@ -250,5 +240,30 @@ class DatabaseHelper {
       where: 'entry_id = ?',
       whereArgs: [entryId],
     );
+  }
+
+  Future<List<Map<String, dynamic>>> loadExcelDataDirectly(String assetPath) async {
+    List<Map<String, dynamic>> excelData = [];
+    try {
+      ByteData data = await rootBundle.load(assetPath);
+      var bytes = data.buffer.asUint8List();
+      var excel = Excel.decodeBytes(bytes);
+
+      for (var table in excel.tables.keys) {
+        var sheet = excel.tables[table];
+        if (sheet != null) {
+          for (var row in sheet.rows.skip(1)) { // Skip header row
+            var rowData = {
+              'nama_indikator': row[1]?.toString(),
+              'sub_indikator': row[2]?.toString(),
+            };
+            excelData.add(rowData);
+          }
+        }
+      }
+    } catch (e) {
+      print('Error loading Excel data: $e');
+    }
+    return excelData;
   }
 }

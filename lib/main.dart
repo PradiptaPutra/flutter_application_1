@@ -1,22 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'puskesmas_screen.dart';
-import 'home_content.dart';
+import 'database_helper.dart';
+import 'splash_screen.dart';
+import 'logreg_screen.dart';
 import 'login_screen.dart';
 import 'registration_screen.dart';
-import 'data_entry_form.dart';
 import 'profile_screen.dart';
-import 'splash_screen.dart';
-// import 'data_summary_view.dart';
-import 'logreg_screen.dart';
 import 'dashboard_screen.dart';
+import 'data_entry_form.dart';
 import 'category_selection_screen.dart';
-// import 'facility_selection_screen.dart';
 import 'indikator_screen.dart';
-import 'penilaian_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // DatabaseHelper dbHelper = DatabaseHelper();
+  // await dbHelper.loadExcelData('assets/form_penilaian.xlsx');
   runApp(MyApp());
 }
 
@@ -34,8 +31,6 @@ class MyApp extends StatelessWidget {
         '/profile': (context) => ProfileScreen(userId: ModalRoute.of(context)!.settings.arguments as int),
         '/dashboard': (context) => DashboardScreen(userId: ModalRoute.of(context)!.settings.arguments as int),
         '/data_entry': (context) => DataEntryForm(userId: ModalRoute.of(context)!.settings.arguments as int),
-        // '/data_summary': (context) => DataSummaryView(entries: []),
-        // '/facility_selection': (context) => FacilitySelectionScreen(userId: ModalRoute.of(context)!.settings.arguments as int),
       },
       onGenerateRoute: (settings) {
         if (settings.name == '/category_selection') {
@@ -44,7 +39,7 @@ class MyApp extends StatelessWidget {
             builder: (context) => CategorySelectionScreen(
               userId: args['userId'],
               kegiatanId: args['kegiatanId'],
-              entryIds: args['entryIds'], // Tambahkan entryIds sebagai nullable
+              entryIds: args['entryIds'], // Add entryIds as nullable
             ),
           );
         } else if (settings.name == '/indikator') {
@@ -54,7 +49,7 @@ class MyApp extends StatelessWidget {
               userId: args['userId'],
               kegiatanId: args['kegiatanId'],
               id_indikator: args['id_indikator'],
-              entryIds: args['entryIds'], // Tambahkan entryIds sebagai nullable
+              entryIds: args['entryIds'], // Add entryIds as nullable
             ),
           );
         }

@@ -75,7 +75,7 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-    - assets/Form Penilaian.xlsx
+    - assets/form_penilaian.xlsx
     - assets/images/bgsplash.png
     - assets/images/logokemenkes.png
     - assets/images/logopuskesmas.png
