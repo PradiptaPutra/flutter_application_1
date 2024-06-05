@@ -59,11 +59,23 @@ class _PenilaianScreenState extends State<PenilaianScreen> {
   }
 
   Future<void> _saveDataEntry() async {
+    // Dapatkan daftar kegiatan untuk user
+    List<Map<String, dynamic>> kegiatanList = await _dbHelper.getKegiatanForUser(widget.userId);
+
+    // Temukan kegiatan yang sesuai dengan kegiatanId yang diberikan
+    Map<String, dynamic> kegiatan = kegiatanList.firstWhere(
+      (kegiatan) => kegiatan['kegiatan_id'] == widget.kegiatanId,
+      orElse: () => <String, dynamic>{},
+    );
+
+    // Ambil nilai nama_puskesmas dari kegiatan
+    String puskesmas = kegiatan.isNotEmpty ? kegiatan['nama_puskesmas'] : '';
+
     for (var i = 0; i < data.length; i++) {
       Map<String, dynamic> entry = {
         'user_id': widget.userId,
         'kegiatan_id': widget.kegiatanId,
-        'puskesmas': '', // Set according to your logic
+        'puskesmas': puskesmas, // Gunakan puskesmas yang didapat dari database
         'indikator': data[i]['nama_indikator'],
         'sub_indikator': data[i]['sub_indikator'],
         'kriteria': '', // Set according to your logic
@@ -81,6 +93,26 @@ class _PenilaianScreenState extends State<PenilaianScreen> {
 
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Data berhasil disimpan')));
     Navigator.pop(context);
+  }
+
+  void _showPopup(BuildContext context, String content) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Informasi"),
+          content: Text(content),
+          actions: [
+            TextButton(
+              child: Text("Close"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -102,97 +134,115 @@ class _PenilaianScreenState extends State<PenilaianScreen> {
       ),
       body: data.isEmpty
           ? Center(child: CircularProgressIndicator())
-          : Stack(
-              children: [
-                ListView.builder(
-                  itemCount: data.length,
-                  itemBuilder: (context, index) {
-                    return Card(
-                      margin: EdgeInsets.all(10),
-                      color: Colors.grey[300],
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
+          : ListView.builder(
+              itemCount: data.length,
+              itemBuilder: (context, index) {
+                return Card(
+                  margin: EdgeInsets.all(10),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  color: Colors.white,
+                  child: Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
                           children: [
-                            Row(
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Image.asset(
+                                'assets/images/logors.jpg', // Ganti dengan path gambar Anda
+                                width: 50,
+                                height: 50,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                            SizedBox(width: 10),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    data[index]["sub_indikator"] ?? '',
+                                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                  ),
+                                  Text(
+                                    data[index]["nama_indikator"] ?? '',
+                                    style: TextStyle(fontSize: 14, color: Colors.grey),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Column(
                               children: [
-                                CircleAvatar(
-                                  radius: 30,
-                                  backgroundImage: AssetImage('assets/images/logors.jpg'),
-                                ),
-                                SizedBox(width: 10),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                Row(
                                   children: [
-                                    Text(
-                                      data[index]["nama_indikator"] ?? '',
-                                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                    IconButton(
+                                      icon: Icon(
+                                        Icons.visibility,
+                                        color: Colors.blue,
+                                      ),
+                                      onPressed: () async {
+                                        String rowData = await _dbHelper.loadRowData(3);
+                                        _showPopup(context, rowData);
+                                      },
                                     ),
-                                    Text(data[index]["sub_indikator"] ?? ''),
+                                    IconButton(
+                                      icon: Icon(
+                                        Icons.help_outline,
+                                        color: Colors.orange,
+                                      ),
+                                      onPressed: () async {
+                                        String rowData = await _dbHelper.loadRowData(4);
+                                        _showPopup(context, rowData);
+                                      },
+                                    ),
                                   ],
                                 ),
-                                Spacer(),
-                              ],
-                            ),
-                            SizedBox(height: 10),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Column(
-                                    children: [
-                                      TextField(
-                                        controller: sebelumControllers[index],
-                                        decoration: InputDecoration(
-                                          hintText: 'Sebelum',
-                                          border: OutlineInputBorder(),
-                                          contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                SizedBox(width: 10),
-                                Expanded(
-                                  child: Column(
-                                    children: [
-                                      TextField(
-                                        controller: sesudahControllers[index],
-                                        decoration: InputDecoration(
-                                          hintText: 'Sesudah',
-                                          border: OutlineInputBorder(),
-                                          contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
+                                SizedBox(height: 4),
                               ],
                             ),
                           ],
                         ),
-                      ),
-                    );
-                  },
-                ),
-                Positioned(
-                  bottom: 20,
-                  left: 20,
-                  right: 20,
-                  child: ElevatedButton(
-                    onPressed: _saveDataEntry,
-                    child: Text('SIMPAN'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      minimumSize: Size(380, 50),
+                        SizedBox(height: 10),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TextField(
+                                controller: sebelumControllers[index],
+                                decoration: InputDecoration(
+                                  labelText: 'Sebelum',
+                                  border: OutlineInputBorder(),
+                                  contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                ),
+                              ),
+                            ),
+                            SizedBox(width: 10),
+                            Expanded(
+                              child: TextField(
+                                controller: sesudahControllers[index],
+                                decoration: InputDecoration(
+                                  labelText: 'Sesudah',
+                                  border: OutlineInputBorder(),
+                                  contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
-                ),
-              ],
+                );
+              },
             ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _saveDataEntry,
+        child: Icon(Icons.save),
+        backgroundColor: Colors.blue,
+      ),
     );
   }
 }
