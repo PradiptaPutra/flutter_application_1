@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'database_helper.dart';
-import 'category_selection_screen.dart';
+import 'penilaian_screen.dart'; // Ensure you import PenilaianScreen
 
 class HistoryScreen extends StatelessWidget {
   final int userId;
@@ -63,10 +63,11 @@ class HistoryScreen extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => CategorySelectionScreen(
+                        builder: (context) => PenilaianScreen(
                           userId: userId,
                           kegiatanId: kegiatan['kegiatan_id'],
-                          entryIds: entryIds.isNotEmpty ? entryIds : null, // Pass entryIds or null
+                          id_indikator: 1, // You may need to adjust this based on your logic
+                          entryId: entryIds.isNotEmpty ? entryIds.first : null,
                         ),
                       ),
                     );

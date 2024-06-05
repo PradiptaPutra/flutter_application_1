@@ -5,7 +5,7 @@ class PenilaianScreen extends StatefulWidget {
   final int? kegiatanId;
   final int id_indikator;
   final int userId;
-  final int? entryId; // Tambahkan entryId sebagai parameter nullable
+  final int? entryId;
 
   PenilaianScreen({this.kegiatanId, required this.id_indikator, required this.userId, this.entryId});
 
@@ -22,7 +22,6 @@ class _PenilaianScreenState extends State<PenilaianScreen> {
   @override
   void initState() {
     super.initState();
-    print('Entry ID in PenilaianScreen: ${widget.entryId}'); // Print entryId to the console
     _loadExcelData();
     if (widget.entryId != null) {
       _loadDataEntry(widget.entryId!);
@@ -57,29 +56,26 @@ class _PenilaianScreenState extends State<PenilaianScreen> {
   }
 
   Future<void> _saveDataEntry() async {
-    // Prepare data to be saved
     for (var i = 0; i < data.length; i++) {
       Map<String, dynamic> entry = {
         'user_id': widget.userId,
         'kegiatan_id': widget.kegiatanId,
-        'puskesmas': '', // This can be set according to your logic
+        'puskesmas': '', // Set according to your logic
         'indikator': data[i]['nama_indikator'],
         'sub_indikator': data[i]['sub_indikator'],
-        'kriteria': '', // This can be set according to your logic
+        'kriteria': '', // Set according to your logic
         'sebelum': sebelumControllers[i].text,
         'sesudah': sesudahControllers[i].text,
-        'keterangan': '', // This can be set according to your logic
+        'keterangan': '', // Set according to your logic
       };
 
       if (widget.entryId != null) {
-        // Update existing entry
         entry['entry_id'] = widget.entryId;
       }
       
       await _dbHelper.saveDataEntry(entry);
     }
 
-    // Show confirmation and navigate back
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Data berhasil disimpan')));
     Navigator.pop(context);
   }
