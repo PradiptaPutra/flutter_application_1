@@ -17,6 +17,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   final _phoneController = TextEditingController();
   final _usernameController = TextEditingController();
   final _emailController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
   final DatabaseHelper _dbHelper = DatabaseHelper();
 
   @override
@@ -30,17 +31,19 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   void _saveProfile() async {
-    Map<String, dynamic> updatedData = {
-      'user_id': widget.userId,
-      'name': _nameController.text,
-      'position': _positionController.text,
-      'phone': _phoneController.text,
-      'username': _usernameController.text,
-      'email': _emailController.text,
-    };
+    if (_formKey.currentState!.validate()) {
+      Map<String, dynamic> updatedData = {
+        'user_id': widget.userId,
+        'name': _nameController.text,
+        'position': _positionController.text,
+        'phone': _phoneController.text,
+        'username': _usernameController.text,
+        'email': _emailController.text,
+      };
 
-    await _dbHelper.updateUserData(updatedData);
-    Navigator.pop(context, true); // Return true to indicate successful update
+      await _dbHelper.updateUserData(updatedData);
+      Navigator.pop(context, true); // Return true to indicate successful update
+    }
   }
 
   @override
@@ -51,42 +54,100 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: ListView(
-          children: [
-            TextField(
-              controller: _nameController,
-              decoration: InputDecoration(labelText: 'Name'),
-            ),
-            TextField(
-              controller: _positionController,
-              decoration: InputDecoration(labelText: 'Position'),
-            ),
-            TextField(
-              controller: _phoneController,
-              decoration: InputDecoration(labelText: 'Phone'),
-            ),
-            TextField(
-              controller: _usernameController,
-              decoration: InputDecoration(labelText: 'Username'),
-            ),
-            TextField(
-              controller: _emailController,
-              decoration: InputDecoration(labelText: 'Email'),
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _saveProfile,
-              child: Text('Save'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                minimumSize: Size(380, 50),
+        child: Form(
+          key: _formKey,
+          child: ListView(
+            children: [
+              _buildTextField(
+                controller: _nameController,
+                labelText: 'Name',
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your name';
+                  }
+                  return null;
+                },
               ),
-            ),
-          ],
+              _buildTextField(
+                controller: _positionController,
+                labelText: 'Position',
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your position';
+                  }
+                  return null;
+                },
+              ),
+              _buildTextField(
+                controller: _phoneController,
+                labelText: 'Phone',
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your phone number';
+                  }
+                  return null;
+                },
+              ),
+              _buildTextField(
+                controller: _usernameController,
+                labelText: 'Username',
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your username';
+                  }
+                  return null;
+                },
+              ),
+              _buildTextField(
+                controller: _emailController,
+                labelText: 'Email',
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your email';
+                  }
+                  if (!RegExp(r'^[^@]+@[^@]+\.[ ^@]+').hasMatch(value)) {
+                    return 'Please enter a valid email address';
+                  }
+                  return null;
+                },
+              ),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: _saveProfile,
+                child: Text('Save'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  minimumSize: Size(double.infinity, 50),
+                ),
+              ),
+            ],
+          ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String labelText,
+    String? Function(String?)? validator,
+  }) {
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 10.0),
+      child: TextFormField(
+        controller: controller,
+        decoration: InputDecoration(
+          labelText: labelText,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(15.0),
+          ),
+          filled: true,
+          fillColor: Colors.grey[200],
+        ),
+        validator: validator,
       ),
     );
   }

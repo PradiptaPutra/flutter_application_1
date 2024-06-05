@@ -7,11 +7,11 @@ import 'registration_screen.dart';
 import 'data_entry_form.dart';
 import 'profile_screen.dart';
 import 'splash_screen.dart';
-import 'data_summary_view.dart';
+// import 'data_summary_view.dart';
 import 'logreg_screen.dart';
 import 'dashboard_screen.dart';
 import 'category_selection_screen.dart';
-import 'facility_selection_screen.dart';
+// import 'facility_selection_screen.dart';
 import 'indikator_screen.dart';
 import 'penilaian_screen.dart';
 
@@ -34,8 +34,8 @@ class MyApp extends StatelessWidget {
         '/profile': (context) => ProfileScreen(userId: ModalRoute.of(context)!.settings.arguments as int),
         '/dashboard': (context) => DashboardScreen(userId: ModalRoute.of(context)!.settings.arguments as int),
         '/data_entry': (context) => DataEntryForm(userId: ModalRoute.of(context)!.settings.arguments as int),
-        '/data_summary': (context) => DataSummaryView(entries: []),
-        '/facility_selection': (context) => FacilitySelectionScreen(userId: ModalRoute.of(context)!.settings.arguments as int),
+        // '/data_summary': (context) => DataSummaryView(entries: []),
+        // '/facility_selection': (context) => FacilitySelectionScreen(userId: ModalRoute.of(context)!.settings.arguments as int),
       },
       onGenerateRoute: (settings) {
         if (settings.name == '/category_selection') {

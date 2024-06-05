@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'package:crypto/crypto.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
@@ -30,7 +32,7 @@ class DatabaseHelper {
         email TEXT, 
         name TEXT,
         position TEXT,
-        phone TEXT,
+        phone INTEGER,
         created_at TEXT
       )
     ''');
@@ -125,11 +127,12 @@ class DatabaseHelper {
 
   Future<int?> verifyLogin(String username, String password) async {
     final db = await database;
+    final passwordHash = sha256.convert(utf8.encode(password)).toString();
     List<Map> results = await db.query(
       'Pengguna',
       columns: ['user_id', 'username', 'password_hash'],
       where: 'username = ? AND password_hash = ?',
-      whereArgs: [username, password],
+      whereArgs: [username, passwordHash],
     );
     if (results.isNotEmpty) {
       return results.first['user_id'] as int?;

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:crypto/crypto.dart';
+import 'dart:convert';
 import 'database_helper.dart';
 
 class RegistrationScreen extends StatefulWidget {
@@ -6,7 +8,7 @@ class RegistrationScreen extends StatefulWidget {
   _RegistrationScreenState createState() => _RegistrationScreenState();
 }
 
-class _RegistrationScreenState extends State<RegistrationScreen> {
+class _RegistrationScreenState extends State<RegistrationScreen> with SingleTickerProviderStateMixin {
   final _usernameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -14,15 +16,63 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   final _positionController = TextEditingController();
   final _phoneController = TextEditingController();
   final DatabaseHelper _dbHelper = DatabaseHelper();
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(seconds: 1),
+      vsync: this,
+    );
+    _animation = CurvedAnimation(parent: _controller, curve: Curves.easeInOut);
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    _usernameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _nameController.dispose();
+    _positionController.dispose();
+    _phoneController.dispose();
+    super.dispose();
+  }
 
   void _register() async {
+    final email = _emailController.text;
+    final name = _nameController.text;
+    final password = _passwordController.text;
+    
+    if (!_isValidEmail(email)) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Invalid email format'),
+        backgroundColor: Colors.red,
+      ));
+      return;
+    }
+
+    if (!_isValidName(name)) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Invalid name format'),
+        backgroundColor: Colors.red,
+      ));
+      return;
+    }
+
+    final passwordHash = sha256.convert(utf8.encode(password)).toString();
+
     Map<String, dynamic> userData = {
       'username': _usernameController.text,
-      'password_hash': _passwordController.text, // Consider hashing the password
-      'email': _emailController.text,
-      'name': _nameController.text,
+      'password_hash': passwordHash,
+      'email': email,
+      'name': name,
       'position': _positionController.text,
       'phone': _phoneController.text,
+      'created_at': DateTime.now().toString(),
     };
 
     try {
@@ -41,124 +91,90 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     }
   }
 
+  bool _isValidEmail(String email) {
+    final regex = RegExp(r'^[^@]+@[^@]+\.[^@]+');
+    return regex.hasMatch(email);
+  }
+
+  bool _isValidName(String name) {
+    final regex = RegExp(r'^[a-zA-Z\s]+$');
+    return regex.hasMatch(name);
+  }
+
   @override
   Widget build(BuildContext context) {
     final bottomPadding = MediaQuery.of(context).viewInsets.bottom;
 
     return Scaffold(
       appBar: AppBar(title: Text("Registration")),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.only(bottom: bottomPadding), // Adjust the padding to ensure visibility
-        child: Padding(
-          padding: const EdgeInsets.all(15.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Container(
-                margin: EdgeInsets.fromLTRB(0, 10, 0, 10),
-                child: TextFormField(
+      body: FadeTransition(
+        opacity: _animation,
+        child: SingleChildScrollView(
+          padding: EdgeInsets.only(bottom: bottomPadding), // Adjust the padding to ensure visibility
+          child: Padding(
+            padding: const EdgeInsets.all(15.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                _buildTextField(
                   controller: _usernameController,
-                  decoration: InputDecoration(
-                    labelText: 'Username',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(15.0),
-                      borderSide: BorderSide(color: const Color.fromARGB(255, 0, 0, 0), width: 1),
-                    ),
-                    filled: true,
-                    fillColor: Colors.white,
-                  ),
+                  labelText: 'Username',
                 ),
-              ),
-              Container(
-                margin: EdgeInsets.only(bottom: 10.0),
-                child: TextFormField(
+                _buildTextField(
                   controller: _emailController,
-                  decoration: InputDecoration(
-                    labelText: 'Email',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(15.0),
-                      borderSide: BorderSide(color: const Color.fromARGB(255, 0, 0, 0), width: 1),
-                    ),
-                    filled: true,
-                    fillColor: Colors.white,
-                  ),
+                  labelText: 'Email',
                 ),
-              ),
-              Container(
-                margin: EdgeInsets.only(bottom: 10.0),
-                child: TextFormField(
+                _buildTextField(
                   controller: _nameController,
-                  decoration: InputDecoration(
-                    labelText: 'Name',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(15.0),
-                      borderSide: BorderSide(color: const Color.fromARGB(255, 0, 0, 0), width: 1),
-                    ),
-                    filled: true,
-                    fillColor: Colors.white,
-                  ),
+                  labelText: 'Name',
                 ),
-              ),
-              Container(
-                margin: EdgeInsets.only(bottom: 10.0),
-                child: TextFormField(
+                _buildTextField(
                   controller: _positionController,
-                  decoration: InputDecoration(
-                    labelText: 'Position',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(15.0),
-                      borderSide: BorderSide(color: const Color.fromARGB(255, 0, 0, 0), width: 1),
-                    ),
-                    filled: true,
-                    fillColor: Colors.white,
-                  ),
+                  labelText: 'Position',
                 ),
-              ),
-              Container(
-                margin: EdgeInsets.only(bottom: 10.0),
-                child: TextFormField(
+                _buildTextField(
                   controller: _phoneController,
-                  decoration: InputDecoration(
-                    labelText: 'Phone',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(15.0),
-                      borderSide: BorderSide(color: const Color.fromARGB(255, 0, 0, 0), width: 1),
-                    ),
-                    filled: true,
-                    fillColor: Colors.white,
-                  ),
+                  labelText: 'Phone',
                 ),
-              ),
-              Container(
-                margin: EdgeInsets.fromLTRB(0, 0, 0, 280),
-                child: TextFormField(
+                _buildTextField(
                   controller: _passwordController,
-                  decoration: InputDecoration(
-                    labelText: 'Password',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(15.0),
-                      borderSide: BorderSide(color: const Color.fromARGB(255, 0, 0, 0), width: 1),
+                  labelText: 'Password',
+                  obscureText: true,
+                ),
+                SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: _register,
+                  child: Text('Register'),
+                  style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
                     ),
-                    filled: true,
-                    fillColor: Colors.white,
+                    padding: EdgeInsets.symmetric(vertical: 15, horizontal: 100),
+                    textStyle: TextStyle(fontSize: 18),
                   ),
                 ),
-              ),
-              ElevatedButton(
-                onPressed: _register,
-                child: Text('Register'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  minimumSize: Size(380, 50),
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildTextField({required TextEditingController controller, required String labelText, bool obscureText = false}) {
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 10.0),
+      child: TextFormField(
+        controller: controller,
+        decoration: InputDecoration(
+          labelText: labelText,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(15.0),
+          ),
+          filled: true,
+          fillColor: Colors.grey[200],
+        ),
+        obscureText: obscureText,
       ),
     );
   }
