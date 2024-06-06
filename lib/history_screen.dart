@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'database_helper.dart';
-import 'penilaian_screen.dart';
+import 'category_selection_screen.dart'; // Import the CategorySelectionScreen
 
 class HistoryScreen extends StatelessWidget {
   final int userId;
@@ -58,16 +58,13 @@ class HistoryScreen extends StatelessWidget {
                   title: Text(kegiatan['nama_puskesmas'] ?? 'Unknown'),
                   subtitle: Text("${kegiatan['tanggal_kegiatan']} - ${kegiatan['dropdown_option']}"),
                   trailing: Icon(Icons.arrow_forward_ios),
-                  onTap: () async {
-                    final entryIds = await _fetchEntryIdsForKegiatan(kegiatan['kegiatan_id']);
+                  onTap: () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => PenilaianScreen(
+                        builder: (context) => CategorySelectionScreen(
                           userId: userId,
                           kegiatanId: kegiatan['kegiatan_id'],
-                          id_indikator: 1, // Adjust this based on your logic
-                          entryId: entryIds.isNotEmpty ? entryIds.first : null,
                         ),
                       ),
                     );

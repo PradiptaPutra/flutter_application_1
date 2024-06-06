@@ -48,6 +48,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: Row(
@@ -61,9 +62,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             Spacer(),
-            Icon(Icons.notifications),
+            IconButton(
+              icon: Icon(Icons.notifications),
+              onPressed: () {
+                // Handle notification icon press
+              },
+            ),
             SizedBox(width: 10),
-            Icon(Icons.person),
+            CircleAvatar(
+              backgroundImage: AssetImage('assets/profile_image.png'), // Use the actual path to the profile image
+              radius: 15,
+            ),
           ],
         ),
         backgroundColor: Colors.transparent,
@@ -73,28 +82,83 @@ class _DashboardScreenState extends State<DashboardScreen> {
         index: _selectedIndex,
         children: _widgetOptions(widget.userId),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Beranda',
+      bottomNavigationBar: BottomAppBar(
+        shape: CircularNotchedRectangle(),
+        notchMargin: 6.0,
+        child: Container(
+          height: 60.0,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: <Widget>[
+              buildTabItem(
+                index: 0,
+                icon: Icons.home,
+                label: 'Home',
+              ),
+              buildTabItem(
+                index: 8,
+                icon: Icons.calendar_today,
+                label: 'Calendar',
+              ),
+              SizedBox(width: 48.0), // The dummy child for the floating button in the middle
+              buildTabItem(
+                index: 2,
+                icon: Icons.message,
+                label: 'History',
+              ),
+              buildTabItem(
+                index: 3,
+                icon: Icons.person,
+                label: 'Profile',
+              ),
+            ],
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.edit),
-            label: 'Penilaian',
+        ),
+      ),
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(top: 40.0), 
+        child: Container(// Adjust this value to lower the position
+        width: 70.0, // Adjust the width as needed
+          height: 70.0, // Adjust the height as needed
+        child: FloatingActionButton(
+          onPressed: () {
+            setState(() {
+              _selectedIndex = 1; // Assuming the note function is the third in the IndexedStack
+            });
+          },
+          child: Icon(Icons.note_add_outlined),
+          backgroundColor: Colors.blue,
+        ),
+      ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+    );
+  }
+
+  Widget buildTabItem({
+    required int index,
+    required IconData icon,
+    required String label,
+  }) {
+    return InkWell(
+      onTap: () {
+        _onItemTapped(index);
+      },
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Icon(
+            icon,
+            color: _selectedIndex == index ? Colors.blue : Colors.black,
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.history),
-            label: 'Histori',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profil',
+          Text(
+            label,
+            style: TextStyle(
+              color: _selectedIndex == index ? Colors.blue : Colors.black,
+            ),
           ),
         ],
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-        type: BottomNavigationBarType.fixed,  // Ensures the bar can show multiple items
       ),
     );
   }

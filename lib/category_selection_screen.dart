@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'indikator_screen.dart';
+
 
 class CategorySelectionScreen extends StatelessWidget {
   final int userId;
@@ -28,12 +28,12 @@ class CategorySelectionScreen extends StatelessWidget {
                 onTap: () {
                   Navigator.pushNamed(
                     context,
-                    '/indikator',
+                    '/penilaian',
                     arguments: {
                       'userId': userId,
                       'kegiatanId': kegiatanId,
                       'entryIds': entryIds, // Pass the list of entry IDs, can be null
-                      'id_indikator': 1, // id_indikator for Fasilitas Pelayanan Kesehatan
+                      'id_indikator': 11, // id_indikator for Fasilitas Pelayanan Kesehatan
                     },
                   );
                 },
@@ -43,12 +43,12 @@ class CategorySelectionScreen extends StatelessWidget {
                 onTap: () {
                   Navigator.pushNamed(
                     context,
-                    '/indikator',
+                    '/penilaian_alkes',
                     arguments: {
                       'userId': userId,
                       'kegiatanId': kegiatanId,
                       'entryIds': entryIds, // Pass the list of entry IDs, can be null
-                      'id_indikator': 1, // id_indikator for Fasilitas Pelayanan Kesehatan
+                      'id_indikator': 12, // id_indikator for Fasilitas Pelayanan Kesehatan
                     },
                   );
                 },
@@ -63,7 +63,7 @@ class CategorySelectionScreen extends StatelessWidget {
                       'userId': userId,
                       'kegiatanId': kegiatanId,
                       'entryIds': entryIds, // Pass the list of entry IDs, can be null
-                      'id_indikator': 1, // id_indikator for Fasilitas Pelayanan Kesehatan
+                      'id_indikator': 13, // id_indikator for Fasilitas Pelayanan Kesehatan
                     },
                   );
                 },

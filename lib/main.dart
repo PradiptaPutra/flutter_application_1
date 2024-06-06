@@ -8,7 +8,8 @@ import 'profile_screen.dart';
 import 'dashboard_screen.dart';
 import 'data_entry_form.dart';
 import 'category_selection_screen.dart';
-import 'indikator_screen.dart';
+import 'penilaian_screen.dart'; // Ganti ini dengan import untuk penilaian_screen
+import 'penilaian_alkes_screen.dart'; // Ganti ini dengan import untuk penilaian_screen
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -42,14 +43,25 @@ class MyApp extends StatelessWidget {
               entryIds: args['entryIds'], // Add entryIds as nullable
             ),
           );
-        } else if (settings.name == '/indikator') {
+        } else if (settings.name == '/penilaian') {
           final args = settings.arguments as Map<String, dynamic>;
           return MaterialPageRoute(
-            builder: (context) => IndikatorScreen(
+            builder: (context) => PenilaianScreen(
               userId: args['userId'],
               kegiatanId: args['kegiatanId'],
               id_indikator: args['id_indikator'],
-              entryIds: args['entryIds'], // Add entryIds as nullable
+              entryId: args['entryId'], // Add entryIds as nullable
+            ),
+          );
+        }
+         else if (settings.name == '/penilaian_alkes') {
+          final args = settings.arguments as Map<String, dynamic>;
+          return MaterialPageRoute(
+            builder: (context) => PenilaianAlkesScreen(
+              userId: args['userId'],
+              kegiatanId: args['kegiatanId'],
+              id_indikator: args['id_indikator'],
+              entryId: args['entryId'], // Add entryIds as nullable
             ),
           );
         }
