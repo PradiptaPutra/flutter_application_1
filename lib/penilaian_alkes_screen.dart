@@ -3,11 +3,11 @@ import 'database_helper.dart';
 
 class PenilaianAlkesScreen extends StatefulWidget {
   final int? kegiatanId;
-  final int id_indikator;
+  final int id_category;
   final int userId;
   final int? entryId;
 
-  PenilaianAlkesScreen({this.kegiatanId, required this.id_indikator, required this.userId, this.entryId});
+  PenilaianAlkesScreen({this.kegiatanId, required this.id_category, required this.userId, this.entryId});
 
   @override
   _PenilaianAlkesScreenState createState() => _PenilaianAlkesScreenState();
@@ -164,7 +164,7 @@ class _PenilaianAlkesScreenState extends State<PenilaianAlkesScreen> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(('juml;ah')
+                                  Text(
                                     data[index]["nama_indikator"] ?? '',
                                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                                   ),

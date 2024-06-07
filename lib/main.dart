@@ -49,7 +49,7 @@ class MyApp extends StatelessWidget {
             builder: (context) => PenilaianScreen(
               userId: args['userId'],
               kegiatanId: args['kegiatanId'],
-              id_indikator: args['id_indikator'],
+              id_category: args['id_category'],
               entryId: args['entryId'], // Add entryIds as nullable
             ),
           );
@@ -60,7 +60,7 @@ class MyApp extends StatelessWidget {
             builder: (context) => PenilaianAlkesScreen(
               userId: args['userId'],
               kegiatanId: args['kegiatanId'],
-              id_indikator: args['id_indikator'],
+              id_category: args['id_category'],
               entryId: args['entryId'], // Add entryIds as nullable
             ),
           );

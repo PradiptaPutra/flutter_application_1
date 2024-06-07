@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/puskesmas_screen.dart';
 import 'home_content.dart';
 import 'profile_screen.dart';
-import 'history_screen.dart';  // Import the history screen
+import 'history_screen.dart';
 import 'database_helper.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -35,7 +35,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   static List<Widget> _widgetOptions(int userId) => <Widget>[
     HomeContent(),
     PuskesmasScreen(userId: userId),
-    HistoryScreen(userId: userId),  // Assuming you have a HistoryScreen
+    HistoryScreen(userId: userId),
     ProfileScreen(userId: userId),
   ];
 
@@ -96,7 +96,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 label: 'Home',
               ),
               buildTabItem(
-                index: 8,
+                index: 10,
                 icon: Icons.calendar_today,
                 label: 'Calendar',
               ),
@@ -116,20 +116,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ),
       ),
       floatingActionButton: Padding(
-        padding: const EdgeInsets.only(top: 40.0), 
-        child: Container(// Adjust this value to lower the position
-        width: 70.0, // Adjust the width as needed
+        padding: const EdgeInsets.only(top: 50.0), 
+        child: Container(
+          width: 70.0, // Adjust the width as needed
           height: 70.0, // Adjust the height as needed
-        child: FloatingActionButton(
-          onPressed: () {
-            setState(() {
-              _selectedIndex = 1; // Assuming the note function is the third in the IndexedStack
-            });
-          },
-          child: Icon(Icons.note_add_outlined),
-          backgroundColor: Colors.blue,
+          child: FloatingActionButton(
+            onPressed: () {
+              setState(() {
+                _selectedIndex = 1; // Assuming the note function is the second in the IndexedStack
+              });
+            },
+            child: Icon(Icons.note_add_outlined),
+            backgroundColor: Colors.blue,
+          ),
         ),
-      ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );

@@ -33,7 +33,7 @@ class CategorySelectionScreen extends StatelessWidget {
                       'userId': userId,
                       'kegiatanId': kegiatanId,
                       'entryIds': entryIds, // Pass the list of entry IDs, can be null
-                      'id_indikator': 11, // id_indikator for Fasilitas Pelayanan Kesehatan
+                      'id_category': 11, // id_category for Fasilitas Pelayanan Kesehatan
                     },
                   );
                 },
@@ -48,7 +48,7 @@ class CategorySelectionScreen extends StatelessWidget {
                       'userId': userId,
                       'kegiatanId': kegiatanId,
                       'entryIds': entryIds, // Pass the list of entry IDs, can be null
-                      'id_indikator': 12, // id_indikator for Fasilitas Pelayanan Kesehatan
+                      'id_category': 12, // id_category for Fasilitas Pelayanan Kesehatan
                     },
                   );
                 },
@@ -63,7 +63,7 @@ class CategorySelectionScreen extends StatelessWidget {
                       'userId': userId,
                       'kegiatanId': kegiatanId,
                       'entryIds': entryIds, // Pass the list of entry IDs, can be null
-                      'id_indikator': 13, // id_indikator for Fasilitas Pelayanan Kesehatan
+                      'id_category': 13, // id_category for Fasilitas Pelayanan Kesehatan
                     },
                   );
                 },
@@ -83,7 +83,7 @@ class CategorySelectionScreen extends StatelessWidget {
                   'userId': userId,
                   'kegiatanId': kegiatanId,
                   'entryIds': entryIds, // Pass the list of entry IDs, can be null
-                  'id_indikator': 2, // id_indikator for SDM Kesehatan
+                  'id_category': 2, // id_category for SDM Kesehatan
                 },
               );
             },
@@ -101,7 +101,7 @@ class CategorySelectionScreen extends StatelessWidget {
                   'userId': userId,
                   'kegiatanId': kegiatanId,
                   'entryIds': entryIds, // Pass the list of entry IDs, can be null
-                  'id_indikator': 3, // id_indikator for Program Kesehatan
+                  'id_category': 3, // id_category for Program Kesehatan
                 },
               );
             },
@@ -119,7 +119,7 @@ class CategorySelectionScreen extends StatelessWidget {
                   'userId': userId,
                   'kegiatanId': kegiatanId,
                   'entryIds': entryIds, // Pass the list of entry IDs, can be null
-                  'id_indikator': 4, // id_indikator for Pembiayaan Kesehatan
+                  'id_category': 4, // id_category for Pembiayaan Kesehatan
                 },
               );
             },

@@ -3,11 +3,11 @@ import 'database_helper.dart';
 
 class PenilaianScreen extends StatefulWidget {
   final int? kegiatanId;
-  final int id_indikator;
+  final int id_category;
   final int userId;
   final int? entryId;
 
-  PenilaianScreen({this.kegiatanId, required this.id_indikator, required this.userId, this.entryId});
+  PenilaianScreen({this.kegiatanId, required this.id_category, required this.userId, this.entryId});
 
   @override
   _PenilaianScreenState createState() => _PenilaianScreenState();
@@ -75,6 +75,7 @@ class _PenilaianScreenState extends State<PenilaianScreen> {
       Map<String, dynamic> entry = {
         'user_id': widget.userId,
         'kegiatan_id': widget.kegiatanId,
+        'id_category': widget.id_category, // Include id_category here
         'puskesmas': puskesmas, // Gunakan puskesmas yang didapat dari database
         'indikator': data[i]['nama_indikator'],
         'sub_indikator': data[i]['sub_indikator'],

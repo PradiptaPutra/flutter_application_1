@@ -20,7 +20,7 @@ class DatabaseHelper {
     print('Database initialized at path: $path');
     return openDatabase(
       path,
-      version: 8,
+      version: 9, // Incremented version number
       onCreate: _createDb,
       onUpgrade: _upgradeDb,
     );
@@ -45,6 +45,7 @@ class DatabaseHelper {
         entry_id INTEGER PRIMARY KEY AUTOINCREMENT,
         user_id INTEGER,
         kegiatan_id INTEGER,
+        id_category INTEGER,
         puskesmas TEXT,
         indikator TEXT,
         sub_indikator TEXT,
@@ -72,23 +73,6 @@ class DatabaseHelper {
         FOREIGN KEY(user_id) REFERENCES Pengguna(user_id)
       )
     ''');
-
-    await db.execute('''
-      CREATE TABLE IF NOT EXISTS Indikator (
-        id_indikator INTEGER PRIMARY KEY AUTOINCREMENT,
-        nama_indikator TEXT,
-        aspek TEXT
-      )
-    ''');
-
-    // Insert default data into Indikator table
-    await db.execute('''
-      INSERT INTO Indikator (nama_indikator, aspek) VALUES
-      ('Fasiltas pelayanan kesehatan', 'fisik'),
-      ('SDM kesehatan', 'non_fisik'),
-      ('Program kesehatan', 'non_fisik'),
-      ('Pembiayaan kesehatan', 'non_fisik')
-    ''');
   }
 
   Future _upgradeDb(Database db, int oldVersion, int newVersion) async {
@@ -107,6 +91,9 @@ class DatabaseHelper {
           id_sesudah TEXT
         )
       ''');
+    }
+    if (oldVersion < 9) {
+      await db.execute('ALTER TABLE DataEntry ADD COLUMN id_category INTEGER');
     }
   }
 
@@ -292,7 +279,7 @@ class DatabaseHelper {
 
           var rowData = {
             'nama_indikator': namaIndikator?.toString(),
-            'sub_indikator': subIndikator != null ? int.tryParse(subIndikator.toString()) : null,
+            'sub_indikator': subIndikator?.toString(),
           };
 
           excelData.add(rowData);
@@ -305,7 +292,21 @@ class DatabaseHelper {
   return excelData;
 }
 
-  Future<String> loadRowData(int rowIndex) async {
+
+  Future<void> insertExcelData(List<Map<String, dynamic>> excelData) async {
+    final db = await database;
+    for (var row in excelData) {
+      await db.insert('tblbangunan', row, conflictAlgorithm: ConflictAlgorithm.replace);
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getExcelData() async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query('tblbangunan');
+    return maps;
+  }
+
+Future<String> loadRowData(int rowIndex) async {
     try {
       ByteData data = await rootBundle.load('assets/form_penilaian.xlsx');
       var bytes = data.buffer.asUint8List();
