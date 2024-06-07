@@ -34,13 +34,8 @@ dependencies:
   syncfusion_flutter_xlsio: ^20.4.54-beta
   excel: ^2.0.4
   crypto: any
-
-
-
-
-  
-
-
+  table_calendar: ^3.0.0
+  flutter_local_notifications: ^9.5.3
 
 dev_dependencies:
   flutter_test:
@@ -76,14 +71,15 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-    - assets/form_penilaian.xlsx
     - assets/form_penilaian_alkes.xlsx
+    - assets/form_penilaian_bangunan.xlsx
     - assets/images/bgsplash.png
     - assets/images/logokemenkes.png
     - assets/images/logopuskesmas.png
     - assets/images/logors.jpg
     - assets/images/logodinkes.jpg
     - assets/images/puskesmasheader.jpeg
+    - assets/images/profile_placeholder.jpg
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

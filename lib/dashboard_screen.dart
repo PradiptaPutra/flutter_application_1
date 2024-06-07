@@ -3,6 +3,7 @@ import 'package:flutter_application_1/puskesmas_screen.dart';
 import 'home_content.dart';
 import 'profile_screen.dart';
 import 'history_screen.dart';
+import 'calender_screen.dart'; // Pastikan import ini ada
 import 'database_helper.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -35,6 +36,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   static List<Widget> _widgetOptions(int userId) => <Widget>[
     HomeContent(),
     PuskesmasScreen(userId: userId),
+    CalendarScreen(),  // Pastikan ini sesuai dengan nama class di calendar_screen.dart
     HistoryScreen(userId: userId),
     ProfileScreen(userId: userId),
   ];
@@ -70,7 +72,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
             SizedBox(width: 10),
             CircleAvatar(
-              backgroundImage: AssetImage('assets/profile_image.png'), // Use the actual path to the profile image
+              // backgroundImage: AssetImage('assets/images/profile_placeholder.jpg'), // Use the actual path to the profile image
               radius: 15,
             ),
           ],
@@ -96,18 +98,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 label: 'Home',
               ),
               buildTabItem(
-                index: 10,
+                index: 2,
                 icon: Icons.calendar_today,
                 label: 'Calendar',
               ),
               SizedBox(width: 48.0), // The dummy child for the floating button in the middle
               buildTabItem(
-                index: 2,
+                index: 3,
                 icon: Icons.message,
                 label: 'History',
               ),
               buildTabItem(
-                index: 3,
+                index: 4,
                 icon: Icons.person,
                 label: 'Profile',
               ),

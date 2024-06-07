@@ -238,6 +238,21 @@ class DatabaseHelper {
     );
   }
 
+  Future<List<String>> getUniquePuskesmasNames() async {
+    final db = await database;
+    final List<Map<String, dynamic>> result = await db.rawQuery('''
+      SELECT DISTINCT puskesmas FROM DataEntry WHERE puskesmas IS NOT NULL AND puskesmas != ''
+    ''');
+    List<String> puskesmasNames = result.map((row) => row['puskesmas'] as String).toList();
+    return puskesmasNames;
+  }
+
+  Future<List<Map<String, dynamic>>> getScheduledSurveys() async {
+    final db = await database;
+    final List<Map<String, dynamic>> result = await db.query('Kegiatan');
+    return result;
+  }
+
   Future<List<Map<String, dynamic>>> loadExcelDataDirectly(String assetPath) async {
     List<Map<String, dynamic>> excelData = [];
     try {
@@ -249,11 +264,17 @@ class DatabaseHelper {
         var sheet = excel.tables[table];
         if (sheet != null) {
           for (var row in sheet.rows.skip(1)) { // Skip header row
-            var rowData = {
-              'nama_indikator': row[1]?.value?.toString(),  // Extract the value
-              'sub_indikator': row[2]?.value?.toString(),  // Extract the value
-            };
-            excelData.add(rowData);
+            if (row.length >= 5) {
+              var rowData = {
+                'nama_indikator': row[1]?.value?.toString(),
+                'sub_indikator': row[2]?.value?.toString(),
+                'keterangan': row[3]?.value?.toString(),
+                'kriteria': row[4]?.value?.toString(),
+              };
+              excelData.add(rowData);
+            } else {
+              print('Error: Row does not have enough columns');
+            }
           }
         }
       }
@@ -263,35 +284,34 @@ class DatabaseHelper {
     return excelData;
   }
 
- Future<List<Map<String, dynamic>>> loadExcelDataDirectly2(String assetPath) async {
-  List<Map<String, dynamic>> excelData = [];
-  try {
-    ByteData data = await rootBundle.load(assetPath);
-    var bytes = data.buffer.asUint8List();
-    var excel = Excel.decodeBytes(bytes);
+  Future<List<Map<String, dynamic>>> loadExcelDataDirectly2(String assetPath) async {
+    List<Map<String, dynamic>> excelData = [];
+    try {
+      ByteData data = await rootBundle.load(assetPath);
+      var bytes = data.buffer.asUint8List();
+      var excel = Excel.decodeBytes(bytes);
 
-    for (var table in excel.tables.keys) {
-      var sheet = excel.tables[table];
-      if (sheet != null) {
-        for (var row in sheet.rows.skip(1)) { // Skip header row
-          var namaIndikator = row[1]?.value;
-          var subIndikator = row[2]?.value;
+      for (var table in excel.tables.keys) {
+        var sheet = excel.tables[table];
+        if (sheet != null) {
+          for (var row in sheet.rows.skip(1)) { // Skip header row
+            var namaIndikator = row[1]?.value;
+            var subIndikator = row[2]?.value;
 
-          var rowData = {
-            'nama_indikator': namaIndikator?.toString(),
-            'sub_indikator': subIndikator?.toString(),
-          };
+            var rowData = {
+              'nama_indikator': namaIndikator?.toString(),
+              'sub_indikator': subIndikator?.toString(),
+            };
 
-          excelData.add(rowData);
+            excelData.add(rowData);
+          }
         }
       }
+    } catch (e) {
+      print('Error loading Excel data: $e');
     }
-  } catch (e) {
-    print('Error loading Excel data: $e');
+    return excelData;
   }
-  return excelData;
-}
-
 
   Future<void> insertExcelData(List<Map<String, dynamic>> excelData) async {
     final db = await database;
@@ -306,9 +326,9 @@ class DatabaseHelper {
     return maps;
   }
 
-Future<String> loadRowData(int rowIndex) async {
+  Future<String> loadRowData(int rowIndex) async {
     try {
-      ByteData data = await rootBundle.load('assets/form_penilaian.xlsx');
+      ByteData data = await rootBundle.load('assets/form_penilaian_bangunan.xlsx');
       var bytes = data.buffer.asUint8List();
       var excel = Excel.decodeBytes(bytes);
 
