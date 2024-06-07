@@ -19,6 +19,7 @@ class _PenilaianScreenState extends State<PenilaianScreen> {
   final List<TextEditingController> sesudahControllers = [];
   List<Map<String, dynamic>> data = [];
   List<Map<String, dynamic>> existingEntries = [];
+  double totalSkor = 0;
 
   @override
   void initState() {
@@ -54,10 +55,31 @@ class _PenilaianScreenState extends State<PenilaianScreen> {
             }
           }
         }
+        _calculateTotalScore(); // Hitung total skor saat data entry dimuat
       });
     }
   }
 
+
+  void _calculateTotalScore() {
+    bool allSesudahFilled = true;
+    double total = 0;
+    for (var controller in sesudahControllers) {
+      if (controller.text.isEmpty) {
+        allSesudahFilled = false;
+        break;
+      } else {
+        total += double.tryParse(controller.text) ?? 0;
+      }
+    }
+    setState(() {
+      if (allSesudahFilled) {
+        totalSkor = total * 4.15;
+      } else {
+        totalSkor = 0;
+      }
+    });
+  }
   Future<void> _saveDataEntry() async {
     // Dapatkan daftar kegiatan untuk user
     List<Map<String, dynamic>> kegiatanList = await _dbHelper.getKegiatanForUser(widget.userId);
@@ -128,11 +150,30 @@ class _PenilaianScreenState extends State<PenilaianScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Penilaian'),
+Widget build(BuildContext context) {
+  return Scaffold(
+    appBar: AppBar(
+      title: Row(
+        children: [
+          Text('Penilaian'),
+          SizedBox(width: 10),
+          if (totalSkor > 0) ...[
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 11, vertical: 5), // Sesuaikan padding
+              margin: EdgeInsets.fromLTRB(70, 0, 0, 0),
+              decoration: BoxDecoration(
+                color: const Color.fromARGB(255, 144, 190, 228),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Text(
+                'Score: ${totalSkor.toStringAsFixed(2)}',
+                style: TextStyle(fontSize: 14), // Sesuaikan fontSize
+              ),
+            ),
+          ],
+        ],
       ),
+    ),
       body: data.isEmpty
           ? Center(child: CircularProgressIndicator())
           : ListView.builder(
