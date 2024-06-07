@@ -17,10 +17,12 @@ class _PenilaianScreenState extends State<PenilaianScreen> {
   final DatabaseHelper _dbHelper = DatabaseHelper();
   final List<TextEditingController> sebelumControllers = [];
   final List<TextEditingController> sesudahControllers = [];
-  final List<TextEditingController> keteranganControllers = []; // Tambahkan controller untuk keterangan
   List<Map<String, dynamic>> data = [];
   List<Map<String, dynamic>> existingEntries = [];
-  double totalSkor = 0;
+  double totalSkorSebelum = 0;
+  double totalSkorSesudah = 0;
+  String interpretasiSebelum = "";
+  String interpretasiSesudah = "";
 
   @override
   void initState() {
@@ -38,7 +40,6 @@ class _PenilaianScreenState extends State<PenilaianScreen> {
       for (var i = 0; i < data.length; i++) {
         sebelumControllers.add(TextEditingController());
         sesudahControllers.add(TextEditingController());
-        keteranganControllers.add(TextEditingController()); // Tambahkan controller untuk setiap item
       }
     });
   }
@@ -53,7 +54,6 @@ class _PenilaianScreenState extends State<PenilaianScreen> {
             if (entry['sub_indikator'] == data[i]['sub_indikator']) {
               sebelumControllers[i].text = entry['sebelum'] ?? '';
               sesudahControllers[i].text = entry['sesudah'] ?? '';
-              keteranganControllers[i].text = entry['keterangan'] ?? ''; // Set text untuk keterangan
               data[i]['entry_id'] = entry['entry_id'].toString();  // Ensure entry_id is stored as String
             }
           }
@@ -64,23 +64,31 @@ class _PenilaianScreenState extends State<PenilaianScreen> {
   }
 
   void _calculateTotalScore() {
-    bool allSesudahFilled = true;
-    double total = 0;
-    for (var controller in sesudahControllers) {
-      if (controller.text.isEmpty) {
-        allSesudahFilled = false;
-        break;
-      } else {
-        total += double.tryParse(controller.text) ?? 0;
-      }
+    double totalSebelum = 0;
+    double totalSesudah = 0;
+
+    for (var i = 0; i < sebelumControllers.length; i++) {
+      totalSebelum += double.tryParse(sebelumControllers[i].text) ?? 0;
+      totalSesudah += double.tryParse(sesudahControllers[i].text) ?? 0;
     }
+
     setState(() {
-      if (allSesudahFilled) {
-        totalSkor = total * 4.15;
-      } else {
-        totalSkor = 0;
-      }
+      totalSkorSebelum = totalSebelum * 4.15;
+      interpretasiSebelum = _setInterpretasi(totalSkorSebelum);
+
+      totalSkorSesudah = totalSesudah * 4.15;
+      interpretasiSesudah = _setInterpretasi(totalSkorSesudah);
     });
+  }
+
+  String _setInterpretasi(double skor) {
+    if (skor > 65) {
+      return "Tinggi/Aman";
+    } else if (skor >= 36 && skor <= 65) {
+      return "Sedang/Kurang Aman";
+    } else {
+      return "Rendah/Tidak Aman";
+    }
   }
 
   Future<void> _saveDataEntry() async {
@@ -104,10 +112,8 @@ class _PenilaianScreenState extends State<PenilaianScreen> {
         'puskesmas': puskesmas,
         'indikator': data[i]['nama_indikator'],
         'sub_indikator': data[i]['sub_indikator'],
-        'kriteria': '',
         'sebelum': sebelumControllers[i].text,
         'sesudah': sesudahControllers[i].text,
-        'keterangan': keteranganControllers[i].text, // Simpan keterangan
       };
 
       if (data[i].containsKey('entry_id')) {
@@ -149,9 +155,6 @@ class _PenilaianScreenState extends State<PenilaianScreen> {
     for (var controller in sesudahControllers) {
       controller.dispose();
     }
-    for (var controller in keteranganControllers) { // Dispose keterangan controllers
-      controller.dispose();
-    }
     super.dispose();
   }
 
@@ -159,145 +162,163 @@ class _PenilaianScreenState extends State<PenilaianScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Row(
-          children: [
-            Text('Penilaian'),
-            SizedBox(width: 10),
-            if (totalSkor > 0) ...[
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 11, vertical: 5), // Sesuaikan padding
-                margin: EdgeInsets.fromLTRB(70, 0, 0, 0),
-                decoration: BoxDecoration(
-                  color: const Color.fromARGB(255, 144, 190, 228),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Text(
-                  'Score: ${totalSkor.toStringAsFixed(2)}',
-                  style: TextStyle(fontSize: 14), // Sesuaikan fontSize
-                ),
-              ),
-            ],
-          ],
-        ),
+        title: Text('Penilaian'),
       ),
       body: data.isEmpty
           ? Center(child: CircularProgressIndicator())
-          : ListView.builder(
-              itemCount: data.length,
-              itemBuilder: (context, index) {
-                return Card(
-                  margin: EdgeInsets.all(10),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  color: Colors.white,
-                  child: Padding(
+          : Column(
+              children: [
+                if (totalSkorSebelum > 0 || totalSkorSesudah > 0) ...[
+                  Padding(
                     padding: const EdgeInsets.all(10.0),
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
-                          children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(8),
-                              child: Image.asset(
-                                'assets/images/logors.jpg', // Ganti dengan path gambar Anda
-                                width: 50,
-                                height: 50,
-                                fit: BoxFit.cover,
+                        if (totalSkorSebelum > 0) ...[
+                          Card(
+                            color: interpretasiSebelum == "Tinggi/Aman" ? Colors.green :
+                                    interpretasiSebelum == "Sedang/Kurang Aman" ? Colors.yellow :
+                                    Colors.red,
+                            child: ListTile(
+                              title: Text(
+                                'Interpretasi Sebelum: $interpretasiSebelum',
+                                style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                                textAlign: TextAlign.center,
                               ),
                             ),
-                            SizedBox(width: 10),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    data[index]["nama_indikator"] ?? '',
-                                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                                  ),
-                                  Text(
-                                    data[index]["sub_indikator"] ?? '',
-                                    style: TextStyle(fontSize: 14, color: Colors.grey),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Column(
-                              children: [
-                                Row(
-                                  children: [
-                                    IconButton(
-                                      icon: Icon(
-                                        Icons.visibility,
-                                        color: Colors.blue,
-                                      ),
-                                      onPressed: () async {
-                                        _showPopup(context, data[index]["keterangan"] ?? '');
-                                      },
-                                    ),
-                                    IconButton(
-                                      icon: Icon(
-                                        Icons.help_outline,
-                                        color: Colors.orange,
-                                      ),
-                                      onPressed: () async {
-                                        _showPopup(context, data[index]["kriteria"] ?? '');
-                                      },
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(height: 4),
-                              ],
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 10),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: TextField(
-                                controller: sebelumControllers[index],
-                                decoration: InputDecoration(
-                                  labelText: 'Sebelum',
-                                  border: OutlineInputBorder(),
-                                  contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                                ),
-                              ),
-                            ),
-                            SizedBox(width: 10),
-                            Expanded(
-                              child: TextField(
-                                controller: sesudahControllers[index],
-                                decoration: InputDecoration(
-                                  labelText: 'Sesudah',
-                                  border: OutlineInputBorder(),
-                                  contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 10), // Tambahkan spacing
-                        TextField(
-                          controller: keteranganControllers[index],
-                          decoration: InputDecoration(
-                            labelText: 'Keterangan',
-                            border: OutlineInputBorder(),
-                            contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                           ),
-                        ),
+                        ],
+                        if (totalSkorSesudah > 0) ...[
+                          Card(
+                            color: interpretasiSesudah == "Tinggi/Aman" ? Colors.green :
+                                    interpretasiSesudah == "Sedang/Kurang Aman" ? Colors.yellow :
+                                    Colors.red,
+                            child: ListTile(
+                              title: Text(
+                                'Interpretasi Sesudah: $interpretasiSesudah',
+                                style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   ),
-                );
-              },
+                ],
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: data.length,
+                    itemBuilder: (context, index) {
+                      return Card(
+                        margin: EdgeInsets.all(10),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        color: Colors.white,
+                        child: Padding(
+                          padding: const EdgeInsets.all(10.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: Image.asset(
+                                      'assets/images/logors.jpg', // Ganti dengan path gambar Anda
+                                      width: 50,
+                                      height: 50,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                  SizedBox(width: 10),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          data[index]["nama_indikator"] ?? '',
+                                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                        ),
+                                        Text(
+                                          data[index]["sub_indikator"] ?? '',
+                                          style: TextStyle(fontSize: 14, color: Colors.grey),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Column(
+                                    children: [
+                                      Row(
+                                        children: [
+                                          IconButton(
+                                            icon: Icon(
+                                              Icons.visibility,
+                                              color: Colors.blue,
+                                            ),
+                                            onPressed: () async {
+                                              _showPopup(context, data[index]["keterangan"] ?? '');
+                                            },
+                                          ),
+                                          IconButton(
+                                            icon: Icon(
+                                              Icons.help_outline,
+                                              color: Colors.orange,
+                                            ),
+                                            onPressed: () async {
+                                              _showPopup(context, data[index]["kriteria"] ?? '');
+                                            },
+                                          ),
+                                        ],
+                                      ),
+                                      SizedBox(height: 4),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 10),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: TextField(
+                                      controller: sebelumControllers[index],
+                                      decoration: InputDecoration(
+                                        labelText: 'Sebelum',
+                                        border: OutlineInputBorder(),
+                                        contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                      ),
+                                      onChanged: (value) => _calculateTotalScore(),
+                                    ),
+                                  ),
+                                  SizedBox(width: 10),
+                                  Expanded(
+                                    child: TextField(
+                                      controller: sesudahControllers[index],
+                                      decoration: InputDecoration(
+                                        labelText: 'Sesudah',
+                                        border: OutlineInputBorder(),
+                                        contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                      ),
+                                      onChanged: (value) => _calculateTotalScore(),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
             ),
       floatingActionButton: FloatingActionButton(
         onPressed: _saveDataEntry,
         child: Icon(Icons.save),
         backgroundColor: Colors.blue,
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 }
