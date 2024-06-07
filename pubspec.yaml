@@ -36,6 +36,11 @@ dependencies:
   crypto: any
   table_calendar: ^3.0.0
   flutter_local_notifications: ^9.5.3
+  pdf: ^3.6.0
+  open_file: ^3.0.1
+  url_launcher: ^6.0.9
+  file_picker: ^4.0.0
+  
 
 dev_dependencies:
   flutter_test:

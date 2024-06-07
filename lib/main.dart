@@ -10,6 +10,8 @@ import 'data_entry_form.dart';
 import 'category_selection_screen.dart';
 import 'penilaian_screen.dart'; // Ganti ini dengan import untuk penilaian_screen
 import 'penilaian_alkes_screen.dart'; // Ganti ini dengan import untuk penilaian_screen
+import 'export_screen.dart'; // Add this import
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,6 +34,7 @@ class MyApp extends StatelessWidget {
         '/profile': (context) => ProfileScreen(userId: ModalRoute.of(context)!.settings.arguments as int),
         '/dashboard': (context) => DashboardScreen(userId: ModalRoute.of(context)!.settings.arguments as int),
         '/data_entry': (context) => DataEntryForm(userId: ModalRoute.of(context)!.settings.arguments as int),
+        '/export': (context) => ExportScreen(puskesmas: "", sebelum: 0, sesudah: 0, interpretasiSebelum: "", interpretasiSesudah: ""), // Tambahkan rute ini
       },
       onGenerateRoute: (settings) {
         if (settings.name == '/category_selection') {

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'database_helper.dart';
+import 'export_screen.dart';
 
 class PenilaianScreen extends StatefulWidget {
   final int? kegiatanId;
@@ -126,6 +127,21 @@ class _PenilaianScreenState extends State<PenilaianScreen> {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Data berhasil disimpan')));
     Navigator.pop(context);
   }
+
+  void _exportData() {
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) => ExportScreen(
+        puskesmas: "Puskesmas Bangun Jaya", // Change this to the actual data
+        sebelum: totalSkorSebelum.toInt(),
+        sesudah: totalSkorSesudah.toInt(),
+         interpretasiSebelum: interpretasiSebelum,
+        interpretasiSesudah: interpretasiSesudah,
+      ),
+    ),
+  );
+}
 
   void _showPopup(BuildContext context, String content) {
     showDialog(
@@ -257,7 +273,7 @@ class _PenilaianScreenState extends State<PenilaianScreen> {
                                               color: Colors.blue,
                                             ),
                                             onPressed: () async {
-                                              _showPopup(context, data[index]["keterangan"] ?? '');
+                                              _showPopup(context, data[index]["kriteria"] ?? '');
                                             },
                                           ),
                                           IconButton(
@@ -266,7 +282,7 @@ class _PenilaianScreenState extends State<PenilaianScreen> {
                                               color: Colors.orange,
                                             ),
                                             onPressed: () async {
-                                              _showPopup(context, data[index]["kriteria"] ?? '');
+                                              _showPopup(context, data[index]["keterangan"] ?? '');
                                             },
                                           ),
                                         ],
@@ -313,10 +329,23 @@ class _PenilaianScreenState extends State<PenilaianScreen> {
                 ),
               ],
             ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _saveDataEntry,
-        child: Icon(Icons.save),
-        backgroundColor: Colors.blue,
+      floatingActionButton: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          FloatingActionButton.extended(
+            onPressed: _saveDataEntry,
+            label: Text('Save'),
+            icon: Icon(Icons.save),
+            backgroundColor: Colors.blue,
+          ),
+          SizedBox(width: 10),
+          FloatingActionButton.extended(
+            onPressed: _exportData,
+            label: Text('Export'),
+            icon: Icon(Icons.import_export),
+            backgroundColor: Colors.green,
+          ),
+        ],
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
