@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'database_helper.dart';
 import 'dashboard_screen.dart';
+import 'registration_screen.dart'; // Import the RegistrationScreen
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -11,6 +12,8 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStateMixin {
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
+  bool _isPasswordVisible = false;
+  bool _isSignUpPressed = false;
   final DatabaseHelper _dbHelper = DatabaseHelper();
   late AnimationController _controller;
   late Animation<double> _animation;
@@ -62,56 +65,143 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Login")),
-      body: FadeTransition(
-        opacity: _animation,
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Text(
-                'Welcome Back!',
-                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 30),
-              TextFormField(
-                controller: _usernameController,
-                decoration: InputDecoration(
-                  labelText: 'Username',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(15.0),
+      body: SafeArea(
+        child: FadeTransition(
+          opacity: _animation,
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  Align(
+                    alignment: Alignment.topLeft,
+                    child: IconButton(
+                      icon: Icon(Icons.arrow_back),
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                    ),
                   ),
-                  filled: true,
-                  fillColor: Colors.grey[200],
-                ),
-              ),
-              SizedBox(height: 20),
-              TextFormField(
-                controller: _passwordController,
-                decoration: InputDecoration(
-                  labelText: 'Password',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(15.0),
+                  SizedBox(height: 20),
+                  Text(
+                    'Sign in now',
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.center,
                   ),
-                  filled: true,
-                  fillColor: Colors.grey[200],
-                ),
-                obscureText: true,
-              ),
-              SizedBox(height: 30),
-              ElevatedButton(
-                onPressed: _login,
-                child: Text('Login'),
-                style: ElevatedButton.styleFrom(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
+                  SizedBox(height: 10),
+                  Text(
+                    'Please sign in to continue our app',
+                    style: TextStyle(fontSize: 16, color: Colors.grey),
+                    textAlign: TextAlign.center,
                   ),
-                  padding: EdgeInsets.symmetric(vertical: 15, horizontal: 100),
-                  textStyle: TextStyle(fontSize: 18),
-                ),
+                  SizedBox(height: 30),
+                  TextFormField(
+                    controller: _usernameController,
+                    decoration: InputDecoration(
+                      hintText: 'somewhereonearth@gmail.com',
+                      filled: true,
+                      fillColor: Colors.grey[200],
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30),
+                        borderSide: BorderSide.none,
+                      ),
+                      contentPadding: EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  TextFormField(
+                    controller: _passwordController,
+                    decoration: InputDecoration(
+                      hintText: '**********',
+                      filled: true,
+                      fillColor: Colors.grey[200],
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30),
+                        borderSide: BorderSide.none,
+                      ),
+                      contentPadding: EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _isPasswordVisible = !_isPasswordVisible;
+                          });
+                        },
+                      ),
+                    ),
+                    obscureText: !_isPasswordVisible,
+                  ),
+                  SizedBox(height: 10),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: () {
+                        // Implement your forget password functionality here
+                      },
+                      child: Text(
+                        'Forget Password?',
+                        style: TextStyle(color: Colors.orange),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: _login,
+                    child: Text(
+                      'Sign In',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                      backgroundColor: Colors.orange,
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  Center(
+                    child: Column(
+                      children: [
+                        Text("Don't have an account? "),
+                        GestureDetector(
+                          onTapDown: (_) {
+                            setState(() {
+                              _isSignUpPressed = true;
+                            });
+                          },
+                          onTapUp: (_) {
+                            setState(() {
+                              _isSignUpPressed = false;
+                            });
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => RegistrationScreen()),
+                            );
+                          },
+                          onTapCancel: () {
+                            setState(() {
+                              _isSignUpPressed = false;
+                            });
+                          },
+                          child: Text(
+                            'Sign up',
+                            style: TextStyle(
+                              color: _isSignUpPressed ? Colors.orangeAccent : Colors.orange,
+                              decoration: _isSignUpPressed ? TextDecoration.underline : TextDecoration.none,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),

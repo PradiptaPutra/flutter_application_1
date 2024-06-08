@@ -84,7 +84,7 @@ flutter:
     - assets/images/logors.jpg
     - assets/images/logodinkes.jpg
     - assets/images/puskesmasheader.jpeg
-    - assets/images/profile_placeholder.jpg
+    - assets/images/profile_placeholder.png
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

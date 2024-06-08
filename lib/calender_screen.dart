@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:timezone/data/latest.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
 import 'database_helper.dart';
 
 class CalendarScreen extends StatefulWidget {
@@ -23,13 +25,15 @@ class _CalendarScreenState extends State<CalendarScreen> {
   @override
   void initState() {
     super.initState();
-    _loadPuskesmasNames();
+    tz.initializeTimeZones();
     flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
     const AndroidInitializationSettings initializationSettingsAndroid =
         AndroidInitializationSettings('app_icon');
-    final InitializationSettings initializationSettings =
-        InitializationSettings(android: initializationSettingsAndroid);
+    final InitializationSettings initializationSettings = InitializationSettings(
+      android: initializationSettingsAndroid,
+    );
     flutterLocalNotificationsPlugin.initialize(initializationSettings);
+    _loadPuskesmasNames();
   }
 
   Future<void> _loadPuskesmasNames() async {
@@ -54,6 +58,12 @@ class _CalendarScreenState extends State<CalendarScreen> {
   }
 
   Future<void> _scheduleNotification(DateTime scheduledDate) async {
+    final tz.TZDateTime tzScheduledDate = tz.TZDateTime.from(scheduledDate, tz.local);
+    if (tzScheduledDate.isBefore(tz.TZDateTime.now(tz.local))) {
+      throw ArgumentError(
+          "Invalid argument (scheduledDate): Must be a date in the future: $tzScheduledDate");
+    }
+
     const AndroidNotificationDetails androidPlatformChannelSpecifics =
         AndroidNotificationDetails(
             'your_channel_id', // id
@@ -64,12 +74,15 @@ class _CalendarScreenState extends State<CalendarScreen> {
             showWhen: false);
     const NotificationDetails platformChannelSpecifics =
         NotificationDetails(android: androidPlatformChannelSpecifics);
-    await flutterLocalNotificationsPlugin.schedule(
+    await flutterLocalNotificationsPlugin.zonedSchedule(
         0,
         'Scheduled Survey',
         'You have a survey scheduled for ${scheduledDate.toLocal()}',
-        scheduledDate,
-        platformChannelSpecifics);
+        tzScheduledDate,
+        platformChannelSpecifics,
+        androidAllowWhileIdle: true,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime);
   }
 
   Future<void> _selectTime(BuildContext context) async {
@@ -141,6 +154,15 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     _selectedTime!.hour,
                     _selectedTime!.minute,
                   );
+                  if (scheduledDate.isBefore(DateTime.now())) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Scheduled date must be in the future.'),
+                      ),
+                    );
+                    return;
+                  }
+
                   final dbHelper = DatabaseHelper();
                   await dbHelper.insertKegiatan({
                     'nama_puskesmas': _selectedPuskesmas,
@@ -183,6 +205,22 @@ class _CalendarScreenState extends State<CalendarScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Calendar'),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.notifications, color: Colors.black),
+            onPressed: () {
+              // Handle notification icon press
+            },
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -239,6 +277,31 @@ class _CalendarScreenState extends State<CalendarScreen> {
               onPageChanged: (focusedDay) {
                 _focusedDay = focusedDay;
               },
+              calendarStyle: CalendarStyle(
+                todayDecoration: BoxDecoration(
+                  color: Colors.orange,
+                  shape: BoxShape.circle,
+                ),
+                selectedDecoration: BoxDecoration(
+                  color: Colors.orange,
+                  shape: BoxShape.circle,
+                ),
+                markersMaxCount: 1,
+              ),
+              daysOfWeekStyle: DaysOfWeekStyle(
+                weekdayStyle: TextStyle(color: Colors.black),
+                weekendStyle: TextStyle(color: Colors.black),
+              ),
+              headerStyle: HeaderStyle(
+                formatButtonVisible: false,
+                titleCentered: true,
+                titleTextStyle: TextStyle(
+                  color: Colors.black,
+                  fontSize: 16,
+                ),
+                leftChevronIcon: Icon(Icons.chevron_left, color: Colors.black),
+                rightChevronIcon: Icon(Icons.chevron_right, color: Colors.black),
+              ),
             ),
             SizedBox(height: 16),
             _isLoading
@@ -250,9 +313,30 @@ class _CalendarScreenState extends State<CalendarScreen> {
                         final survey = _scheduledSurveys[index];
                         return Card(
                           margin: EdgeInsets.symmetric(vertical: 8),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          elevation: 3,
                           child: ListTile(
-                            title: Text(survey['nama_puskesmas']),
-                            subtitle: Text(survey['tanggal_kegiatan']),
+                            leading: ClipRRect(
+                              borderRadius: BorderRadius.circular(8.0),
+                              child: Image.asset(
+                                'assets/images/logors.jpg',
+                                width: 50,
+                                height: 50,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                            title: Text(
+                              survey['nama_puskesmas'],
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            subtitle: Text(
+                              '${survey['tanggal_kegiatan']}\n${survey['alamat'] ?? ''}',
+                              style: TextStyle(color: Colors.grey),
+                            ),
+                            isThreeLine: true,
+                            trailing: Icon(Icons.chevron_right),
                           ),
                         );
                       },

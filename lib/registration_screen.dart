@@ -103,57 +103,103 @@ class _RegistrationScreenState extends State<RegistrationScreen> with SingleTick
 
   @override
   Widget build(BuildContext context) {
-    final bottomPadding = MediaQuery.of(context).viewInsets.bottom;
-
     return Scaffold(
-      appBar: AppBar(title: Text("Registration")),
-      body: FadeTransition(
-        opacity: _animation,
-        child: SingleChildScrollView(
-          padding: EdgeInsets.only(bottom: bottomPadding), // Adjust the padding to ensure visibility
-          child: Padding(
-            padding: const EdgeInsets.all(15.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                _buildTextField(
-                  controller: _usernameController,
-                  labelText: 'Username',
-                ),
-                _buildTextField(
-                  controller: _emailController,
-                  labelText: 'Email',
-                ),
-                _buildTextField(
-                  controller: _nameController,
-                  labelText: 'Name',
-                ),
-                _buildTextField(
-                  controller: _positionController,
-                  labelText: 'Position',
-                ),
-                _buildTextField(
-                  controller: _phoneController,
-                  labelText: 'Phone',
-                ),
-                _buildTextField(
-                  controller: _passwordController,
-                  labelText: 'Password',
-                  obscureText: true,
-                ),
-                SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: _register,
-                  child: Text('Register'),
-                  style: ElevatedButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
+      body: SafeArea(
+        child: FadeTransition(
+          opacity: _animation,
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  Align(
+                    alignment: Alignment.topLeft,
+                    child: IconButton(
+                      icon: Icon(Icons.arrow_back),
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
                     ),
-                    padding: EdgeInsets.symmetric(vertical: 15, horizontal: 100),
-                    textStyle: TextStyle(fontSize: 18),
                   ),
-                ),
-              ],
+                  SizedBox(height: 20),
+                  Text(
+                    'Sign up now',
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(height: 10),
+                  Text(
+                    'Please fill in the details to create an account',
+                    style: TextStyle(fontSize: 16, color: Colors.grey),
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(height: 30),
+                  _buildTextField(
+                    controller: _usernameController,
+                    hintText: 'Username',
+                  ),
+                  SizedBox(height: 20),
+                  _buildTextField(
+                    controller: _emailController,
+                    hintText: 'Email',
+                  ),
+                  SizedBox(height: 20),
+                  _buildTextField(
+                    controller: _nameController,
+                    hintText: 'Name',
+                  ),
+                  SizedBox(height: 20),
+                  _buildTextField(
+                    controller: _positionController,
+                    hintText: 'Position',
+                  ),
+                  SizedBox(height: 20),
+                  _buildTextField(
+                    controller: _phoneController,
+                    hintText: 'Phone',
+                  ),
+                  SizedBox(height: 20),
+                  _buildTextField(
+                    controller: _passwordController,
+                    hintText: 'Password',
+                    obscureText: true,
+                  ),
+                  SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: _register,
+                    child: Text(
+                      'Sign Up',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                      backgroundColor: Colors.orange,
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  Center(
+                    child: Column(
+                      children: [
+                        Text("Already have an account? "),
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.pop(context);
+                          },
+                          child: Text(
+                            'Sign in',
+                            style: TextStyle(color: Colors.orange),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -161,21 +207,20 @@ class _RegistrationScreenState extends State<RegistrationScreen> with SingleTick
     );
   }
 
-  Widget _buildTextField({required TextEditingController controller, required String labelText, bool obscureText = false}) {
-    return Container(
-      margin: EdgeInsets.symmetric(vertical: 10.0),
-      child: TextFormField(
-        controller: controller,
-        decoration: InputDecoration(
-          labelText: labelText,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(15.0),
-          ),
-          filled: true,
-          fillColor: Colors.grey[200],
+  Widget _buildTextField({required TextEditingController controller, required String hintText, bool obscureText = false}) {
+    return TextFormField(
+      controller: controller,
+      decoration: InputDecoration(
+        hintText: hintText,
+        filled: true,
+        fillColor: Colors.grey[200],
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(30),
+          borderSide: BorderSide.none,
         ),
-        obscureText: obscureText,
+        contentPadding: EdgeInsets.symmetric(vertical: 16, horizontal: 20),
       ),
+      obscureText: obscureText,
     );
   }
 }

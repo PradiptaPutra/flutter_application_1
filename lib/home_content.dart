@@ -1,134 +1,123 @@
 import 'package:flutter/material.dart';
+import 'database_helper.dart';
 
-class HomeContent extends StatelessWidget {
+class HomeContent extends StatefulWidget {
+  final int userId;
+
+  HomeContent({required this.userId});
+
+  @override
+  _HomeContentState createState() => _HomeContentState();
+}
+
+class _HomeContentState extends State<HomeContent> {
+  final DatabaseHelper _dbHelper = DatabaseHelper();
+  List<Map<String, dynamic>> _puskesmasList = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPuskesmasData();
+  }
+
+  Future<void> _loadPuskesmasData() async {
+    List<Map<String, dynamic>> puskesmasData = await _dbHelper.getDataEntriesForUser(widget.userId);
+    setState(() {
+      _puskesmasList = puskesmasData;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            color: Colors.blue[100],
-            padding: EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Lindungi kesehatan Anda dan keluarga dengan vaksin!',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-                SizedBox(height: 5),
-                GestureDetector(
-                  onTap: () {
-                    // Tambahkan logika untuk navigasi ke halaman rekomendasi vaksin
-                  },
-                  child: Text(
-                    'Lihat Rekomendasi Vaksin >',
-                    style: TextStyle(
-                      color: Colors.blue,
-                      decoration: TextDecoration.underline,
-                    ),
-                  ),
-                ),
-                SizedBox(height: 10),
-                Container(
-                  padding: EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          'Verifikasi profil untuk melihat rekam medis Anda!',
-                          style: TextStyle(fontSize: 14),
-                        ),
-                      ),
-                      ElevatedButton(
-                        onPressed: () {
-                          // Tambahkan logika untuk verifikasi profil
-                        },
-                        child: Text('Verifikasi'),
-                        style: ElevatedButton.styleFrom(
-                          // primary: Colors.blue,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Text(
-              'Fitur',
+              'Survei Puskesmas',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Text(
+              'Ayo Kerja!',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
           ),
-          GridView.count(
-            crossAxisCount: 4,
-            shrinkWrap: true,
-            physics: NeverScrollableScrollPhysics(),
-            children: [
-              buildFeatureItem('Resume Medis', Icons.medical_services),
-              buildFeatureItem('Pertumbuhan Anak', Icons.child_care),
-              buildFeatureItem('Diari Kesehatan', Icons.book),
-              buildFeatureItem('Cari Obat', Icons.search),
-              buildFeatureItem('Cari Nakes', Icons.person_search),
-              buildFeatureItem('Pengingat Minum Obat', Icons.alarm),
-              buildFeatureItem('Vaksin dan Imunisasi', Icons.vaccines),
-              buildFeatureItem('Lainnya', Icons.more_horiz),
-            ],
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Container(
-              color: Colors.blue[100],
-              padding: EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(Icons.info_outline, color: Colors.blue),
-                      SizedBox(width: 10),
-                      Text(
-                        'Info & Bantuan Kemenkes',
-                        style: TextStyle(
-                          color: Colors.blue,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 10),
-                  Text(
-                    '1500 567\n0812 8156 2620\nkontak@kemenkes.go.id',
-                    style: TextStyle(fontSize: 16),
-                  ),
-                ],
+          if (_puskesmasList.isEmpty)
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Text(
+                'Belum ada puskesmas yang diinput. Slide untuk melihat info.',
+                style: TextStyle(fontSize: 16),
               ),
             ),
-          ),
+          if (_puskesmasList.isNotEmpty)
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                children: _puskesmasList.map((puskesmas) {
+                  return Container(
+                    width: 300,
+                    margin: EdgeInsets.only(right: 16.0),
+                    child: Card(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      elevation: 5,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.vertical(top: Radius.circular(15)),
+                            child: Image.asset(
+                              'assets/images/logors.jpg', // Use actual path to the puskesmas image
+                              height: 200,
+                              width: double.infinity,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(12.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  puskesmas['nama_puskesmas'] ?? '',
+                                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                                ),
+                                SizedBox(height: 5),
+                                Text(
+                                  puskesmas['alamat'] ?? '',
+                                  style: TextStyle(fontSize: 14, color: Colors.grey),
+                                ),
+                                SizedBox(height: 5),
+                                Row(
+                                  children: [
+                                    Icon(Icons.star, color: Colors.orange, size: 16),
+                                    SizedBox(width: 5),
+                                    Text(
+                                      '4.7', // This is a placeholder rating, replace with actual data if available
+                                      style: TextStyle(fontSize: 14, color: Colors.grey),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
         ],
       ),
-    );
-  }
-
-  Widget buildFeatureItem(String title, IconData icon) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Icon(icon, size: 30, color: Colors.blue),
-        SizedBox(height: 5),
-        Text(
-          title,
-          textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 12),
-        ),
-      ],
     );
   }
 }

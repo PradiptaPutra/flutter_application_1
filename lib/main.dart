@@ -8,15 +8,18 @@ import 'profile_screen.dart';
 import 'dashboard_screen.dart';
 import 'data_entry_form.dart';
 import 'category_selection_screen.dart';
-import 'penilaian_screen.dart'; // Ganti ini dengan import untuk penilaian_screen
-import 'penilaian_alkes_screen.dart'; // Ganti ini dengan import untuk penilaian_screen
+import 'penilaian_screen.dart'; // Import for penilaian_screen
+import 'penilaian_alkes_screen.dart'; // Import for penilaian_alkes_screen
+import 'calender_screen.dart'; // Import for calendar_screen
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:timezone/data/latest.dart' as tz;
 import 'export_screen.dart'; // Add this import
 
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // DatabaseHelper dbHelper = DatabaseHelper();
-  // await dbHelper.loadExcelData('assets/form_penilaian.xlsx');
+  tz.initializeTimeZones();
+
   runApp(MyApp());
 }
 
@@ -53,20 +56,21 @@ class MyApp extends StatelessWidget {
               userId: args['userId'],
               kegiatanId: args['kegiatanId'],
               id_category: args['id_category'],
-              entryId: args['entryId'], // Add entryIds as nullable
+              entryId: args['entryId'], // Add entryId as nullable
             ),
           );
-        }
-         else if (settings.name == '/penilaian_alkes') {
+        } else if (settings.name == '/penilaian_alkes') {
           final args = settings.arguments as Map<String, dynamic>;
           return MaterialPageRoute(
             builder: (context) => PenilaianAlkesScreen(
               userId: args['userId'],
               kegiatanId: args['kegiatanId'],
               id_category: args['id_category'],
-              entryId: args['entryId'], // Add entryIds as nullable
+              entryId: args['entryId'], // Add entryId as nullable
             ),
           );
+        } else if (settings.name == '/calendar') {
+          return MaterialPageRoute(builder: (context) => CalendarScreen());
         }
         return null;
       },

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/puskesmas_screen.dart';
 import 'home_content.dart';
+import 'package:flutter_application_1/puskesmas_screen.dart';
 import 'profile_screen.dart';
 import 'history_screen.dart';
-import 'calender_screen.dart'; // Pastikan import ini ada
+import 'calender_screen.dart';
 import 'database_helper.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -33,10 +33,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
     });
   }
 
-  static List<Widget> _widgetOptions(int userId) => <Widget>[
-    HomeContent(),
+  List<Widget> _widgetOptions(int userId) => <Widget>[
+    HomeContent(userId: userId),
     PuskesmasScreen(userId: userId),
-    CalendarScreen(),  // Pastikan ini sesuai dengan nama class di calendar_screen.dart
+    CalendarScreen(),
     HistoryScreen(userId: userId),
     ProfileScreen(userId: userId),
   ];
@@ -53,32 +53,32 @@ class _DashboardScreenState extends State<DashboardScreen> {
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
         automaticallyImplyLeading: false,
+        backgroundColor: Colors.white,
+        elevation: 0,
         title: Row(
           children: [
             Text(
               'Halo, ',
-              style: TextStyle(fontWeight: FontWeight.normal),
+              style: TextStyle(fontWeight: FontWeight.normal, color: Colors.black),
             ),
             Text(
               userName,
-              style: TextStyle(fontWeight: FontWeight.bold),
+              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
             ),
             Spacer(),
             IconButton(
-              icon: Icon(Icons.notifications),
+              icon: Icon(Icons.notifications, color: Colors.black),
               onPressed: () {
                 // Handle notification icon press
               },
             ),
             SizedBox(width: 10),
             CircleAvatar(
-              // backgroundImage: AssetImage('assets/images/profile_placeholder.jpg'), // Use the actual path to the profile image
               radius: 15,
+              backgroundImage: AssetImage('assets/images/logors.jpg'), // Use the actual path to the profile image
             ),
           ],
         ),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
       ),
       body: IndexedStack(
         index: _selectedIndex,
@@ -87,8 +87,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
       bottomNavigationBar: BottomAppBar(
         shape: CircularNotchedRectangle(),
         notchMargin: 6.0,
+        elevation: 10.0,
         child: Container(
-          height: 60.0,
+          height: 70.0,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black12,
+                blurRadius: 10,
+                spreadRadius: 5,
+                offset: Offset(0, -5),
+              ),
+            ],
+            borderRadius: BorderRadius.vertical(
+              top: Radius.circular(30),
+            ),
+          ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: <Widget>[
@@ -105,7 +120,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               SizedBox(width: 48.0), // The dummy child for the floating button in the middle
               buildTabItem(
                 index: 3,
-                icon: Icons.message,
+                icon: Icons.history,
                 label: 'History',
               ),
               buildTabItem(
@@ -118,18 +133,35 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ),
       ),
       floatingActionButton: Padding(
-        padding: const EdgeInsets.only(top: 50.0), 
+        padding: const EdgeInsets.only(top: 50.0),
         child: Container(
-          width: 70.0, // Adjust the width as needed
-          height: 70.0, // Adjust the height as needed
-          child: FloatingActionButton(
-            onPressed: () {
-              setState(() {
-                _selectedIndex = 1; // Assuming the note function is the second in the IndexedStack
-              });
-            },
-            child: Icon(Icons.note_add_outlined),
-            backgroundColor: Colors.blue,
+          width: 70.0,
+          height: 70.0,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.orange.withOpacity(0.5),
+                      spreadRadius: 5,
+                      blurRadius: 15,
+                    ),
+                  ],
+                ),
+              ),
+              FloatingActionButton(
+                onPressed: () {
+                  setState(() {
+                    _selectedIndex = 1; // Assuming the note function is the second in the IndexedStack
+                  });
+                },
+                child: Icon(Icons.add_task, color: Colors.white),
+                backgroundColor: Colors.orange,
+              ),
+            ],
           ),
         ),
       ),
@@ -142,6 +174,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     required IconData icon,
     required String label,
   }) {
+    final isSelected = _selectedIndex == index;
     return InkWell(
       onTap: () {
         _onItemTapped(index);
@@ -152,12 +185,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
         children: <Widget>[
           Icon(
             icon,
-            color: _selectedIndex == index ? Colors.blue : Colors.black,
+            color: isSelected ? Colors.orange : Colors.grey,
           ),
+          SizedBox(height: 4),
           Text(
             label,
             style: TextStyle(
-              color: _selectedIndex == index ? Colors.blue : Colors.black,
+              color: isSelected ? Colors.orange : Colors.grey,
+              fontSize: 12,
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
             ),
           ),
         ],
