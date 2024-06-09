@@ -106,7 +106,7 @@ class _ExportScreenState extends State<ExportScreen> {
                     crossAxisAlignment: pw.CrossAxisAlignment.start,
                     children: [
                       pw.Text(
-                        'PUSKESMAS BANGUN JAYA',
+                        ('Puskesmas: ${widget.puskesmas}'),
                         style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold),
                       ),
                       pw.Text(
@@ -188,10 +188,10 @@ class _ExportScreenState extends State<ExportScreen> {
   }
 
   Future<void> _sendEmail(String pdfPath, String recipient) async {
-    final smtpServer = gmail('mtsalikhlasberbahh@gmail.com', 'oxtm hpkh ciiq ppan'); // Use your email and password
+    final smtpServer = gmail('your-email@gmail.com', 'your-email-password'); // Use your email and password
 
     final message = Message()
-      ..from = Address('mtsalikhlasberbahh@gmail.com', 'JITUPASNA ADMIN')
+      ..from = Address('your-email@gmail.com', 'Your Name')
       ..recipients.add(recipient)
       ..subject = 'Lampiran PDF'
       ..text = 'Silakan temukan lampiran PDF.'

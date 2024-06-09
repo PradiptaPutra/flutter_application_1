@@ -25,6 +25,8 @@ class _PenilaianScreenState extends State<PenilaianScreen> {
   double totalSkorSesudah = 0;
   String interpretasiSebelum = "";
   String interpretasiSesudah = "";
+  String puskesmas = "";
+  bool showInterpretations = true;
 
   @override
   void initState() {
@@ -106,7 +108,7 @@ class _PenilaianScreenState extends State<PenilaianScreen> {
     );
 
     // Ambil nilai nama_puskesmas dari kegiatan
-    String puskesmas = kegiatan.isNotEmpty ? kegiatan['nama_puskesmas'] : '';
+    puskesmas = kegiatan.isNotEmpty ? kegiatan['nama_puskesmas'] : '';
 
     for (var i = 0; i < data.length; i++) {
       Map<String, dynamic> entry = {
@@ -132,17 +134,29 @@ class _PenilaianScreenState extends State<PenilaianScreen> {
     Navigator.pop(context);
   }
 
-  void _exportData() {
+  Future<void> _exportData() async {
+    // Dapatkan daftar kegiatan untuk user
+    List<Map<String, dynamic>> kegiatanList = await _dbHelper.getKegiatanForUser(widget.userId);
+
+    // Temukan kegiatan yang sesuai dengan kegiatanId yang diberikan
+    Map<String, dynamic> kegiatan = kegiatanList.firstWhere(
+      (kegiatan) => kegiatan['kegiatan_id'] == widget.kegiatanId,
+      orElse: () => <String, dynamic>{},
+    );
+
+    // Ambil nilai nama_puskesmas dari kegiatan
+    String puskesmas = kegiatan.isNotEmpty ? kegiatan['nama_puskesmas'] : '';
+
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => ExportScreen(
-          puskesmas: "Puskesmas Bangun Jaya", // Change this to the actual data
+          puskesmas: puskesmas,
           sebelum: totalSkorSebelum.toInt(),
           sesudah: totalSkorSesudah.toInt(),
           interpretasiSebelum: interpretasiSebelum,
           interpretasiSesudah: interpretasiSesudah,
-          userId: widget.userId, // Tambahkan userId di sini
+          userId: widget.userId,
         ),
       ),
     );
@@ -197,42 +211,52 @@ class _PenilaianScreenState extends State<PenilaianScreen> {
                     padding: const EdgeInsets.all(10.0),
                     child: Column(
                       children: [
-                        if (totalSkorSebelum > 0) ...[
-                          Card(
-                            color: interpretasiSebelum == "Tinggi/Aman"
-                                ? Colors.green
-                                : interpretasiSebelum == "Sedang/Kurang Aman"
-                                    ? Colors.yellow
-                                    : Colors.red,
-                            child: ListTile(
-                              title: Text(
-                                'Interpretasi Sebelum: $interpretasiSebelum',
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white),
-                                textAlign: TextAlign.center,
+                        if (showInterpretations) ...[
+                          if (totalSkorSebelum > 0) ...[
+                            Card(
+                              color: interpretasiSebelum == "Tinggi/Aman"
+                                  ? Colors.green
+                                  : interpretasiSebelum == "Sedang/Kurang Aman"
+                                      ? Colors.yellow
+                                      : Colors.red,
+                              child: ListTile(
+                                title: Text(
+                                  'Interpretasi Sebelum: $interpretasiSebelum',
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white),
+                                  textAlign: TextAlign.center,
+                                ),
                               ),
                             ),
-                          ),
-                        ],
-                        if (totalSkorSesudah > 0) ...[
-                          Card(
-                            color: interpretasiSesudah == "Tinggi/Aman"
-                                ? Colors.green
-                                : interpretasiSesudah == "Sedang/Kurang Aman"
-                                    ? Colors.yellow
-                                    : Colors.red,
-                            child: ListTile(
-                              title: Text(
-                                'Interpretasi Sesudah: $interpretasiSesudah',
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white),
-                                textAlign: TextAlign.center,
+                          ],
+                          if (totalSkorSesudah > 0) ...[
+                            Card(
+                              color: interpretasiSesudah == "Tinggi/Aman"
+                                  ? Colors.green
+                                  : interpretasiSesudah == "Sedang/Kurang Aman"
+                                      ? Colors.yellow
+                                      : Colors.red,
+                              child: ListTile(
+                                title: Text(
+                                  'Interpretasi Sesudah: $interpretasiSesudah',
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white),
+                                  textAlign: TextAlign.center,
+                                ),
                               ),
                             ),
-                          ),
+                          ],
                         ],
+                        TextButton(
+                          onPressed: () {
+                            setState(() {
+                              showInterpretations = !showInterpretations;
+                            });
+                          },
+                          child: Text(showInterpretations ? 'Hide Interpretations' : 'Show Interpretations'),
+                        ),
                       ],
                     ),
                   ),
