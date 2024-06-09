@@ -18,6 +18,7 @@ class _PenilaianScreenState extends State<PenilaianScreen> {
   final DatabaseHelper _dbHelper = DatabaseHelper();
   final List<TextEditingController> sebelumControllers = [];
   final List<TextEditingController> sesudahControllers = [];
+  final List<TextEditingController> keteranganControllers = [];
   List<Map<String, dynamic>> data = [];
   List<Map<String, dynamic>> existingEntries = [];
   double totalSkorSebelum = 0;
@@ -41,6 +42,7 @@ class _PenilaianScreenState extends State<PenilaianScreen> {
       for (var i = 0; i < data.length; i++) {
         sebelumControllers.add(TextEditingController());
         sesudahControllers.add(TextEditingController());
+        keteranganControllers.add(TextEditingController());
       }
     });
   }
@@ -55,6 +57,7 @@ class _PenilaianScreenState extends State<PenilaianScreen> {
             if (entry['sub_indikator'] == data[i]['sub_indikator']) {
               sebelumControllers[i].text = entry['sebelum'] ?? '';
               sesudahControllers[i].text = entry['sesudah'] ?? '';
+              keteranganControllers[i].text = entry['keterangan'] ?? '';
               data[i]['entry_id'] = entry['entry_id'].toString();  // Ensure entry_id is stored as String
             }
           }
@@ -115,7 +118,7 @@ class _PenilaianScreenState extends State<PenilaianScreen> {
         'sub_indikator': data[i]['sub_indikator'],
         'sebelum': sebelumControllers[i].text,
         'sesudah': sesudahControllers[i].text,
-        
+        'keterangan': keteranganControllers[i].text, // Tambahkan keterangan
       };
 
       if (data[i].containsKey('entry_id')) {
@@ -130,21 +133,20 @@ class _PenilaianScreenState extends State<PenilaianScreen> {
   }
 
   void _exportData() {
-  Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (context) => ExportScreen(
-        puskesmas: "Puskesmas Bangun Jaya", // Change this to the actual data
-        sebelum: totalSkorSebelum.toInt(),
-        sesudah: totalSkorSesudah.toInt(),
-        interpretasiSebelum: interpretasiSebelum,
-        interpretasiSesudah: interpretasiSesudah,
-        userId: widget.userId, // Tambahkan userId di sini
-        
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ExportScreen(
+          puskesmas: "Puskesmas Bangun Jaya", // Change this to the actual data
+          sebelum: totalSkorSebelum.toInt(),
+          sesudah: totalSkorSesudah.toInt(),
+          interpretasiSebelum: interpretasiSebelum,
+          interpretasiSesudah: interpretasiSesudah,
+          userId: widget.userId, // Tambahkan userId di sini
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 
   void _showPopup(BuildContext context, String content) {
     showDialog(
@@ -174,6 +176,9 @@ class _PenilaianScreenState extends State<PenilaianScreen> {
     for (var controller in sesudahControllers) {
       controller.dispose();
     }
+    for (var controller in keteranganControllers) {
+      controller.dispose();
+    }
     super.dispose();
   }
 
@@ -194,13 +199,17 @@ class _PenilaianScreenState extends State<PenilaianScreen> {
                       children: [
                         if (totalSkorSebelum > 0) ...[
                           Card(
-                            color: interpretasiSebelum == "Tinggi/Aman" ? Colors.green :
-                                    interpretasiSebelum == "Sedang/Kurang Aman" ? Colors.yellow :
-                                    Colors.red,
+                            color: interpretasiSebelum == "Tinggi/Aman"
+                                ? Colors.green
+                                : interpretasiSebelum == "Sedang/Kurang Aman"
+                                    ? Colors.yellow
+                                    : Colors.red,
                             child: ListTile(
                               title: Text(
                                 'Interpretasi Sebelum: $interpretasiSebelum',
-                                style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white),
                                 textAlign: TextAlign.center,
                               ),
                             ),
@@ -208,13 +217,17 @@ class _PenilaianScreenState extends State<PenilaianScreen> {
                         ],
                         if (totalSkorSesudah > 0) ...[
                           Card(
-                            color: interpretasiSesudah == "Tinggi/Aman" ? Colors.green :
-                                    interpretasiSesudah == "Sedang/Kurang Aman" ? Colors.yellow :
-                                    Colors.red,
+                            color: interpretasiSesudah == "Tinggi/Aman"
+                                ? Colors.green
+                                : interpretasiSesudah == "Sedang/Kurang Aman"
+                                    ? Colors.yellow
+                                    : Colors.red,
                             child: ListTile(
                               title: Text(
                                 'Interpretasi Sesudah: $interpretasiSesudah',
-                                style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white),
                                 textAlign: TextAlign.center,
                               ),
                             ),
@@ -253,15 +266,19 @@ class _PenilaianScreenState extends State<PenilaianScreen> {
                                   SizedBox(width: 10),
                                   Expanded(
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Text(
                                           data[index]["nama_indikator"] ?? '',
-                                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                          style: TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold),
                                         ),
                                         Text(
                                           data[index]["sub_indikator"] ?? '',
-                                          style: TextStyle(fontSize: 14, color: Colors.grey),
+                                          style: TextStyle(
+                                              fontSize: 14, color: Colors.grey),
                                         ),
                                       ],
                                     ),
@@ -276,7 +293,9 @@ class _PenilaianScreenState extends State<PenilaianScreen> {
                                               color: Colors.blue,
                                             ),
                                             onPressed: () async {
-                                              _showPopup(context, data[index]["kriteria"] ?? '');
+                                              _showPopup(context,
+                                                  data[index]["kriteria"] ??
+                                                      '');
                                             },
                                           ),
                                           IconButton(
@@ -285,7 +304,9 @@ class _PenilaianScreenState extends State<PenilaianScreen> {
                                               color: Colors.orange,
                                             ),
                                             onPressed: () async {
-                                              _showPopup(context, data[index]["keterangan"] ?? '');
+                                              _showPopup(context,
+                                                  data[index]["keterangan"] ??
+                                                      '');
                                             },
                                           ),
                                         ],
@@ -304,9 +325,12 @@ class _PenilaianScreenState extends State<PenilaianScreen> {
                                       decoration: InputDecoration(
                                         labelText: 'Sebelum',
                                         border: OutlineInputBorder(),
-                                        contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                        contentPadding:
+                                            EdgeInsets.symmetric(
+                                                horizontal: 10, vertical: 5),
                                       ),
-                                      onChanged: (value) => _calculateTotalScore(),
+                                      onChanged: (value) =>
+                                          _calculateTotalScore(),
                                     ),
                                   ),
                                   SizedBox(width: 10),
@@ -316,12 +340,25 @@ class _PenilaianScreenState extends State<PenilaianScreen> {
                                       decoration: InputDecoration(
                                         labelText: 'Sesudah',
                                         border: OutlineInputBorder(),
-                                        contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                        contentPadding:
+                                            EdgeInsets.symmetric(
+                                                horizontal: 10, vertical: 5),
                                       ),
-                                      onChanged: (value) => _calculateTotalScore(),
+                                      onChanged: (value) =>
+                                          _calculateTotalScore(),
                                     ),
                                   ),
                                 ],
+                              ),
+                              SizedBox(height: 10),
+                              TextField(
+                                controller: keteranganControllers[index],
+                                decoration: InputDecoration(
+                                  labelText: 'Keterangan',
+                                  border: OutlineInputBorder(),
+                                  contentPadding: EdgeInsets.symmetric(
+                                      horizontal: 10, vertical: 5),
+                                ),
                               ),
                             ],
                           ),

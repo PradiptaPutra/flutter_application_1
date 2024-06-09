@@ -358,4 +358,22 @@ class DatabaseHelper {
     }
     return 'Data tidak ditemukan';
   }
+  Future<String> loadRowData2(int rowIndex) async {
+    try {
+      ByteData data = await rootBundle.load('assets/form_penilaian_bangunan.xlsx');
+      var bytes = data.buffer.asUint8List();
+      var excel = Excel.decodeBytes(bytes);
+
+      for (var table in excel.tables.keys) {
+        var sheet = excel.tables[table];
+        if (sheet != null && sheet.rows.length > rowIndex) {
+          var row = sheet.rows[rowIndex];
+          return row.map((cell) => cell?.value?.toString() ?? '').join(', ');
+        }
+      }
+    } catch (e) {
+      print('Error loading Excel row data: $e');
+    }
+    return 'Data tidak ditemukan';
+  }
 }
