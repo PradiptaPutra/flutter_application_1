@@ -94,14 +94,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
             color: Colors.white,
             boxShadow: [
               BoxShadow(
-                color: Colors.black12,
+                color: Colors.white12,
                 blurRadius: 10,
-                spreadRadius: 5,
+                spreadRadius: 2,
                 offset: Offset(0, -5),
               ),
             ],
             borderRadius: BorderRadius.vertical(
-              top: Radius.circular(30),
+              top: Radius.circular(20),
+              bottom: Radius.circular(10)
             ),
           ),
           child: Row(

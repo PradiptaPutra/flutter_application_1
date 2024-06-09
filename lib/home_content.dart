@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'database_helper.dart';
+import 'category_selection_screen.dart'; // Make sure this import matches the location of your screen
 
 class HomeContent extends StatefulWidget {
   final int userId;
@@ -13,6 +14,7 @@ class HomeContent extends StatefulWidget {
 class _HomeContentState extends State<HomeContent> {
   final DatabaseHelper _dbHelper = DatabaseHelper();
   List<Map<String, dynamic>> _puskesmasList = [];
+  Map<int, double> _progressMap = {};
 
   @override
   void initState() {
@@ -21,7 +23,11 @@ class _HomeContentState extends State<HomeContent> {
   }
 
   Future<void> _loadPuskesmasData() async {
-    List<Map<String, dynamic>> puskesmasData = await _dbHelper.getDataEntriesForUser(widget.userId);
+    List<Map<String, dynamic>> puskesmasData = await _dbHelper.getDataEntriesForUserHome(widget.userId);
+    for (var puskesmas in puskesmasData) {
+      double progress = await _dbHelper.getProgressForKegiatan(puskesmas['kegiatan_id']);
+      _progressMap[puskesmas['kegiatan_id']] = progress;
+    }
     setState(() {
       _puskesmasList = puskesmasData;
     });
@@ -61,6 +67,7 @@ class _HomeContentState extends State<HomeContent> {
               padding: const EdgeInsets.all(16.0),
               child: Row(
                 children: _puskesmasList.map((puskesmas) {
+                  double progress = _progressMap[puskesmas['kegiatan_id']] ?? 0.0;
                   return Container(
                     width: 300,
                     margin: EdgeInsets.only(right: 16.0),
@@ -69,47 +76,62 @@ class _HomeContentState extends State<HomeContent> {
                         borderRadius: BorderRadius.circular(15),
                       ),
                       elevation: 5,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.vertical(top: Radius.circular(15)),
-                            child: Image.asset(
-                              'assets/images/logors.jpg', // Use actual path to the puskesmas image
-                              height: 200,
-                              width: double.infinity,
-                              fit: BoxFit.cover,
+                      child: InkWell(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => CategorySelectionScreen(
+                                userId: widget.userId,
+                                kegiatanId: puskesmas['kegiatan_id'],
+                              ),
                             ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(12.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  puskesmas['nama_puskesmas'] ?? '',
-                                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                                ),
-                                SizedBox(height: 5),
-                                Text(
-                                  puskesmas['alamat'] ?? '',
-                                  style: TextStyle(fontSize: 14, color: Colors.grey),
-                                ),
-                                SizedBox(height: 5),
-                                Row(
-                                  children: [
-                                    Icon(Icons.star, color: Colors.orange, size: 16),
-                                    SizedBox(width: 5),
-                                    Text(
-                                      '4.7', // This is a placeholder rating, replace with actual data if available
-                                      style: TextStyle(fontSize: 14, color: Colors.grey),
-                                    ),
-                                  ],
-                                ),
-                              ],
+                          );
+                        },
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.vertical(top: Radius.circular(15)),
+                              child: Image.asset(
+                                'assets/images/logors.jpg', // Use actual path to the puskesmas image
+                                height: 200,
+                                width: double.infinity,
+                                fit: BoxFit.cover,
+                              ),
                             ),
-                          ),
-                        ],
+                            Padding(
+                              padding: const EdgeInsets.all(12.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    puskesmas['nama_puskesmas']?.isEmpty ?? true
+                                        ? 'Nama Puskesmas tidak ada'
+                                        : puskesmas['nama_puskesmas'],
+                                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                                  ),
+                                  SizedBox(height: 5),
+                                  Text(
+                                    puskesmas['dropdown_option'] ?? 'Tidak Tersedia Informasi',
+                                    style: TextStyle(fontSize: 14, color: Colors.grey),
+                                  ),
+                                  SizedBox(height: 5),
+                                  LinearProgressIndicator(
+                                    value: progress / 100,
+                                    backgroundColor: Colors.grey[200],
+                                    color: Color(0xFFFF7043),
+                                  ),
+                                  SizedBox(height: 5),
+                                  Text(
+                                    'Progress Survei: ${progress.toStringAsFixed(2)}%',
+                                    style: TextStyle(fontSize: 14, color: Colors.grey),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   );

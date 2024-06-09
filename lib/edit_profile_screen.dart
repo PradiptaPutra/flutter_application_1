@@ -105,7 +105,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   if (value == null || value.isEmpty) {
                     return 'Please enter your email';
                   }
-                  if (!RegExp(r'^[^@]+@[^@]+\.[ ^@]+').hasMatch(value)) {
+                  if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
                     return 'Please enter a valid email address';
                   }
                   return null;
@@ -114,13 +114,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _saveProfile,
-                child: Text('Save'),
+                child: Text('Save', style: TextStyle(color: Colors.white)),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
+                  backgroundColor: Color(0xFFFF7043), // Background color
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  minimumSize: Size(double.infinity, 50),
+                  minimumSize: Size(double.infinity, 50), // Full width button
                 ),
               ),
             ],
@@ -145,7 +145,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             borderRadius: BorderRadius.circular(15.0),
           ),
           filled: true,
-          fillColor: Colors.grey[200],
+          fillColor: Colors.white, // White background for the text fields
+          contentPadding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0), // Padding inside the text fields
         ),
         validator: validator,
       ),

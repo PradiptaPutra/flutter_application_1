@@ -52,7 +52,7 @@ class HistoryScreen extends StatelessWidget {
                 var kegiatan = snapshot.data![index];
                 return ListTile(
                   leading: CircleAvatar(
-                    backgroundColor: Colors.blue,
+                    backgroundColor:Color(0xFFFF7043),
                     child: Icon(Icons.local_hospital, color: Colors.white),
                   ),
                   title: Text(kegiatan['nama_puskesmas'] ?? 'Unknown'),

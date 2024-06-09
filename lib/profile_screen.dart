@@ -15,17 +15,27 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   final DatabaseHelper _dbHelper = DatabaseHelper();
   Map<String, dynamic>? userData;
+  int puskesmasCount = 0;
 
   @override
   void initState() {
     super.initState();
     _loadUserData();
+    _loadPuskesmasCount();
   }
 
   void _loadUserData() async {
     final data = await _dbHelper.getUserData(widget.userId);
     setState(() {
       userData = data;
+    });
+  }
+
+  void _loadPuskesmasCount() async {
+    final count = await _dbHelper.getPuskesmasSurveyedCount(widget.userId);
+    print('Puskesmas surveyed count: $count');
+    setState(() {
+      puskesmasCount = count;
     });
   }
 
@@ -38,6 +48,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     ).then((value) {
       if (value == true) {
         _loadUserData();
+        _loadPuskesmasCount(); // Reload count after profile update
       }
     });
   }
@@ -52,199 +63,111 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        automaticallyImplyLeading: false, // Menambahkan baris ini
-        title: Text('Profil'),
+        automaticallyImplyLeading: false,
+        title: Text('Profile'),
+        backgroundColor: Color(0xFFF9D5A7), // Light peach color
+        elevation: 0, // No shadow for the AppBar
       ),
       body: userData == null
           ? Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  children: [
-                    Container(
-                      padding: EdgeInsets.all(16.0),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(8.0),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.withOpacity(0.5),
-                            spreadRadius: 2,
-                            blurRadius: 5,
-                            offset: Offset(0, 3),
+              child: Column(
+                children: [
+                  Container(
+                    color: Color(0xFFF9D5A7), // Light peach color
+                    padding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
+                    child: Column(
+                      children: [
+                        CircleAvatar(
+                          radius: 50,
+                          backgroundImage: AssetImage('assets/images/logors.jpg'), // Replace with the actual image
+                        ),
+                        SizedBox(height: 10),
+                        Text(
+                          userData!['name'] ?? '',
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
                           ),
-                        ],
-                      ),
-                      child: Column(
-                        children: [
-                          Row(
-                            children: [
-                              CircleAvatar(
-                                radius: 30,
-                                child: Icon(Icons.person, size: 30),
-                              ),
-                              SizedBox(width: 10),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    userData!['name'] ?? '',
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  Text(
-                                    userData!['phone'] ?? '',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      color: Colors.grey,
-                                    ),
-                                  ),
-                                  Text(
-                                     userData!['email'] ?? '',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      color: Colors.grey,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              Spacer(),
-                              IconButton(
-                                icon: Icon(Icons.edit),
-                                onPressed: _navigateToEditProfile,
-                              ),
-                            ],
+                        ),
+                        Text(
+                          userData!['email'] ?? '',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.grey,
                           ),
-                          SizedBox(height: 10),
-                          Row(
-                            children: [
-                              Icon(Icons.qr_code),
-                              SizedBox(width: 10),
-                              Text(
-                                'Kode Identitas',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
+                        ),
+                        SizedBox(height: 20),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            _buildInfoCard('Jumlah Puskesmas Di Survei', puskesmasCount.toString()),
+                          ],
+                        ),
+                      ],
                     ),
-                    SizedBox(height: 20),
-                    Container(
-                      padding: EdgeInsets.all(16.0),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(8.0),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.withOpacity(0.5),
-                            spreadRadius: 2,
-                            blurRadius: 5,
-                            offset: Offset(0, 3),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Informasi Umum',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          Divider(),
-                          ListTile(
-                            leading: Icon(Icons.person_outline),
-                            title: Text('Profil Tertaut'),
-                            trailing: Icon(Icons.arrow_forward_ios),
-                            onTap: () {},
-                          ),
-                          ListTile(
-                            leading: Icon(Icons.help_outline),
-                            title: Text('Pusat Bantuan'),
-                            trailing: Icon(Icons.arrow_forward_ios),
-                            onTap: () {},
-                          ),
-                          ListTile(
-                            leading: Icon(Icons.phone),
-                            title: Text('Nomor Gawat Darurat Nasional'),
-                            trailing: Icon(Icons.arrow_forward_ios),
-                            onTap: () {},
-                          ),
-                          ListTile(
-                            leading: Icon(Icons.book),
-                            title: Text('Tentang'),
-                            trailing: Icon(Icons.arrow_forward_ios),
-                            onTap: () {},
-                          ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: 20),
-                    Container(
-                      padding: EdgeInsets.all(16.0),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(8.0),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.withOpacity(0.5),
-                            spreadRadius: 2,
-                            blurRadius: 5,
-                            offset: Offset(0, 3),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Preferensi',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          Divider(),
-                          ListTile(
-                            leading: Icon(Icons.notifications),
-                            title: Text('Notifikasi'),
-                            trailing: Icon(Icons.arrow_forward_ios),
-                            onTap: () {},
-                          ),
-                          ListTile(
-                            leading: Icon(Icons.language),
-                            title: Text('Bahasa'),
-                            trailing: Icon(Icons.arrow_forward_ios),
-                            onTap: () {},
-                          ),
-                          ListTile(
-                            leading: Icon(Icons.lock),
-                            title: Text('Keamanan Akun'),
-                            trailing: Icon(Icons.arrow_forward_ios),
-                            onTap: () {},
-                          ),
-                          ListTile(
-                            leading: Icon(Icons.exit_to_app),
-                            title: Text('Keluar'),
-                            trailing: Icon(Icons.arrow_forward_ios),
-                            onTap: _logout,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                  SizedBox(height: 20),
+                  _buildMenuSection('Profile', [
+                    _buildMenuItem(Icons.person_outline, 'Profile', _navigateToEditProfile),
+                  ]),
+                ],
               ),
             ),
+    );
+  }
+
+  Widget _buildInfoCard(String title, String value) {
+    return Column(
+      children: [
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFFFF7043),
+          ),
+        ),
+        Text(
+          title,
+          style: TextStyle(
+            fontSize: 16,
+            color: Colors.grey,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMenuSection(String title, List<Widget> items) {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 16.0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8.0),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.5),
+            spreadRadius: 2,
+            blurRadius: 5,
+            offset: Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          ...items,
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMenuItem(IconData icon, String title, VoidCallback onTap) {
+    return ListTile(
+      leading: Icon(icon, color: Colors.black),
+      title: Text(title),
+      trailing: Icon(Icons.arrow_forward_ios),
+      onTap: onTap,
     );
   }
 }

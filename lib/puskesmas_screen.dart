@@ -20,6 +20,34 @@ class _PuskesmasScreenState extends State<PuskesmasScreen> {
   String dropdownValue = 'Rawat Inap';
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  bool _isNextButtonEnabled = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Add listeners to text fields and other inputs
+    namaPuskesmasController.addListener(_validateInputs);
+  }
+
+  void _validateInputs() {
+    if (namaPuskesmasController.text.isNotEmpty &&
+        selectedDate != null) {
+      setState(() {
+        _isNextButtonEnabled = true;
+      });
+    } else {
+      setState(() {
+        _isNextButtonEnabled = false;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    // Dispose controllers when the screen is disposed
+    namaPuskesmasController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -155,6 +183,7 @@ class _PuskesmasScreenState extends State<PuskesmasScreen> {
                 onChanged: (String? newValue) {
                   setState(() {
                     dropdownValue = newValue!;
+                    _validateInputs();
                   });
                 },
                 items: <String>['Rawat Inap', 'Non Rawat Inap']
@@ -171,21 +200,21 @@ class _PuskesmasScreenState extends State<PuskesmasScreen> {
                 children: [
                   Icon(Icons.date_range),
                   SizedBox(width: 10),
-                  selectedDate == null
-                      ? Text('Pilih Tanggal')
-                      : Text(DateFormat('dd MMMM yyyy').format(selectedDate!)),
+                  InkWell(
+                    onTap: () {
+                      _selectDate(context);
+                    },
+                    child: selectedDate == null
+                        ? Text('Pilih Tanggal')
+                        : Text(DateFormat('dd MMMM yyyy').format(selectedDate!)),
+                  ),
                 ],
               ),
-              onTap: () {
-                _selectDate(context);
-              },
             ),
             SizedBox(height: 20), // Add spacing between fields and the "Next" button
             ListTile(
               title: ElevatedButton(
-                onPressed: () {
-                  _insertKegiatan();
-                },
+                onPressed: _isNextButtonEnabled ? _insertKegiatan : null,
                 child: Text('Next'),
               ),
             ),
@@ -205,6 +234,7 @@ class _PuskesmasScreenState extends State<PuskesmasScreen> {
     if (pickedDate != null && pickedDate != selectedDate) {
       setState(() {
         selectedDate = pickedDate;
+        _validateInputs();
       });
     }
   }
@@ -242,6 +272,7 @@ class _PuskesmasScreenState extends State<PuskesmasScreen> {
       namaPuskesmasController.clear();
       setState(() {
         selectedDate = null;
+        _validateInputs();
       });
 
       // Pindah ke halaman selanjutnya

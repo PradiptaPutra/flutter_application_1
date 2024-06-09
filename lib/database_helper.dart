@@ -382,4 +382,51 @@ class DatabaseHelper {
     }
     return 'Data tidak ditemukan';
   }
+
+Future<List<Map<String, dynamic>>> getDataEntriesForUserHome(int userId) async {
+  final db = await database;
+  final List<Map<String, dynamic>> maps = await db.rawQuery('''
+    SELECT DISTINCT kegiatan_id, nama_puskesmas, dropdown_option
+    FROM Kegiatan 
+    WHERE user_id = ?
+  ''', [userId]);
+  return maps;
+}
+
+  Future<double> getProgressForKegiatan(int kegiatanId) async {
+    final db = await database;
+    final List<Map<String, dynamic>> entries = await db.rawQuery('''
+      SELECT sebelum, sesudah, sebelum2, sesudah2
+      FROM DataEntry
+      WHERE kegiatan_id = ?
+    ''', [kegiatanId]);
+
+    int totalFields = 4; // Total fields to check (sebelum, sesudah, sebelum2, sesudah2)
+    int filledFields = 0;
+
+    for (var entry in entries) {
+      if (entry['sebelum'] != null && entry['sebelum'].toString().isNotEmpty) filledFields++;
+      if (entry['sesudah'] != null && entry['sesudah'].toString().isNotEmpty) filledFields++;
+      if (entry['sebelum2'] != null && entry['sebelum2'].toString().isNotEmpty) filledFields++;
+      if (entry['sesudah2'] != null && entry['sesudah2'].toString().isNotEmpty) filledFields++;
+    }
+
+    if (entries.isNotEmpty) {
+      return (filledFields / (entries.length * totalFields)) * 100;
+    } else {
+      return 0.0;
+    }
+  }
+
+ Future<int> getPuskesmasSurveyedCount(int userId) async {
+    final db = await database;
+    final result = await db.rawQuery('''
+      SELECT COUNT(DISTINCT nama_puskesmas) as count
+      FROM Kegiatan
+      WHERE user_id = ?
+    ''', [userId]);
+    print('Puskesmas surveyed count query result: $result');
+    return result[0]['count'] as int;
+  }
+  
 }
