@@ -18,12 +18,22 @@ class _PenilaianAlkesScreenState extends State<PenilaianAlkesScreen> {
   final DatabaseHelper _dbHelper = DatabaseHelper();
   final List<TextEditingController> sebelumControllers = [];
   final List<TextEditingController> sesudahControllers = [];
+  final List<TextEditingController> sebelum2Controllers = [];
+  final List<TextEditingController> sesudah2Controllers = [];
+  final List<TextEditingController> keteranganControllers = [];
   List<Map<String, dynamic>> data = [];
   List<Map<String, dynamic>> existingEntries = [];
-  double totalSkorSebelum = 0;
-  double totalSkorSesudah = 0;
-  String interpretasiSebelum = "";
-  String interpretasiSesudah = "";
+  double totalSkorIndikator1Sebelum = 0;
+  double totalSkorIndikator1Sesudah = 0;
+  double totalSkorIndikator2Sebelum = 0;
+  double totalSkorIndikator2Sesudah = 0;
+  double totalSkorAkhir = 0;
+  String interpretasiIndikator1Sebelum = "";
+  String interpretasiIndikator1Sesudah = "";
+  String interpretasiIndikator2Sebelum = "";
+  String interpretasiIndikator2Sesudah = "";
+  String interpretasiAkhir = "";
+  bool showInterpretations = true;
 
   @override
   void initState() {
@@ -41,6 +51,9 @@ class _PenilaianAlkesScreenState extends State<PenilaianAlkesScreen> {
       for (var i = 0; i < data.length; i++) {
         sebelumControllers.add(TextEditingController());
         sesudahControllers.add(TextEditingController());
+        sebelum2Controllers.add(TextEditingController());
+        sesudah2Controllers.add(TextEditingController());
+        keteranganControllers.add(TextEditingController());
       }
     });
   }
@@ -55,6 +68,9 @@ class _PenilaianAlkesScreenState extends State<PenilaianAlkesScreen> {
             if (entry['sub_indikator'] == data[i]['sub_indikator']) {
               sebelumControllers[i].text = entry['sebelum'] ?? '';
               sesudahControllers[i].text = entry['sesudah'] ?? '';
+              sebelum2Controllers[i].text = entry['sebelum2'] ?? '';
+              sesudah2Controllers[i].text = entry['sesudah2'] ?? '';
+              keteranganControllers[i].text = entry['keterangan'] ?? '';
               data[i]['entry_id'] = entry['entry_id'].toString();  // Ensure entry_id is stored as String
             }
           }
@@ -65,30 +81,43 @@ class _PenilaianAlkesScreenState extends State<PenilaianAlkesScreen> {
   }
 
   void _calculateTotalScore() {
-    double totalSebelum = 0;
-    double totalSesudah = 0;
+    double totalIndikator1Sebelum = 0;
+    double totalIndikator1Sesudah = 0;
+    double totalIndikator2Sebelum = 0;
+    double totalIndikator2Sesudah = 0;
 
     for (var i = 0; i < sebelumControllers.length; i++) {
-      totalSebelum += double.tryParse(sebelumControllers[i].text) ?? 0;
-      totalSesudah += double.tryParse(sesudahControllers[i].text) ?? 0;
+      totalIndikator1Sebelum += double.tryParse(sebelumControllers[i].text) ?? 0;
+      totalIndikator1Sesudah += double.tryParse(sesudahControllers[i].text) ?? 0;
+      totalIndikator2Sebelum += double.tryParse(sebelum2Controllers[i].text) ?? 0;
+      totalIndikator2Sesudah += double.tryParse(sesudah2Controllers[i].text) ?? 0;
     }
 
     setState(() {
-      totalSkorSebelum = totalSebelum * 4.15;
-      interpretasiSebelum = _setInterpretasi(totalSkorSebelum);
+      totalSkorIndikator1Sebelum = totalIndikator1Sebelum * 4.35 / 2;
+      interpretasiIndikator1Sebelum = _setInterpretasi(totalSkorIndikator1Sebelum);
 
-      totalSkorSesudah = totalSesudah * 4.15;
-      interpretasiSesudah = _setInterpretasi(totalSkorSesudah);
+      totalSkorIndikator1Sesudah = totalIndikator1Sesudah * 4.35 / 2;
+      interpretasiIndikator1Sesudah = _setInterpretasi(totalSkorIndikator1Sesudah);
+
+      totalSkorIndikator2Sebelum = totalIndikator2Sebelum * 5.9 / 2;
+      interpretasiIndikator2Sebelum = _setInterpretasi(totalSkorIndikator2Sebelum);
+
+      totalSkorIndikator2Sesudah = totalIndikator2Sesudah * 5.9 / 2;
+      interpretasiIndikator2Sesudah = _setInterpretasi(totalSkorIndikator2Sesudah);
+
+      totalSkorAkhir = (totalSkorIndikator1Sesudah * 0.5) + (totalSkorIndikator2Sesudah * 0.5);
+      interpretasiAkhir = _setInterpretasi(totalSkorAkhir);
     });
   }
 
   String _setInterpretasi(double skor) {
     if (skor > 65) {
-      return "Tinggi/Aman";
+      return "Tinggi/Baik";
     } else if (skor >= 36 && skor <= 65) {
-      return "Sedang/Kurang Aman";
+      return "Sedang/Cukup";
     } else {
-      return "Rendah/Tidak Aman";
+      return "Rendah/Kurang";
     }
   }
 
@@ -115,7 +144,9 @@ class _PenilaianAlkesScreenState extends State<PenilaianAlkesScreen> {
         'sub_indikator': data[i]['sub_indikator'],
         'sebelum': sebelumControllers[i].text,
         'sesudah': sesudahControllers[i].text,
-        
+        'sebelum2': sebelum2Controllers[i].text,
+        'sesudah2': sesudah2Controllers[i].text,
+        'keterangan': keteranganControllers[i].text,
       };
 
       if (data[i].containsKey('entry_id')) {
@@ -130,21 +161,20 @@ class _PenilaianAlkesScreenState extends State<PenilaianAlkesScreen> {
   }
 
   void _exportData() {
-  Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (context) => ExportScreen(
-        puskesmas: "Puskesmas Bangun Jaya", // Change this to the actual data
-        sebelum: totalSkorSebelum.toInt(),
-        sesudah: totalSkorSesudah.toInt(),
-        interpretasiSebelum: interpretasiSebelum,
-        interpretasiSesudah: interpretasiSesudah,
-        userId: widget.userId, // Tambahkan userId di sini
-        
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ExportScreen(
+          puskesmas: "Puskesmas Bangun Jaya", // Change this to the actual data
+          sebelum: totalSkorAkhir.toInt(),
+          sesudah: totalSkorAkhir.toInt(),
+          interpretasiSebelum: interpretasiIndikator1Sebelum,
+          interpretasiSesudah: interpretasiIndikator1Sesudah,
+          userId: widget.userId, // Tambahkan userId di sini
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 
   void _showPopup(BuildContext context, String content) {
     showDialog(
@@ -174,6 +204,15 @@ class _PenilaianAlkesScreenState extends State<PenilaianAlkesScreen> {
     for (var controller in sesudahControllers) {
       controller.dispose();
     }
+    for (var controller in sebelum2Controllers) {
+      controller.dispose();
+    }
+    for (var controller in sesudah2Controllers) {
+      controller.dispose();
+    }
+    for (var controller in keteranganControllers) {
+      controller.dispose();
+    }
     super.dispose();
   }
 
@@ -187,39 +226,81 @@ class _PenilaianAlkesScreenState extends State<PenilaianAlkesScreen> {
           ? Center(child: CircularProgressIndicator())
           : Column(
               children: [
-                if (totalSkorSebelum > 0 || totalSkorSesudah > 0) ...[
+                if (totalSkorAkhir > 0) ...[
                   Padding(
                     padding: const EdgeInsets.all(10.0),
                     child: Column(
                       children: [
-                        if (totalSkorSebelum > 0) ...[
+                        Card(
+                          color: interpretasiAkhir == "Tinggi/Baik" ? Colors.green :
+                                  interpretasiAkhir == "Sedang/Cukup" ? Colors.yellow :
+                                  Colors.red,
+                          child: ListTile(
+                            title: Text(
+                              'Interpretasi Akhir: $interpretasiAkhir',
+                              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
+                        if (showInterpretations) ...[
                           Card(
-                            color: interpretasiSebelum == "Tinggi/Aman" ? Colors.green :
-                                    interpretasiSebelum == "Sedang/Kurang Aman" ? Colors.yellow :
+                            color: interpretasiIndikator1Sebelum == "Tinggi/Baik" ? Colors.green :
+                                    interpretasiIndikator1Sebelum == "Sedang/Cukup" ? Colors.yellow :
                                     Colors.red,
                             child: ListTile(
                               title: Text(
-                                'Interpretasi Sebelum: $interpretasiSebelum',
+                                'Interpretasi Indikator 1 Sebelum: $interpretasiIndikator1Sebelum',
+                                style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ),
+                          Card(
+                            color: interpretasiIndikator1Sesudah == "Tinggi/Baik" ? Colors.green :
+                                    interpretasiIndikator1Sesudah == "Sedang/Cukup" ? Colors.yellow :
+                                    Colors.red,
+                            child: ListTile(
+                              title: Text(
+                                'Interpretasi Indikator 1 Sesudah: $interpretasiIndikator1Sesudah',
+                                style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ),
+                          Card(
+                            color: interpretasiIndikator2Sebelum == "Tinggi/Baik" ? Colors.green :
+                                    interpretasiIndikator2Sebelum == "Sedang/Cukup" ? Colors.yellow :
+                                    Colors.red,
+                            child: ListTile(
+                              title: Text(
+                                'Interpretasi Indikator 2 Sebelum: $interpretasiIndikator2Sebelum',
+                                style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ),
+                          Card(
+                            color: interpretasiIndikator2Sesudah == "Tinggi/Baik" ? Colors.green :
+                                    interpretasiIndikator2Sesudah == "Sedang/Cukup" ? Colors.yellow :
+                                    Colors.red,
+                            child: ListTile(
+                              title: Text(
+                                'Interpretasi Indikator 2 Sesudah: $interpretasiIndikator2Sesudah',
                                 style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
                                 textAlign: TextAlign.center,
                               ),
                             ),
                           ),
                         ],
-                        if (totalSkorSesudah > 0) ...[
-                          Card(
-                            color: interpretasiSesudah == "Tinggi/Aman" ? Colors.green :
-                                    interpretasiSesudah == "Sedang/Kurang Aman" ? Colors.yellow :
-                                    Colors.red,
-                            child: ListTile(
-                              title: Text(
-                                'Interpretasi Sesudah: $interpretasiSesudah',
-                                style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                          ),
-                        ],
+                        TextButton(
+                          onPressed: () {
+                            setState(() {
+                              showInterpretations = !showInterpretations;
+                            });
+                          },
+                          child: Text(showInterpretations ? 'Hide Interpretations' : 'Show Interpretations'),
+                        ),
                       ],
                     ),
                   ),
@@ -302,7 +383,7 @@ class _PenilaianAlkesScreenState extends State<PenilaianAlkesScreen> {
                                     child: TextField(
                                       controller: sebelumControllers[index],
                                       decoration: InputDecoration(
-                                        labelText: 'Sebelum',
+                                        labelText: 'Indikator 1 Sebelum',
                                         border: OutlineInputBorder(),
                                         contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                                       ),
@@ -314,7 +395,7 @@ class _PenilaianAlkesScreenState extends State<PenilaianAlkesScreen> {
                                     child: TextField(
                                       controller: sesudahControllers[index],
                                       decoration: InputDecoration(
-                                        labelText: 'Sesudah',
+                                        labelText: 'Indikator 1 Sesudah',
                                         border: OutlineInputBorder(),
                                         contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                                       ),
@@ -322,6 +403,41 @@ class _PenilaianAlkesScreenState extends State<PenilaianAlkesScreen> {
                                     ),
                                   ),
                                 ],
+                              ),
+                              SizedBox(height: 10),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: TextField(
+                                      controller: sebelum2Controllers[index],
+                                      decoration: InputDecoration(
+                                        labelText: 'Indikator 2 Sebelum',
+                                        border: OutlineInputBorder(),
+                                        contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(width: 10),
+                                  Expanded(
+                                    child: TextField(
+                                      controller: sesudah2Controllers[index],
+                                      decoration: InputDecoration(
+                                        labelText: 'Indikator 2 Sesudah',
+                                        border: OutlineInputBorder(),
+                                        contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 10),
+                              TextField(
+                                controller: keteranganControllers[index],
+                                decoration: InputDecoration(
+                                  labelText: 'Keterangan',
+                                  border: OutlineInputBorder(),
+                                  contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                ),
                               ),
                             ],
                           ),

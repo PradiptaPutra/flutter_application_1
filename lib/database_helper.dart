@@ -20,7 +20,7 @@ class DatabaseHelper {
     print('Database initialized at path: $path');
     return openDatabase(
       path,
-      version: 9, // Incremented version number
+      version: 10, // Incremented version number
       onCreate: _createDb,
       onUpgrade: _upgradeDb,
     );
@@ -52,6 +52,8 @@ class DatabaseHelper {
         kriteria TEXT,
         sebelum TEXT,
         sesudah TEXT,
+        sebelum2 TEXT,
+        sesudah2 TEXT,
         keterangan TEXT,
         FOREIGN KEY(user_id) REFERENCES Pengguna(user_id),
         FOREIGN KEY(kegiatan_id) REFERENCES Kegiatan(kegiatan_id)
@@ -94,6 +96,10 @@ class DatabaseHelper {
     }
     if (oldVersion < 9) {
       await db.execute('ALTER TABLE DataEntry ADD COLUMN id_category INTEGER');
+    }
+    if (oldVersion < 10) {
+      await db.execute('ALTER TABLE DataEntry ADD COLUMN sebelum2 TEXT');
+      await db.execute('ALTER TABLE DataEntry ADD COLUMN sesudah2 TEXT');
     }
   }
 
