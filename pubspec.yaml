@@ -40,6 +40,10 @@ dependencies:
   open_file: ^3.0.1
   url_launcher: ^6.0.9
   file_picker: ^4.0.0
+  flutter_email_sender: ^5.0.2
+  http: ^0.13.3
+  mailer: ^5.0.0
+  connectivity_plus: ^2.3.5
   
 
 dev_dependencies:

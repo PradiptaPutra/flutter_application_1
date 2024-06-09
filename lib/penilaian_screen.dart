@@ -115,6 +115,7 @@ class _PenilaianScreenState extends State<PenilaianScreen> {
         'sub_indikator': data[i]['sub_indikator'],
         'sebelum': sebelumControllers[i].text,
         'sesudah': sesudahControllers[i].text,
+        
       };
 
       if (data[i].containsKey('entry_id')) {
@@ -136,8 +137,10 @@ class _PenilaianScreenState extends State<PenilaianScreen> {
         puskesmas: "Puskesmas Bangun Jaya", // Change this to the actual data
         sebelum: totalSkorSebelum.toInt(),
         sesudah: totalSkorSesudah.toInt(),
-         interpretasiSebelum: interpretasiSebelum,
+        interpretasiSebelum: interpretasiSebelum,
         interpretasiSesudah: interpretasiSesudah,
+        userId: widget.userId, // Tambahkan userId di sini
+        
       ),
     ),
   );

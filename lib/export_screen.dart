@@ -1,10 +1,17 @@
 import 'dart:io';
+import 'dart:typed_data';  // Tambahkan ini
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show rootBundle;  // Tambahkan ini
 import 'package:file_picker/file_picker.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:pdf/pdf.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:open_file/open_file.dart';
+import 'package:mailer/mailer.dart';
+import 'package:mailer/smtp_server.dart';
+import 'package:sqflite/sqflite.dart';
+import 'database_helper.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 
 class ExportScreen extends StatefulWidget {
   final String puskesmas;
@@ -12,6 +19,7 @@ class ExportScreen extends StatefulWidget {
   final int sesudah;
   final String interpretasiSebelum;
   final String interpretasiSesudah;
+  final int userId;
 
   ExportScreen({
     required this.puskesmas,
@@ -19,6 +27,7 @@ class ExportScreen extends StatefulWidget {
     required this.sesudah,
     required this.interpretasiSebelum,
     required this.interpretasiSesudah,
+    required this.userId,
   });
 
   @override
@@ -29,32 +38,108 @@ class _ExportScreenState extends State<ExportScreen> {
   String catatan = '';
   String upayaKegiatan = '';
   String estimasiBiaya = '';
+  bool isConnected = false;
+  String? emailPenerima;
+  Uint8List? logoData;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkConnectivity();
+    _fetchEmailPenerima();
+    _loadLogo();
+  }
+
+  Future<void> _checkConnectivity() async {
+    var connectivityResult = await (Connectivity().checkConnectivity());
+    if (connectivityResult != ConnectivityResult.none) {
+      setState(() {
+        isConnected = true;
+      });
+    } else {
+      setState(() {
+        isConnected = false;
+      });
+    }
+  }
+
+  Future<void> _fetchEmailPenerima() async {
+    final email = await DatabaseHelper().getEmailByUserId(widget.userId);
+    setState(() {
+      emailPenerima = email;
+    });
+  }
+
+  Future<void> _loadLogo() async {
+    final logo = await rootBundle.load('assets/images/logors.jpg');
+    setState(() {
+      logoData = logo.buffer.asUint8List();
+    });
+  }
 
   Future<void> _savePdf() async {
+    if (logoData == null) {
+      print('Logo not loaded');
+      return;
+    }
+
     final pdf = pw.Document();
 
     // Add metadata
-    pdf.addPage(pw.Page(
-      build: (context) {
-        return pw.Column(
-          crossAxisAlignment: pw.CrossAxisAlignment.start,
-          children: [
-            pw.Header(
-              level: 1,
-              text: 'Data Export',
-            ),
-            pw.Text('Puskesmas: ${widget.puskesmas}'),
-            pw.Text('Sebelum: ${widget.sebelum}'),
-            pw.Text('Sesudah: ${widget.sesudah}'),
-            pw.Text('Interpretasi Sebelum: ${widget.interpretasiSebelum}'),
-            pw.Text('Interpretasi Sesudah: ${widget.interpretasiSesudah}'),
-            pw.Text('Catatan: $catatan'),
-            pw.Text('Upaya / Kegiatan: $upayaKegiatan'),
-            pw.Text('Estimasi Biaya: $estimasiBiaya'),
-          ],
-        );
-      },
-    ));
+    pdf.addPage(
+      pw.Page(
+        build: (context) {
+          return pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              // Kop surat
+              pw.Row(
+                mainAxisAlignment: pw.MainAxisAlignment.center,
+                children: [
+                  pw.Image(
+                    pw.MemoryImage(logoData!),
+                    width: 100,
+                    height: 100,
+                  ),
+                  pw.SizedBox(width: 20),
+                  pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: [
+                      pw.Text(
+                        'PUSKESMAS BANGUN JAYA',
+                        style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold),
+                      ),
+                      pw.Text(
+                        'Jl. Puskesmas No.123, Bangun Jaya, Kec. Bangun',
+                        style: pw.TextStyle(fontSize: 12),
+                      ),
+                      pw.Text(
+                        'Telp: (021) 12345678 | Email: info@puskesmasbangunjaya.id',
+                        style: pw.TextStyle(fontSize: 12),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              pw.Divider(),
+              // Isi surat
+              pw.Header(
+                level: 1,
+                text: 'Data Export',
+              ),
+              pw.Text('Puskesmas: ${widget.puskesmas}'),
+              pw.Text('Sebelum: ${widget.sebelum}'),
+              pw.Text('Sesudah: ${widget.sesudah}'),
+              pw.Text('Interpretasi Sebelum: ${widget.interpretasiSebelum}'),
+              pw.Text('Interpretasi Sesudah: ${widget.interpretasiSesudah}'),
+              pw.Text('Catatan: $catatan'),
+              pw.Text('Upaya / Kegiatan: $upayaKegiatan'),
+              pw.Text('Estimasi Biaya: $estimasiBiaya'),
+            ],
+          );
+        },
+      ),
+    );
 
     try {
       final directory = await getExternalStorageDirectory();
@@ -63,13 +148,22 @@ class _ExportScreenState extends State<ExportScreen> {
         return;
       }
 
-      final pdfPath = '${directory.path}/exsport.pdf';
+      final pdfPath = '${directory.path}/export.pdf';
       final pdfFile = File(pdfPath);
 
       await pdfFile.writeAsBytes(await pdf.save());
       print('PDF saved to $pdfPath');
 
+      // Open the PDF
       _openPdf(pdfPath);
+
+      // Check connectivity and send email if online
+      if (isConnected && emailPenerima != null) {
+        _sendEmail(pdfPath, emailPenerima!);
+      } else {
+        print('Device is offline or email recipient not found. Email will be sent when online.');
+        // Save the file path or email details to be sent later when online
+      }
     } catch (e) {
       print('Error while saving PDF: $e');
     }
@@ -90,6 +184,24 @@ class _ExportScreenState extends State<ExportScreen> {
       }
     } catch (e) {
       print('Error while picking file: $e');
+    }
+  }
+
+  Future<void> _sendEmail(String pdfPath, String recipient) async {
+    final smtpServer = gmail('mtsalikhlasberbahh@gmail.com', 'oxtm hpkh ciiq ppan'); // Use your email and password
+
+    final message = Message()
+      ..from = Address('mtsalikhlasberbahh@gmail.com', 'JITUPASNA ADMIN')
+      ..recipients.add(recipient)
+      ..subject = 'Lampiran PDF'
+      ..text = 'Silakan temukan lampiran PDF.'
+      ..attachments.add(FileAttachment(File(pdfPath)));
+
+    try {
+      final sendReport = await send(message, smtpServer);
+      print('Email sent: ${sendReport.toString()}');
+    } catch (e) {
+      print('Error while sending email: $e');
     }
   }
 
@@ -183,9 +295,10 @@ class _ExportScreenState extends State<ExportScreen> {
                 ],
               ),
             ),
+            SizedBox(height: 20),
             ElevatedButton(
               onPressed: _savePdf,
-              child: Text('Save as PDF'),
+              child: Text('Save PDF'),
             ),
           ],
         ),

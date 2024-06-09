@@ -37,7 +37,7 @@ class MyApp extends StatelessWidget {
         '/profile': (context) => ProfileScreen(userId: ModalRoute.of(context)!.settings.arguments as int),
         '/dashboard': (context) => DashboardScreen(userId: ModalRoute.of(context)!.settings.arguments as int),
         '/data_entry': (context) => DataEntryForm(userId: ModalRoute.of(context)!.settings.arguments as int),
-        '/export': (context) => ExportScreen(puskesmas: "", sebelum: 0, sesudah: 0, interpretasiSebelum: "", interpretasiSesudah: ""), // Tambahkan rute ini
+        '/export': (context) => ExportScreen(puskesmas: "", sebelum: 0, sesudah: 0, interpretasiSebelum: "", interpretasiSesudah: "", userId: ModalRoute.of(context)!.settings.arguments as int), // Tambahkan rute ini
       },
       onGenerateRoute: (settings) {
         if (settings.name == '/category_selection') {

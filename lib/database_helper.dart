@@ -117,6 +117,20 @@ class DatabaseHelper {
     return null;
   }
 
+  Future<String?> getEmailByUserId(int userId) async {
+    final db = await database;
+    List<Map> results = await db.query(
+      'Pengguna',
+      columns: ['email'],
+      where: 'user_id = ?',
+      whereArgs: [userId],
+    );
+    if (results.isNotEmpty) {
+      return results.first['email'] as String?;
+    }
+    return null;
+  }
+
   Future<void> insertDataEntry(Map<String, dynamic> dataEntry) async {
     final db = await database;
     await db.insert('DataEntry', dataEntry, conflictAlgorithm: ConflictAlgorithm.replace);
