@@ -33,6 +33,7 @@ class _PenilaianAlkesScreenState extends State<PenilaianAlkesScreen> {
   String interpretasiIndikator2Sebelum = "";
   String interpretasiIndikator2Sesudah = "";
   String interpretasiAkhir = "";
+  String puskesmas = "";
   bool showInterpretations = true;
 
   @override
@@ -132,7 +133,7 @@ class _PenilaianAlkesScreenState extends State<PenilaianAlkesScreen> {
     );
 
     // Ambil nilai nama_puskesmas dari kegiatan
-    String puskesmas = kegiatan.isNotEmpty ? kegiatan['nama_puskesmas'] : '';
+    puskesmas = kegiatan.isNotEmpty ? kegiatan['nama_puskesmas'] : '';
 
     for (var i = 0; i < data.length; i++) {
       Map<String, dynamic> entry = {
@@ -160,17 +161,29 @@ class _PenilaianAlkesScreenState extends State<PenilaianAlkesScreen> {
     Navigator.pop(context);
   }
 
-  void _exportData() {
+  Future<void> _exportData() async {
+    // Dapatkan daftar kegiatan untuk user
+    List<Map<String, dynamic>> kegiatanList = await _dbHelper.getKegiatanForUser(widget.userId);
+
+    // Temukan kegiatan yang sesuai dengan kegiatanId yang diberikan
+    Map<String, dynamic> kegiatan = kegiatanList.firstWhere(
+      (kegiatan) => kegiatan['kegiatan_id'] == widget.kegiatanId,
+      orElse: () => <String, dynamic>{},
+    );
+
+    // Ambil nilai nama_puskesmas dari kegiatan
+    String puskesmas = kegiatan.isNotEmpty ? kegiatan['nama_puskesmas'] : '';
+
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => ExportScreen(
-          puskesmas: "Puskesmas Bangun Jaya", // Change this to the actual data
+          puskesmas: puskesmas,
           sebelum: totalSkorAkhir.toInt(),
           sesudah: totalSkorAkhir.toInt(),
           interpretasiSebelum: interpretasiIndikator1Sebelum,
           interpretasiSesudah: interpretasiIndikator1Sesudah,
-          userId: widget.userId, // Tambahkan userId di sini
+          userId: widget.userId,
         ),
       ),
     );

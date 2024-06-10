@@ -15,7 +15,6 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'export_screen.dart'; // Add this import
 
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   tz.initializeTimeZones();
@@ -37,7 +36,6 @@ class MyApp extends StatelessWidget {
         '/profile': (context) => ProfileScreen(userId: ModalRoute.of(context)!.settings.arguments as int),
         '/dashboard': (context) => DashboardScreen(userId: ModalRoute.of(context)!.settings.arguments as int),
         '/data_entry': (context) => DataEntryForm(userId: ModalRoute.of(context)!.settings.arguments as int),
-        '/export': (context) => ExportScreen(puskesmas: "", sebelum: 0, sesudah: 0, interpretasiSebelum: "", interpretasiSesudah: "", userId: ModalRoute.of(context)!.settings.arguments as int), // Tambahkan rute ini
       },
       onGenerateRoute: (settings) {
         if (settings.name == '/category_selection') {
@@ -67,6 +65,18 @@ class MyApp extends StatelessWidget {
               kegiatanId: args['kegiatanId'],
               id_category: args['id_category'],
               entryId: args['entryId'], // Add entryId as nullable
+            ),
+          );
+        } else if (settings.name == '/export') {
+          final args = settings.arguments as Map<String, dynamic>;
+          return MaterialPageRoute(
+            builder: (context) => ExportScreen(
+              puskesmas: args['puskesmas'],
+              sebelumList: args['sebelumList'],
+              sesudahList: args['sesudahList'],
+              interpretasiSebelumList: args['interpretasiSebelumList'],
+              interpretasiSesudahList: args['interpretasiSesudahList'],
+              userId: args['userId'],
             ),
           );
         } else if (settings.name == '/calendar') {
