@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'database_helper.dart';
-import 'export_screen.dart';
+import 'export_alkes_screen.dart';
 
 class PenilaianAlkesScreen extends StatefulWidget {
   final int? kegiatanId;
@@ -177,12 +177,17 @@ class _PenilaianAlkesScreenState extends State<PenilaianAlkesScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ExportScreen(
+        builder: (context) => ExportAlkesScreen(
           puskesmas: puskesmas,
-          sebelum: totalSkorAkhir.toInt(),
-          sesudah: totalSkorAkhir.toInt(),
-          interpretasiSebelum: interpretasiIndikator1Sebelum,
-          interpretasiSesudah: interpretasiIndikator1Sesudah,
+          sebelumIndikator1: totalSkorIndikator1Sebelum,
+          sesudahIndikator1: totalSkorIndikator1Sesudah,
+          sebelumIndikator2: totalSkorIndikator2Sebelum,
+          sesudahIndikator2: totalSkorIndikator2Sesudah,
+          interpretasiIndikator1Sebelum: interpretasiIndikator1Sebelum,
+          interpretasiIndikator1Sesudah: interpretasiIndikator1Sesudah,
+          interpretasiIndikator2Sebelum: interpretasiIndikator2Sebelum,
+          interpretasiIndikator2Sesudah: interpretasiIndikator2Sesudah,
+          interpretasiAkhir: interpretasiAkhir,
           userId: widget.userId,
         ),
       ),

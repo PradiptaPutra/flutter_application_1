@@ -1,24 +1,34 @@
 import 'package:flutter/material.dart';
 import 'database_helper.dart';
+import 'export_kendaraan_screen.dart';
 
-class PenilaianAlkesScreen extends StatefulWidget {
+class PenilaianKendaraanScreen extends StatefulWidget {
   final int? kegiatanId;
   final int id_category;
   final int userId;
   final int? entryId;
 
-  PenilaianAlkesScreen({this.kegiatanId, required this.id_category, required this.userId, this.entryId});
+  PenilaianKendaraanScreen({this.kegiatanId, required this.id_category, required this.userId, this.entryId});
 
   @override
-  _PenilaianAlkesScreenState createState() => _PenilaianAlkesScreenState();
+  _PenilaianKendaraanScreenState createState() => _PenilaianKendaraanScreenState();
 }
 
-class _PenilaianAlkesScreenState extends State<PenilaianAlkesScreen> {
+class _PenilaianKendaraanScreenState extends State<PenilaianKendaraanScreen> {
   final DatabaseHelper _dbHelper = DatabaseHelper();
   final List<TextEditingController> sebelumControllers = [];
   final List<TextEditingController> sesudahControllers = [];
+  final List<TextEditingController> keteranganControllers = [];
   List<Map<String, dynamic>> data = [];
   List<Map<String, dynamic>> existingEntries = [];
+  double totalSkorSebelum = 0;
+  double totalSkorSesudah = 0;
+  double totalSkorAkhir = 0;
+  String interpretasiSebelum = "";
+  String interpretasiSesudah = "";
+  String interpretasiAkhir = "";
+  String puskesmas = "";
+  bool showInterpretations = true;
 
   @override
   void initState() {
@@ -30,12 +40,13 @@ class _PenilaianAlkesScreenState extends State<PenilaianAlkesScreen> {
   }
 
   Future<void> _loadExcelData() async {
-    List<Map<String, dynamic>> excelData = await _dbHelper.loadExcelDataDirectly2('assets/form_penilaian_alkes.xlsx');
+    List<Map<String, dynamic>> excelData = await _dbHelper.loadExcelDataDirectly('assets/form_penilaian_kendaraan.xlsx');
     setState(() {
       data = excelData;
       for (var i = 0; i < data.length; i++) {
         sebelumControllers.add(TextEditingController());
         sesudahControllers.add(TextEditingController());
+        keteranganControllers.add(TextEditingController());
       }
     });
   }
@@ -50,11 +61,44 @@ class _PenilaianAlkesScreenState extends State<PenilaianAlkesScreen> {
             if (entry['sub_indikator'] == data[i]['sub_indikator']) {
               sebelumControllers[i].text = entry['sebelum'] ?? '';
               sesudahControllers[i].text = entry['sesudah'] ?? '';
+              keteranganControllers[i].text = entry['keterangan'] ?? '';
               data[i]['entry_id'] = entry['entry_id'].toString();  // Ensure entry_id is stored as String
             }
           }
         }
+        _calculateTotalScore(); // Hitung total skor saat data entry dimuat
       });
+    }
+  }
+
+  void _calculateTotalScore() {
+    double totalSebelum = 0;
+    double totalSesudah = 0;
+
+    for (var i = 0; i < sebelumControllers.length; i++) {
+      totalSebelum += double.tryParse(sebelumControllers[i].text) ?? 0;
+      totalSesudah += double.tryParse(sesudahControllers[i].text) ?? 0;
+    }
+
+    setState(() {
+      totalSkorSebelum = totalSebelum * 4.35 / 2;
+      interpretasiSebelum = _setInterpretasi(totalSkorSebelum);
+
+      totalSkorSesudah = totalSesudah * 4.35 / 2;
+      interpretasiSesudah = _setInterpretasi(totalSkorSesudah);
+
+      totalSkorAkhir = (totalSkorSebelum + totalSkorSesudah) / 2;
+      interpretasiAkhir = _setInterpretasi(totalSkorAkhir);
+    });
+  }
+
+  String _setInterpretasi(double skor) {
+    if (skor > 65) {
+      return "Tinggi/Baik";
+    } else if (skor >= 36 && skor <= 65) {
+      return "Sedang/Cukup";
+    } else {
+      return "Rendah/Kurang";
     }
   }
 
@@ -69,24 +113,23 @@ class _PenilaianAlkesScreenState extends State<PenilaianAlkesScreen> {
     );
 
     // Ambil nilai nama_puskesmas dari kegiatan
-    String puskesmas = kegiatan.isNotEmpty ? kegiatan['nama_puskesmas'] : '';
+    puskesmas = kegiatan.isNotEmpty ? kegiatan['nama_puskesmas'] : '';
 
     for (var i = 0; i < data.length; i++) {
       Map<String, dynamic> entry = {
         'user_id': widget.userId,
         'kegiatan_id': widget.kegiatanId,
-        'id_category': widget.id_category, // Include id_category here
-        'puskesmas': puskesmas, // Gunakan puskesmas yang didapat dari database
+        'id_category': widget.id_category,
+        'puskesmas': puskesmas,
         'indikator': data[i]['nama_indikator'],
         'sub_indikator': data[i]['sub_indikator'],
-        'kriteria': '', // Set according to your logic
         'sebelum': sebelumControllers[i].text,
         'sesudah': sesudahControllers[i].text,
-        'keterangan': '', // Set according to your logic
+        'keterangan': keteranganControllers[i].text,
       };
 
       if (data[i].containsKey('entry_id')) {
-        entry['entry_id'] = int.parse(data[i]['entry_id']);  // Convert entry_id back to int
+        entry['entry_id'] = int.parse(data[i]['entry_id']);
       }
 
       await _dbHelper.saveDataEntry(entry);
@@ -94,6 +137,35 @@ class _PenilaianAlkesScreenState extends State<PenilaianAlkesScreen> {
 
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Data berhasil disimpan')));
     Navigator.pop(context);
+  }
+
+  Future<void> _exportData() async {
+    // Dapatkan daftar kegiatan untuk user
+    List<Map<String, dynamic>> kegiatanList = await _dbHelper.getKegiatanForUser(widget.userId);
+
+    // Temukan kegiatan yang sesuai dengan kegiatanId yang diberikan
+    Map<String, dynamic> kegiatan = kegiatanList.firstWhere(
+      (kegiatan) => kegiatan['kegiatan_id'] == widget.kegiatanId,
+      orElse: () => <String, dynamic>{},
+    );
+
+    // Ambil nilai nama_puskesmas dari kegiatan
+    String puskesmas = kegiatan.isNotEmpty ? kegiatan['nama_puskesmas'] : '';
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ExportKendaraanScreen(
+          puskesmas: puskesmas,
+          sebelumIndikator: totalSkorSebelum,
+          sesudahIndikator: totalSkorSesudah,
+          interpretasiSebelum: interpretasiSebelum,
+          interpretasiSesudah: interpretasiSesudah,
+          interpretasiAkhir: interpretasiAkhir,
+          userId: widget.userId,
+        ),
+      ),
+    );
   }
 
   void _showPopup(BuildContext context, String content) {
@@ -124,6 +196,9 @@ class _PenilaianAlkesScreenState extends State<PenilaianAlkesScreen> {
     for (var controller in sesudahControllers) {
       controller.dispose();
     }
+    for (var controller in keteranganControllers) {
+      controller.dispose();
+    }
     super.dispose();
   }
 
@@ -135,115 +210,199 @@ class _PenilaianAlkesScreenState extends State<PenilaianAlkesScreen> {
       ),
       body: data.isEmpty
           ? Center(child: CircularProgressIndicator())
-          : ListView.builder(
-              itemCount: data.length,
-              itemBuilder: (context, index) {
-                return Card(
-                  margin: EdgeInsets.all(10),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  color: Colors.white,
-                  child: Padding(
+          : Column(
+              children: [
+                if (totalSkorAkhir > 0) ...[
+                  Padding(
                     padding: const EdgeInsets.all(10.0),
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
-                          children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(8),
-                              child: Image.asset(
-                                'assets/images/logors.jpg', // Ganti dengan path gambar Anda
-                                width: 50,
-                                height: 50,
-                                fit: BoxFit.cover,
-                              ),
+                        Card(
+                          color: interpretasiAkhir == "Tinggi/Baik" ? Colors.green :
+                                  interpretasiAkhir == "Sedang/Cukup" ? Colors.yellow :
+                                  Colors.red,
+                          child: ListTile(
+                            title: Text(
+                              'Interpretasi Akhir: $interpretasiAkhir',
+                              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                              textAlign: TextAlign.center,
                             ),
-                            SizedBox(width: 10),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    data[index]["nama_indikator"] ?? '',
-                                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                                  ),
-                                  Text(
-                                    data[index]["sub_indikator"] != null ? data[index]["sub_indikator"].toString() : '',
-                                    style: TextStyle(fontSize: 14, color: Colors.grey),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Column(
-                              children: [
-                                Row(
-                                  children: [
-                                    IconButton(
-                                      icon: Icon(
-                                        Icons.visibility,
-                                        color: Colors.blue,
-                                      ),
-                                      onPressed: () async {
-                                        String rowData = await _dbHelper.loadRowData(3);
-                                        _showPopup(context, rowData);
-                                      },
-                                    ),
-                                    IconButton(
-                                      icon: Icon(
-                                        Icons.help_outline,
-                                        color: Colors.orange,
-                                      ),
-                                      onPressed: () async {
-                                        String rowData = await _dbHelper.loadRowData(4);
-                                        _showPopup(context, rowData);
-                                      },
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(height: 4),
-                              ],
-                            ),
-                          ],
+                          ),
                         ),
-                        SizedBox(height: 10),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: TextField(
-                                controller: sebelumControllers[index],
-                                decoration: InputDecoration(
-                                  labelText: 'Sebelum',
-                                  border: OutlineInputBorder(),
-                                  contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                                ),
+                        if (showInterpretations) ...[
+                          Card(
+                            color: interpretasiSebelum == "Tinggi/Baik" ? Colors.green :
+                                    interpretasiSebelum == "Sedang/Cukup" ? Colors.yellow :
+                                    Colors.red,
+                            child: ListTile(
+                              title: Text(
+                                'Interpretasi Sebelum: $interpretasiSebelum',
+                                style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                                textAlign: TextAlign.center,
                               ),
                             ),
-                            SizedBox(width: 10),
-                            Expanded(
-                              child: TextField(
-                                controller: sesudahControllers[index],
-                                decoration: InputDecoration(
-                                  labelText: 'Sesudah',
-                                  border: OutlineInputBorder(),
-                                  contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                                ),
+                          ),
+                          Card(
+                            color: interpretasiSesudah == "Tinggi/Baik" ? Colors.green :
+                                    interpretasiSesudah == "Sedang/Cukup" ? Colors.yellow :
+                                    Colors.red,
+                            child: ListTile(
+                              title: Text(
+                                'Interpretasi Sesudah: $interpretasiSesudah',
+                                style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                                textAlign: TextAlign.center,
                               ),
                             ),
-                          ],
+                          ),
+                        ],
+                        TextButton(
+                          onPressed: () {
+                            setState(() {
+                              showInterpretations = !showInterpretations;
+                            });
+                          },
+                          child: Text(showInterpretations ? 'Hide Interpretations' : 'Show Interpretations'),
                         ),
                       ],
                     ),
                   ),
-                );
-              },
+                ],
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: data.length,
+                    itemBuilder: (context, index) {
+                      return Card(
+                        margin: EdgeInsets.all(10),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        color: Colors.white,
+                        child: Padding(
+                          padding: const EdgeInsets.all(10.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: Image.asset(
+                                      'assets/images/logors.jpg', // Ganti dengan path gambar Anda
+                                      width: 50,
+                                      height: 50,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                  SizedBox(width: 10),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          data[index]["nama_indikator"] ?? '',
+                                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                        ),
+                                        Text(
+                                          data[index]["sub_indikator"] ?? '',
+                                          style: TextStyle(fontSize: 14, color: Colors.grey),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Column(
+                                    children: [
+                                      Row(
+                                        children: [
+                                          IconButton(
+                                            icon: Icon(
+                                              Icons.visibility,
+                                              color: Colors.blue,
+                                            ),
+                                            onPressed: () async {
+                                              _showPopup(context, data[index]["kriteria"] ?? '');
+                                            },
+                                          ),
+                                          IconButton(
+                                            icon: Icon(
+                                              Icons.help_outline,
+                                              color: Colors.orange,
+                                            ),
+                                            onPressed: () async {
+                                              _showPopup(context, data[index]["keterangan"] ?? '');
+                                            },
+                                          ),
+                                        ],
+                                      ),
+                                      SizedBox(height: 4),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 10),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: TextField(
+                                      controller: sebelumControllers[index],
+                                      decoration: InputDecoration(
+                                        labelText: 'Indikator Sebelum',
+                                        border: OutlineInputBorder(),
+                                        contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                      ),
+                                      onChanged: (value) => _calculateTotalScore(),
+                                    ),
+                                  ),
+                                  SizedBox(width: 10),
+                                  Expanded(
+                                    child: TextField(
+                                      controller: sesudahControllers[index],
+                                      decoration: InputDecoration(
+                                        labelText: 'Indikator Sesudah',
+                                        border: OutlineInputBorder(),
+                                        contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                      ),
+                                      onChanged: (value) => _calculateTotalScore(),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 10),
+                              TextField(
+                                controller: keteranganControllers[index],
+                                decoration: InputDecoration(
+                                  labelText: 'Keterangan',
+                                  border: OutlineInputBorder(),
+                                  contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
             ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _saveDataEntry,
-        child: Icon(Icons.save),
-        backgroundColor: Colors.blue,
+      floatingActionButton: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          FloatingActionButton.extended(
+            onPressed: _saveDataEntry,
+            label: Text('Save'),
+            icon: Icon(Icons.save),
+            backgroundColor: Colors.blue,
+          ),
+          SizedBox(width: 10),
+          FloatingActionButton.extended(
+            onPressed: _exportData,
+            label: Text('Export'),
+            icon: Icon(Icons.import_export),
+            backgroundColor: Colors.green,
+          ),
+        ],
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 }

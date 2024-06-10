@@ -10,10 +10,13 @@ import 'data_entry_form.dart';
 import 'category_selection_screen.dart';
 import 'penilaian_screen.dart'; // Import for penilaian_screen
 import 'penilaian_alkes_screen.dart'; // Import for penilaian_alkes_screen
+import 'penilaian_kendaraan_screen.dart'; // Import for penilaian_alkes_screen
 import 'calender_screen.dart'; // Import for calendar_screen
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'export_screen.dart'; // Add this import
+import 'export_alkes_screen.dart'; // Add this import
+import 'export_kendaraan_screen.dart'; // Add this import
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -36,6 +39,33 @@ class MyApp extends StatelessWidget {
         '/profile': (context) => ProfileScreen(userId: ModalRoute.of(context)!.settings.arguments as int),
         '/dashboard': (context) => DashboardScreen(userId: ModalRoute.of(context)!.settings.arguments as int),
         '/data_entry': (context) => DataEntryForm(userId: ModalRoute.of(context)!.settings.arguments as int),
+        '/export': (context) => ExportScreen(
+          puskesmas: "",
+          sebelum: 0,
+          sesudah: 0,
+          interpretasiSebelum: "",
+          interpretasiSesudah: "",
+          userId: ModalRoute.of(context)!.settings.arguments as int), // Tambahkan rute ini
+        '/export_alkes': (context) => ExportAlkesScreen(
+          puskesmas: "",
+          sebelumIndikator1: 0,
+          sesudahIndikator1: 0,
+          sebelumIndikator2: 0,
+          sesudahIndikator2: 0,
+          interpretasiIndikator1Sebelum: "",
+          interpretasiIndikator1Sesudah: "",
+          interpretasiIndikator2Sebelum: "",
+          interpretasiIndikator2Sesudah: "",
+          interpretasiAkhir: "",
+          userId: ModalRoute.of(context)!.settings.arguments as int), // Tambahkan rute ini
+        '/export_kendaraan': (context) => ExportKendaraanScreen(
+          puskesmas: "",
+          sebelumIndikator: 0,
+          sesudahIndikator: 0,
+          interpretasiSebelum: "",
+          interpretasiSesudah: "",
+          interpretasiAkhir: "",
+          userId: ModalRoute.of(context)!.settings.arguments as int), // Tambahkan rute ini
       },
       onGenerateRoute: (settings) {
         if (settings.name == '/category_selection') {
@@ -67,16 +97,14 @@ class MyApp extends StatelessWidget {
               entryId: args['entryId'], // Add entryId as nullable
             ),
           );
-        } else if (settings.name == '/export') {
+        } else if (settings.name == '/penilaian_kendaraan') {
           final args = settings.arguments as Map<String, dynamic>;
           return MaterialPageRoute(
-            builder: (context) => ExportScreen(
-              puskesmas: args['puskesmas'],
-              sebelumList: args['sebelumList'],
-              sesudahList: args['sesudahList'],
-              interpretasiSebelumList: args['interpretasiSebelumList'],
-              interpretasiSesudahList: args['interpretasiSesudahList'],
+            builder: (context) => PenilaianKendaraanScreen(
               userId: args['userId'],
+              kegiatanId: args['kegiatanId'],
+              id_category: args['id_category'],
+              entryId: args['entryId'], // Add entryId as nullable
             ),
           );
         } else if (settings.name == '/calendar') {

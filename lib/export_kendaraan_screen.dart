@@ -1,7 +1,7 @@
 import 'dart:io';
-import 'dart:typed_data';  // Tambahkan ini
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show rootBundle;  // Tambahkan ini
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:file_picker/file_picker.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:pdf/pdf.dart';
@@ -9,32 +9,33 @@ import 'package:path_provider/path_provider.dart';
 import 'package:open_file/open_file.dart';
 import 'package:mailer/mailer.dart';
 import 'package:mailer/smtp_server.dart';
-import 'package:sqflite/sqflite.dart';
-import 'database_helper.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'database_helper.dart';
 
-class ExportScreen extends StatefulWidget {
+class ExportKendaraanScreen extends StatefulWidget {
   final String puskesmas;
-  final int sebelum;
-  final int sesudah;
+  final double sebelumIndikator;
+  final double sesudahIndikator;
   final String interpretasiSebelum;
   final String interpretasiSesudah;
+  final String interpretasiAkhir;
   final int userId;
 
-  ExportScreen({
+  ExportKendaraanScreen({
     required this.puskesmas,
-    required this.sebelum,
-    required this.sesudah,
+    required this.sebelumIndikator,
+    required this.sesudahIndikator,
     required this.interpretasiSebelum,
     required this.interpretasiSesudah,
+    required this.interpretasiAkhir,
     required this.userId,
   });
 
   @override
-  _ExportScreenState createState() => _ExportScreenState();
+  _ExportKendaraanScreenState createState() => _ExportKendaraanScreenState();
 }
 
-class _ExportScreenState extends State<ExportScreen> {
+class _ExportKendaraanScreenState extends State<ExportKendaraanScreen> {
   String catatan = '';
   String upayaKegiatan = '';
   String estimasiBiaya = '';
@@ -128,10 +129,11 @@ class _ExportScreenState extends State<ExportScreen> {
                 text: 'Data Export',
               ),
               pw.Text('Puskesmas: ${widget.puskesmas}'),
-              pw.Text('Sebelum: ${widget.sebelum}'),
-              pw.Text('Sesudah: ${widget.sesudah}'),
+              pw.Text('Indikator Sebelum: ${widget.sebelumIndikator}'),
+              pw.Text('Indikator Sesudah: ${widget.sesudahIndikator}'),
               pw.Text('Interpretasi Sebelum: ${widget.interpretasiSebelum}'),
               pw.Text('Interpretasi Sesudah: ${widget.interpretasiSesudah}'),
+              pw.Text('Interpretasi Akhir: ${widget.interpretasiAkhir}'),
               pw.Text('Catatan: $catatan'),
               pw.Text('Upaya / Kegiatan: $upayaKegiatan'),
               pw.Text('Estimasi Biaya: $estimasiBiaya'),
@@ -230,8 +232,8 @@ class _ExportScreenState extends State<ExportScreen> {
               children: [
                 Column(
                   children: [
-                    Text('Sebelum', style: TextStyle(fontSize: 18)),
-                    Text(widget.sebelum.toString(),
+                    Text('Indikator Sebelum', style: TextStyle(fontSize: 18)),
+                    Text(widget.sebelumIndikator.toString(),
                         style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                     SizedBox(height: 5),
                     Text('Interpretasi', style: TextStyle(fontSize: 16)),
@@ -241,8 +243,8 @@ class _ExportScreenState extends State<ExportScreen> {
                 ),
                 Column(
                   children: [
-                    Text('Sesudah', style: TextStyle(fontSize: 18)),
-                    Text(widget.sesudah.toString(),
+                    Text('Indikator Sesudah', style: TextStyle(fontSize: 18)),
+                    Text(widget.sesudahIndikator.toString(),
                         style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                     SizedBox(height: 5),
                     Text('Interpretasi', style: TextStyle(fontSize: 16)),
@@ -250,6 +252,14 @@ class _ExportScreenState extends State<ExportScreen> {
                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                   ],
                 ),
+              ],
+            ),
+            SizedBox(height: 20),
+            Column(
+              children: [
+                Text('Interpretasi Akhir', style: TextStyle(fontSize: 18)),
+                Text(widget.interpretasiAkhir,
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               ],
             ),
             SizedBox(height: 20),

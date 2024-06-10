@@ -58,7 +58,7 @@ class CategorySelectionScreen extends StatelessWidget {
                 onTap: () {
                   Navigator.pushNamed(
                     context,
-                    '/indikator',
+                    '/penilaian_kendaraan',
                     arguments: {
                       'userId': userId,
                       'kegiatanId': kegiatanId,

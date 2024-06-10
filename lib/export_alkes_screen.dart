@@ -1,7 +1,7 @@
 import 'dart:io';
-import 'dart:typed_data';  // Tambahkan ini
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show rootBundle;  // Tambahkan ini
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:file_picker/file_picker.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:pdf/pdf.dart';
@@ -9,32 +9,41 @@ import 'package:path_provider/path_provider.dart';
 import 'package:open_file/open_file.dart';
 import 'package:mailer/mailer.dart';
 import 'package:mailer/smtp_server.dart';
-import 'package:sqflite/sqflite.dart';
-import 'database_helper.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'database_helper.dart';
 
-class ExportScreen extends StatefulWidget {
+class ExportAlkesScreen extends StatefulWidget {
   final String puskesmas;
-  final int sebelum;
-  final int sesudah;
-  final String interpretasiSebelum;
-  final String interpretasiSesudah;
+  final double sebelumIndikator1;
+  final double sesudahIndikator1;
+  final double sebelumIndikator2;
+  final double sesudahIndikator2;
+  final String interpretasiIndikator1Sebelum;
+  final String interpretasiIndikator1Sesudah;
+  final String interpretasiIndikator2Sebelum;
+  final String interpretasiIndikator2Sesudah;
+  final String interpretasiAkhir;
   final int userId;
 
-  ExportScreen({
+  ExportAlkesScreen({
     required this.puskesmas,
-    required this.sebelum,
-    required this.sesudah,
-    required this.interpretasiSebelum,
-    required this.interpretasiSesudah,
+    required this.sebelumIndikator1,
+    required this.sesudahIndikator1,
+    required this.sebelumIndikator2,
+    required this.sesudahIndikator2,
+    required this.interpretasiIndikator1Sebelum,
+    required this.interpretasiIndikator1Sesudah,
+    required this.interpretasiIndikator2Sebelum,
+    required this.interpretasiIndikator2Sesudah,
+    required this.interpretasiAkhir,
     required this.userId,
   });
 
   @override
-  _ExportScreenState createState() => _ExportScreenState();
+  _ExportAlkesScreenState createState() => _ExportAlkesScreenState();
 }
 
-class _ExportScreenState extends State<ExportScreen> {
+class _ExportAlkesScreenState extends State<ExportAlkesScreen> {
   String catatan = '';
   String upayaKegiatan = '';
   String estimasiBiaya = '';
@@ -128,10 +137,15 @@ class _ExportScreenState extends State<ExportScreen> {
                 text: 'Data Export',
               ),
               pw.Text('Puskesmas: ${widget.puskesmas}'),
-              pw.Text('Sebelum: ${widget.sebelum}'),
-              pw.Text('Sesudah: ${widget.sesudah}'),
-              pw.Text('Interpretasi Sebelum: ${widget.interpretasiSebelum}'),
-              pw.Text('Interpretasi Sesudah: ${widget.interpretasiSesudah}'),
+              pw.Text('Indikator 1 Sebelum: ${widget.sebelumIndikator1}'),
+              pw.Text('Indikator 1 Sesudah: ${widget.sesudahIndikator1}'),
+              pw.Text('Interpretasi Indikator 1 Sebelum: ${widget.interpretasiIndikator1Sebelum}'),
+              pw.Text('Interpretasi Indikator 1 Sesudah: ${widget.interpretasiIndikator1Sesudah}'),
+              pw.Text('Indikator 2 Sebelum: ${widget.sebelumIndikator2}'),
+              pw.Text('Indikator 2 Sesudah: ${widget.sesudahIndikator2}'),
+              pw.Text('Interpretasi Indikator 2 Sebelum: ${widget.interpretasiIndikator2Sebelum}'),
+              pw.Text('Interpretasi Indikator 2 Sesudah: ${widget.interpretasiIndikator2Sesudah}'),
+              pw.Text('Interpretasi Akhir: ${widget.interpretasiAkhir}'),
               pw.Text('Catatan: $catatan'),
               pw.Text('Upaya / Kegiatan: $upayaKegiatan'),
               pw.Text('Estimasi Biaya: $estimasiBiaya'),
@@ -188,7 +202,7 @@ class _ExportScreenState extends State<ExportScreen> {
   }
 
   Future<void> _sendEmail(String pdfPath, String recipient) async {
-    final smtpServer = gmail('mtsalikhlasberbahh@gmail.com', 'oxtm hpkh ciiq ppan'); // Use your email and password
+    final smtpServer = gmail('your-email@gmail.com', 'your-email-password'); // Use your email and password
 
     final message = Message()
       ..from = Address('your-email@gmail.com', 'Your Name')
@@ -211,7 +225,7 @@ class _ExportScreenState extends State<ExportScreen> {
       appBar: AppBar(
         title: Text('Export'),
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
@@ -230,70 +244,104 @@ class _ExportScreenState extends State<ExportScreen> {
               children: [
                 Column(
                   children: [
-                    Text('Sebelum', style: TextStyle(fontSize: 18)),
-                    Text(widget.sebelum.toString(),
+                    Text('Indikator 1 Sebelum', style: TextStyle(fontSize: 18)),
+                    Text(widget.sebelumIndikator1.toString(),
                         style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                     SizedBox(height: 5),
                     Text('Interpretasi', style: TextStyle(fontSize: 16)),
-                    Text(widget.interpretasiSebelum,
+                    Text(widget.interpretasiIndikator1Sebelum,
                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                   ],
                 ),
                 Column(
                   children: [
-                    Text('Sesudah', style: TextStyle(fontSize: 18)),
-                    Text(widget.sesudah.toString(),
+                    Text('Indikator 1 Sesudah', style: TextStyle(fontSize: 18)),
+                    Text(widget.sesudahIndikator1.toString(),
                         style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                     SizedBox(height: 5),
                     Text('Interpretasi', style: TextStyle(fontSize: 16)),
-                    Text(widget.interpretasiSesudah,
+                    Text(widget.interpretasiIndikator1Sesudah,
                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                   ],
                 ),
               ],
             ),
             SizedBox(height: 20),
-            Expanded(
-              child: ListView(
-                children: [
-                  Card(
-                    child: ListTile(
-                      title: Text('Catatan:'),
-                      subtitle: TextFormField(
-                        onChanged: (value) {
-                          setState(() {
-                            catatan = value;
-                          });
-                        },
-                      ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                Column(
+                  children: [
+                    Text('Indikator 2 Sebelum', style: TextStyle(fontSize: 18)),
+                    Text(widget.sebelumIndikator2.toString(),
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    SizedBox(height: 5),
+                    Text('Interpretasi', style: TextStyle(fontSize: 16)),
+                    Text(widget.interpretasiIndikator2Sebelum,
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  ],
+                ),
+                Column(
+                  children: [
+                    Text('Indikator 2 Sesudah', style: TextStyle(fontSize: 18)),
+                    Text(widget.sesudahIndikator2.toString(),
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    SizedBox(height: 5),
+                    Text('Interpretasi', style: TextStyle(fontSize: 16)),
+                    Text(widget.interpretasiIndikator2Sesudah,
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  ],
+                ),
+              ],
+            ),
+            SizedBox(height: 20),
+            Column(
+              children: [
+                Text('Interpretasi Akhir', style: TextStyle(fontSize: 18)),
+                Text(widget.interpretasiAkhir,
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              ],
+            ),
+            SizedBox(height: 20),
+            Column(
+              children: [
+                Card(
+                  child: ListTile(
+                    title: Text('Catatan:'),
+                    subtitle: TextFormField(
+                      onChanged: (value) {
+                        setState(() {
+                          catatan = value;
+                        });
+                      },
                     ),
                   ),
-                  Card(
-                    child: ListTile(
-                      title: Text('Upaya / Kegiatan:'),
-                      subtitle: TextFormField(
-                        onChanged: (value) {
-                          setState(() {
-                            upayaKegiatan = value;
-                          });
-                        },
-                      ),
+                ),
+                Card(
+                  child: ListTile(
+                    title: Text('Upaya / Kegiatan:'),
+                    subtitle: TextFormField(
+                      onChanged: (value) {
+                        setState(() {
+                          upayaKegiatan = value;
+                        });
+                      },
                     ),
                   ),
-                  Card(
-                    child: ListTile(
-                      title: Text('Estimasi Biaya:'),
-                      subtitle: TextFormField(
-                        onChanged: (value) {
-                          setState(() {
-                            estimasiBiaya = value;
-                          });
-                        },
-                      ),
+                ),
+                Card(
+                  child: ListTile(
+                    title: Text('Estimasi Biaya:'),
+                    subtitle: TextFormField(
+                      onChanged: (value) {
+                        setState(() {
+                          estimasiBiaya = value;
+                        });
+                      },
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
             SizedBox(height: 20),
             ElevatedButton(
