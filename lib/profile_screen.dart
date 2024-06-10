@@ -110,6 +110,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   SizedBox(height: 20),
                   _buildMenuSection('Profile', [
                     _buildMenuItem(Icons.person_outline, 'Profile', _navigateToEditProfile),
+                    _buildMenuItem(Icons.exit_to_app, 'Logout', _logout),
                   ]),
                 ],
               ),
