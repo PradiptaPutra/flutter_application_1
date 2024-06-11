@@ -11,6 +11,7 @@ import 'category_selection_screen.dart';
 import 'penilaian_screen.dart'; // Import for penilaian_screen
 import 'penilaian_alkes_screen.dart'; // Import for penilaian_alkes_screen
 import 'penilaian_kendaraan_screen.dart'; // Import for penilaian_alkes_screen
+import 'penilaian_pembiayaan_screen.dart'; // Import for penilaian_alkes_screen
 import 'calender_screen.dart'; // Import for calendar_screen
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest.dart' as tz;
@@ -101,6 +102,16 @@ class MyApp extends StatelessWidget {
           final args = settings.arguments as Map<String, dynamic>;
           return MaterialPageRoute(
             builder: (context) => PenilaianKendaraanScreen(
+              userId: args['userId'],
+              kegiatanId: args['kegiatanId'],
+              id_category: args['id_category'],
+              entryId: args['entryId'], // Add entryId as nullable
+            ),
+          );
+        } else if (settings.name == '/penilaian_pembiayaan') {
+          final args = settings.arguments as Map<String, dynamic>;
+          return MaterialPageRoute(
+            builder: (context) => PenilaianPembiayaanScreen(
               userId: args['userId'],
               kegiatanId: args['kegiatanId'],
               id_category: args['id_category'],
