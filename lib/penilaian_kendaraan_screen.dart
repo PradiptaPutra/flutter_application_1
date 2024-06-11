@@ -58,7 +58,7 @@ class _PenilaianKendaraanScreenState extends State<PenilaianKendaraanScreen> {
         existingEntries = entries;
         for (var entry in entries) {
           for (var i = 0; i < data.length; i++) {
-            if (entry['sub_indikator'] == data[i]['sub_indikator']) {
+            if (entry['indikator'] == data[i]['nama_indikator']) {
               sebelumControllers[i].text = entry['sebelum'] ?? '';
               sesudahControllers[i].text = entry['sesudah'] ?? '';
               keteranganControllers[i].text = entry['keterangan'] ?? '';
@@ -122,7 +122,6 @@ class _PenilaianKendaraanScreenState extends State<PenilaianKendaraanScreen> {
         'id_category': widget.id_category,
         'puskesmas': puskesmas,
         'indikator': data[i]['nama_indikator'],
-        'sub_indikator': data[i]['sub_indikator'],
         'sebelum': sebelumControllers[i].text,
         'sesudah': sesudahControllers[i].text,
         'keterangan': keteranganControllers[i].text,
@@ -301,10 +300,6 @@ class _PenilaianKendaraanScreenState extends State<PenilaianKendaraanScreen> {
                                         Text(
                                           data[index]["nama_indikator"] ?? '',
                                           style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                                        ),
-                                        Text(
-                                          data[index]["sub_indikator"] ?? '',
-                                          style: TextStyle(fontSize: 14, color: Colors.grey),
                                         ),
                                       ],
                                     ),
