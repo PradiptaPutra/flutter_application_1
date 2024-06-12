@@ -13,7 +13,7 @@ import 'package:sqflite/sqflite.dart';
 import 'database_helper.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
-class ExportScreen extends StatefulWidget {
+class ExportPembiayaanScreen extends StatefulWidget {
   final String puskesmas;
   final int sebelum;
   final int sesudah;
@@ -21,7 +21,7 @@ class ExportScreen extends StatefulWidget {
   final String interpretasiSesudah;
   final int userId;
 
-  ExportScreen({
+  ExportPembiayaanScreen({
     required this.puskesmas,
     required this.sebelum,
     required this.sesudah,
@@ -31,10 +31,10 @@ class ExportScreen extends StatefulWidget {
   });
 
   @override
-  _ExportScreenState createState() => _ExportScreenState();
+  _ExportPembiayaanScreenState createState() => _ExportPembiayaanScreenState();
 }
 
-class _ExportScreenState extends State<ExportScreen> {
+class _ExportPembiayaanScreenState extends State<ExportPembiayaanScreen> {
   String catatan = '';
   String upayaKegiatan = '';
   String estimasiBiaya = '';

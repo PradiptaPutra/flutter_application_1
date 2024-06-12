@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'database_helper.dart';
-import 'export_screen.dart';
+import 'export_pembiayaan_screen.dart';
 
 class PenilaianPembiayaanScreen extends StatefulWidget {
   final int? kegiatanId;
@@ -150,7 +150,7 @@ class _PenilaianPembiayaanScreenState extends State<PenilaianPembiayaanScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ExportScreen(
+        builder: (context) => ExportPembiayaanScreen(
           puskesmas: puskesmas,
           sebelum: totalSkorSebelum.toInt(),
           sesudah: totalSkorSesudah.toInt(),

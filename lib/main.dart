@@ -18,6 +18,7 @@ import 'package:timezone/data/latest.dart' as tz;
 import 'export_screen.dart'; // Add this import
 import 'export_alkes_screen.dart'; // Add this import
 import 'export_kendaraan_screen.dart'; // Add this import
+import 'export_pembiayaan_screen.dart'; // Add this import
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -41,6 +42,13 @@ class MyApp extends StatelessWidget {
         '/dashboard': (context) => DashboardScreen(userId: ModalRoute.of(context)!.settings.arguments as int),
         '/data_entry': (context) => DataEntryForm(userId: ModalRoute.of(context)!.settings.arguments as int),
         '/export': (context) => ExportScreen(
+          puskesmas: "",
+          sebelum: 0,
+          sesudah: 0,
+          interpretasiSebelum: "",
+          interpretasiSesudah: "",
+          userId: ModalRoute.of(context)!.settings.arguments as int), // Tambahkan rute ini
+        '/export_pembiayaan': (context) => ExportPembiayaanScreen(
           puskesmas: "",
           sebelum: 0,
           sesudah: 0,
