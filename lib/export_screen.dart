@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show rootBundle;
+import 'package:flutter/services.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:pdf/pdf.dart';
@@ -155,7 +155,7 @@ class _ExportScreenState extends State<ExportScreen> {
       print('PDF saved to $pdfPath');
 
       // Open the PDF
-      _openPdf(pdfPath);
+      _openLatestPdf();
 
       // Check connectivity and send email if online
       if (isConnected && emailPenerima != null) {
@@ -169,6 +169,34 @@ class _ExportScreenState extends State<ExportScreen> {
     }
   }
 
+Future<void> _openLatestPdf() async {
+  try {
+    // Dapatkan direktori unduhan
+    Directory? downloadDirectory = await getExternalStorageDirectory();
+    if (downloadDirectory != null) {
+      // List semua file di direktori unduhan
+      List<FileSystemEntity> files = downloadDirectory.listSync();
+
+      // Filter file-file PDF
+      List<File> pdfFiles = files.whereType<File>().where((file) => file.path.toLowerCase().endsWith('.pdf')).toList();
+
+      // Jika ada file PDF
+      if (pdfFiles.isNotEmpty) {
+        // Sort berdasarkan waktu modifikasi untuk mendapatkan file terbaru
+        pdfFiles.sort((a, b) => b.lastModifiedSync().compareTo(a.lastModifiedSync()));
+
+        // Buka file PDF terbaru
+        OpenFile.open(pdfFiles.first.path);
+      } else {
+        print('Tidak ada file PDF di direktori unduhan');
+      }
+    } else {
+      print('Gagal mendapatkan direktori unduhan');
+    }
+  } on PlatformException catch (e) {
+    print('Error: $e');
+  }
+}
   void _openPdf(String filePath) async {
     try {
       final result = await FilePicker.platform.pickFiles(
