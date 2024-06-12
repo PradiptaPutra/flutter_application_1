@@ -16,8 +16,57 @@ class _PuskesmasScreenState extends State<PuskesmasScreen> {
   TextEditingController namaPuskesmasController = TextEditingController();
   DateTime? selectedDate;
 
-  // Define dropdown value
+  // Define dropdown values
   String dropdownValue = 'Rawat Inap';
+  String? selectedProvinsi;
+  String? selectedKabupaten;
+  
+  List<String> provinsiList = [
+    'Aceh', 'Bali', 'Banten', 'Bengkulu', 'Gorontalo', 'Jakarta', 
+    'Jambi', 'Jawa Barat', 'Jawa Tengah', 'Jawa Timur', 'Kalimantan Barat',
+    'Kalimantan Selatan', 'Kalimantan Tengah', 'Kalimantan Timur',
+    'Kalimantan Utara', 'Kepulauan Bangka Belitung', 'Kepulauan Riau', 
+    'Lampung', 'Maluku', 'Maluku Utara', 'Nusa Tenggara Barat', 
+    'Nusa Tenggara Timur', 'Papua', 'Papua Barat', 'Riau', 'Sulawesi Barat',
+    'Sulawesi Selatan', 'Sulawesi Tengah', 'Sulawesi Tenggara', 'Sulawesi Utara',
+    'Sumatera Barat', 'Sumatera Selatan', 'Sumatera Utara', 'Yogyakarta'
+  ];
+  Map<String, List<String>> kabupatenList = {
+    'Aceh': ['Banda Aceh', 'Langsa', 'Lhokseumawe', 'Meulaboh', 'Sabang', 'Subulussalam'],
+    'Bali': ['Denpasar'],
+    'Banten': ['Cilegon', 'Serang', 'Tangerang', 'Tangerang Selatan'],
+    'Bengkulu': ['Bengkulu'],
+    'Gorontalo': ['Gorontalo'],
+    'Jakarta': ['Jakarta Barat', 'Jakarta Pusat', 'Jakarta Selatan', 'Jakarta Timur', 'Jakarta Utara'],
+    'Jambi': ['Jambi'],
+    'Jawa Barat': ['Bandung', 'Bekasi', 'Bogor', 'Cimahi', 'Cirebon', 'Depok', 'Sukabumi', 'Tasikmalaya'],
+    'Jawa Tengah': ['Magelang', 'Pekalongan', 'Salatiga', 'Semarang', 'Surakarta', 'Tegal'],
+    'Jawa Timur': ['Batu', 'Blitar', 'Kediri', 'Madiun', 'Malang', 'Mojokerto', 'Pasuruan', 'Probolinggo', 'Surabaya'],
+    'Kalimantan Barat': ['Pontianak', 'Singkawang'],
+    'Kalimantan Selatan': ['Banjarbaru', 'Banjarmasin'],
+    'Kalimantan Tengah': ['Palangka Raya'],
+    'Kalimantan Timur': ['Balikpapan', 'Bontang', 'Samarinda'],
+    'Kalimantan Utara': ['Tarakan'],
+    'Kepulauan Bangka Belitung': ['Pangkal Pinang'],
+    'Kepulauan Riau': ['Batam', 'Tanjung Pinang'],
+    'Lampung': ['Bandar Lampung', 'Metro'],
+    'Maluku': ['Ambon', 'Tual'],
+    'Maluku Utara': ['Ternate', 'Tidore Kepulauan'],
+    'Nusa Tenggara Barat': ['Bima', 'Mataram'],
+    'Nusa Tenggara Timur': ['Kupang'],
+    'Papua': ['Jayapura'],
+    'Papua Barat': ['Manokwari'],
+    'Riau': ['Dumai', 'Pekanbaru'],
+    'Sulawesi Barat': ['Mamuju'],
+    'Sulawesi Selatan': ['Makassar', 'Palopo', 'Parepare'],
+    'Sulawesi Tengah': ['Palu'],
+    'Sulawesi Tenggara': ['Bau-Bau', 'Kendari'],
+    'Sulawesi Utara': ['Bitung', 'Kotamobagu', 'Manado', 'Tomohon'],
+    'Sumatera Barat': ['Bukittinggi', 'Padang', 'Padang Panjang', 'Pariaman', 'Payakumbuh', 'Sawahlunto', 'Solok'],
+    'Sumatera Selatan': ['Lubuklinggau', 'Pagar Alam', 'Palembang', 'Prabumulih'],
+    'Sumatera Utara': ['Binjai', 'Gunungsitoli', 'Medan', 'Padang Sidempuan', 'Pematang Siantar', 'Sibolga', 'Tanjungbalai', 'Tebing Tinggi'],
+    'Yogyakarta': ['Yogyakarta'],
+  };
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   bool _isNextButtonEnabled = false;
@@ -31,7 +80,9 @@ class _PuskesmasScreenState extends State<PuskesmasScreen> {
 
   void _validateInputs() {
     if (namaPuskesmasController.text.isNotEmpty &&
-        selectedDate != null) {
+        selectedDate != null &&
+        selectedProvinsi != null &&
+        selectedKabupaten != null) {
       setState(() {
         _isNextButtonEnabled = true;
       });
@@ -196,6 +247,48 @@ class _PuskesmasScreenState extends State<PuskesmasScreen> {
               ),
             ),
             ListTile(
+              title: DropdownButton<String>(
+                hint: Text('Pilih Provinsi'),
+                value: selectedProvinsi,
+                onChanged: (String? newValue) {
+                  setState(() {
+                    selectedProvinsi = newValue;
+                    selectedKabupaten = null; // Reset kabupaten when provinsi changes
+                    _validateInputs();
+                  });
+                },
+                items: provinsiList.map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
+              ),
+            ),
+            ListTile(
+              title: DropdownButton<String>(
+                hint: Text('Pilih Kabupaten/Kota'),
+                value: selectedKabupaten,
+                onChanged: selectedProvinsi != null
+                    ? (String? newValue) {
+                        setState(() {
+                          selectedKabupaten = newValue;
+                          _validateInputs();
+                        });
+                      }
+                    : null,
+                items: selectedProvinsi != null
+                    ? kabupatenList[selectedProvinsi]!
+                        .map<DropdownMenuItem<String>>((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(value),
+                        );
+                      }).toList()
+                    : [],
+              ),
+            ),
+            ListTile(
               title: Row(
                 children: [
                   Icon(Icons.date_range),
@@ -239,50 +332,54 @@ class _PuskesmasScreenState extends State<PuskesmasScreen> {
     }
   }
 
-  void _insertKegiatan() async {
-    String namaPuskesmas = namaPuskesmasController.text;
-    String tanggalKegiatan =
-        selectedDate != null ? DateFormat('dd-MM-yyyy').format(selectedDate!) : '';
+ void _insertKegiatan() async {
+  String namaPuskesmas = namaPuskesmasController.text;
+  String tanggalKegiatan =
+      selectedDate != null ? DateFormat('dd-MM-yyyy').format(selectedDate!) : '';
 
-    // Mendapatkan data pengguna yang sedang login
-    Map<String, dynamic>? userData = await DatabaseHelper().getUserData(widget.userId);
+  // Mendapatkan data pengguna yang sedang login
+  Map<String, dynamic>? userData = await DatabaseHelper().getUserData(widget.userId);
 
-    // Jika data pengguna ditemukan
-    if (userData != null) {
-      // Mengisi kolom nama, jabatan, dan nomor telepon dari data pengguna
-      String nama = userData['name'];
-      String jabatan = userData['position'];
-      String notelp = userData['phone'];
+  // Jika data pengguna ditemukan
+  if (userData != null) {
+    // Mengisi kolom nama, jabatan, dan nomor telepon dari data pengguna
+    String nama = userData['name'];
+    String jabatan = userData['position'];
+    String notelp = userData['phone'];
 
-      // Membuat objek data kegiatan
-      Map<String, dynamic> kegiatanData = {
-        'user_id': widget.userId,
-        'nama_puskesmas': namaPuskesmas,
-        'dropdown_option': dropdownValue,
-        'tanggal_kegiatan': tanggalKegiatan,
-        'nama': nama, // Mengisi kolom nama dengan data pengguna
-        'jabatan': jabatan, // Mengisi kolom jabatan dengan data pengguna
-        'notelepon': notelp, // Mengisi kolom nomor telepon dengan data pengguna
-      };
+    // Membuat objek data kegiatan
+    Map<String, dynamic> kegiatanData = {
+      'user_id': widget.userId,
+      'nama_puskesmas': namaPuskesmas,
+      'dropdown_option': dropdownValue,
+      'provinsi': selectedProvinsi,
+      'kabupaten_kota': selectedKabupaten,
+      'tanggal_kegiatan': tanggalKegiatan,
+      'nama': nama, // Mengisi kolom nama dengan data pengguna
+      'jabatan': jabatan, // Mengisi kolom jabatan dengan data pengguna
+      'notelepon': notelp, // Mengisi kolom nomor telepon dengan data pengguna
+    };
 
-      // Memasukkan data kegiatan ke dalam database
-      int kegiatanId = await DatabaseHelper().insertKegiatan(kegiatanData);
+    // Memasukkan data kegiatan ke dalam database
+    int kegiatanId = await DatabaseHelper().insertKegiatan(kegiatanData);
 
-      // Mengosongkan input setelah data disimpan
-      namaPuskesmasController.clear();
-      setState(() {
-        selectedDate = null;
-        _validateInputs();
-      });
+    // Mengosongkan input setelah data disimpan
+    namaPuskesmasController.clear();
+    setState(() {
+      selectedDate = null;
+      selectedProvinsi = null;
+      selectedKabupaten = null;
+      _validateInputs();
+    });
 
-      // Pindah ke halaman selanjutnya
-      Navigator.pushNamed(context, '/category_selection',
-          arguments: {'userId': widget.userId, 'kegiatanId': kegiatanId});
-    } else {
-      // Jika data pengguna tidak ditemukan, tampilkan pesan kesalahan
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Data pengguna tidak ditemukan.'),
-      ));
-    }
+    // Pindah ke halaman selanjutnya
+    Navigator.pushNamed(context, '/category_selection',
+        arguments: {'userId': widget.userId, 'kegiatanId': kegiatanId});
+  } else {
+    // Jika data pengguna tidak ditemukan, tampilkan pesan kesalahan
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text('Data pengguna tidak ditemukan.'),
+    ));
   }
+}
 }
