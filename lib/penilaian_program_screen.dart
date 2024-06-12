@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
 import 'database_helper.dart';
-import 'export_sdm_screen.dart';
+import 'export_alkes_screen.dart';
 
-class PenilaianSdmScreen extends StatefulWidget {
+class PenilaianProgramScreen extends StatefulWidget {
   final int? kegiatanId;
   final int id_category;
   final int userId;
   final int? entryId;
 
-  PenilaianSdmScreen({this.kegiatanId, required this.id_category, required this.userId, this.entryId});
+  PenilaianProgramScreen({this.kegiatanId, required this.id_category, required this.userId, this.entryId});
 
   @override
-  _PenilaianSdmScreenState createState() => _PenilaianSdmScreenState();
+  _PenilaianProgramScreenState createState() => _PenilaianProgramScreenState();
 }
 
-class _PenilaianSdmScreenState extends State<PenilaianSdmScreen> {
+class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
   final DatabaseHelper _dbHelper = DatabaseHelper();
   final List<TextEditingController> sebelumControllers = [];
   final List<TextEditingController> sesudahControllers = [];
@@ -46,7 +46,7 @@ class _PenilaianSdmScreenState extends State<PenilaianSdmScreen> {
   }
 
   Future<void> _loadExcelData() async {
-    List<Map<String, dynamic>> excelData = await _dbHelper.loadExcelDataDirectly('assets/form_penilaian_sumberdaya_manusia.xlsx');
+    List<Map<String, dynamic>> excelData = await _dbHelper.loadExcelDataDirectly('assets/form_penilaian_program.xlsx');
     setState(() {
       data = excelData;
       for (var i = 0; i < data.length; i++) {
@@ -80,9 +80,6 @@ class _PenilaianSdmScreenState extends State<PenilaianSdmScreen> {
       });
     }
   }
-
-  // Remaining code for _calculateTotalScore, _saveDataEntry, _exportData, _showPopup, and dispose methods remains the same.
-
 
   void _calculateTotalScore() {
     double totalIndikator1Sebelum = 0;
@@ -180,7 +177,7 @@ class _PenilaianSdmScreenState extends State<PenilaianSdmScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ExportSdmScreen(
+        builder: (context) => ExportAlkesScreen(
           puskesmas: puskesmas,
           sebelumIndikator1: totalSkorIndikator1Sebelum,
           sesudahIndikator1: totalSkorIndikator1Sesudah,

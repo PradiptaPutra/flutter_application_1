@@ -12,11 +12,13 @@ import 'penilaian_screen.dart';
 import 'penilaian_alkes_screen.dart';
 import 'penilaian_kendaraan_screen.dart';
 import 'penilaian_pembiayaan_screen.dart';
+import 'penilaian_program_screen.dart';
 import 'calender_screen.dart';
 import 'export_screen.dart';
 import 'export_alkes_screen.dart';
 import 'export_kendaraan_screen.dart';
 import 'export_pembiayaan_screen.dart';
+import 'export_sdm_screen.dart';
 import 'penilaian_sdm_screen.dart'; // Add this import
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest.dart' as tz;
@@ -59,6 +61,18 @@ class MyApp extends StatelessWidget {
           userId: ModalRoute.of(context)!.settings.arguments as int,
         ),
         '/export_alkes': (context) => ExportAlkesScreen(
+          puskesmas: "",
+          sebelumIndikator1: 0,
+          sesudahIndikator1: 0,
+          sebelumIndikator2: 0,
+          sesudahIndikator2: 0,
+          interpretasiIndikator1Sebelum: "",
+          interpretasiIndikator1Sesudah: "",
+          interpretasiIndikator2Sebelum: "",
+          interpretasiIndikator2Sesudah: "",
+          interpretasiAkhir: "",
+          userId: ModalRoute.of(context)!.settings.arguments as int,
+        ), '/export_alkes': (context) => ExportSdmScreen(
           puskesmas: "",
           sebelumIndikator1: 0,
           sesudahIndikator1: 0,
@@ -115,6 +129,16 @@ class MyApp extends StatelessWidget {
           final args = settings.arguments as Map<String, dynamic>;
           return MaterialPageRoute(
             builder: (context) => PenilaianKendaraanScreen(
+              userId: args['userId'],
+              kegiatanId: args['kegiatanId'],
+              id_category: args['id_category'],
+              entryId: args['entryId'],
+            ),
+          );
+          } else if (settings.name == '/penilaian_program') {
+          final args = settings.arguments as Map<String, dynamic>;
+          return MaterialPageRoute(
+            builder: (context) => PenilaianProgramScreen(
               userId: args['userId'],
               kegiatanId: args['kegiatanId'],
               id_category: args['id_category'],
