@@ -188,10 +188,10 @@ class _ExportPembiayaanScreenState extends State<ExportPembiayaanScreen> {
   }
 
   Future<void> _sendEmail(String pdfPath, String recipient) async {
-    final smtpServer = gmail('your-email@gmail.com', 'your-email-password'); // Use your email and password
+    final smtpServer = gmail('mtsalikhlasberbahh@gmail.com', 'oxtm hpkh ciiq ppan'); // Use your email and password
 
     final message = Message()
-      ..from = Address('your-email@gmail.com', 'Your Name')
+      ..from = Address('mtsalikhlasberbahh@gmail.com', 'Your Name')
       ..recipients.add(recipient)
       ..subject = 'Lampiran PDF'
       ..text = 'Silakan temukan lampiran PDF.'
