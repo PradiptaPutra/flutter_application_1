@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
 
-
 class CategorySelectionScreen extends StatelessWidget {
   final int userId;
   final int? kegiatanId;
-  final List<int>? entryIds;  // Tambahkan entryIds sebagai parameter nullable
+  final List<int>? entryIds; // Make entryIds nullable
 
   CategorySelectionScreen({required this.userId, this.kegiatanId, this.entryIds});
 
   @override
   Widget build(BuildContext context) {
-     print('kegiatanId: $kegiatanId');
+    print('kegiatanId: $kegiatanId');
 
     return Scaffold(
       appBar: AppBar(
@@ -78,7 +77,7 @@ class CategorySelectionScreen extends StatelessWidget {
             onTap: () {
               Navigator.pushNamed(
                 context,
-                '/indikator',
+                '/penilaian_sdm',
                 arguments: {
                   'userId': userId,
                   'kegiatanId': kegiatanId,
@@ -96,7 +95,7 @@ class CategorySelectionScreen extends StatelessWidget {
             onTap: () {
               Navigator.pushNamed(
                 context,
-                '/indikator',
+                '/penilaian',
                 arguments: {
                   'userId': userId,
                   'kegiatanId': kegiatanId,

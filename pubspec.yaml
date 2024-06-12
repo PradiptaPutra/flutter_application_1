@@ -85,6 +85,7 @@ flutter:
     - assets/form_penilaian_bangunan.xlsx
     - assets/form_penilaian_kendaraan.xlsx
     - assets/form_penilaian_pembiayaan.xlsx
+    - assets/form_penilaian_sumberdaya_manusia.xlsx
     - assets/images/bgsplash.png
     - assets/images/logokemenkes.png
     - assets/images/logopuskesmas.png

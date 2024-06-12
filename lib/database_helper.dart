@@ -428,5 +428,32 @@ Future<List<Map<String, dynamic>>> getDataEntriesForUserHome(int userId) async {
     print('Puskesmas surveyed count query result: $result');
     return result[0]['count'] as int;
   }
+
+Future<String> getFormPenilaianSumberdayaManusia(int rowIndex) async {
+  try {
+    ByteData data = await rootBundle.load('assets/form_penilaian_sumberdaya_manusia.xlsx');
+    var bytes = data.buffer.asUint8List();
+    var excel = Excel.decodeBytes(bytes);
+
+    for (var table in excel.tables.keys) {
+      var sheet = excel.tables[table];
+      if (sheet != null && sheet.rows.length > rowIndex) {
+        var row = sheet.rows[rowIndex];
+        // Extract relevant data fields from the Excel row
+        String header1 = row[0]?.value?.toString() ?? ''; // Header1
+        String namaIndikator = row[1]?.value?.toString() ?? ''; // Nama Indikator
+        String nonRawatInapSPM = row[2]?.value?.toString() ?? ''; // Non Rawat Inap SPM
+        String rawatInapSPM = row[3]?.value?.toString() ?? ''; // Rawat Inap SPM
+        // Format the data as required
+        return '$header1: $namaIndikator, Non Rawat Inap SPM: $nonRawatInapSPM, Rawat Inap SPM: $rawatInapSPM';
+      }
+    }
+  } catch (e) {
+    print('Error loading Excel row data: $e');
+  }
+  return 'Data tidak ditemukan';
+}
+
+
   
 }

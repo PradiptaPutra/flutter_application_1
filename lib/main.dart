@@ -8,17 +8,18 @@ import 'profile_screen.dart';
 import 'dashboard_screen.dart';
 import 'data_entry_form.dart';
 import 'category_selection_screen.dart';
-import 'penilaian_screen.dart'; // Import for penilaian_screen
-import 'penilaian_alkes_screen.dart'; // Import for penilaian_alkes_screen
-import 'penilaian_kendaraan_screen.dart'; // Import for penilaian_alkes_screen
-import 'penilaian_pembiayaan_screen.dart'; // Import for penilaian_alkes_screen
-import 'calender_screen.dart'; // Import for calendar_screen
+import 'penilaian_screen.dart';
+import 'penilaian_alkes_screen.dart';
+import 'penilaian_kendaraan_screen.dart';
+import 'penilaian_pembiayaan_screen.dart';
+import 'calender_screen.dart';
+import 'export_screen.dart';
+import 'export_alkes_screen.dart';
+import 'export_kendaraan_screen.dart';
+import 'export_pembiayaan_screen.dart';
+import 'penilaian_sdm_screen.dart'; // Add this import
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest.dart' as tz;
-import 'export_screen.dart'; // Add this import
-import 'export_alkes_screen.dart'; // Add this import
-import 'export_kendaraan_screen.dart'; // Add this import
-import 'export_pembiayaan_screen.dart'; // Add this import
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -47,14 +48,16 @@ class MyApp extends StatelessWidget {
           sesudah: 0,
           interpretasiSebelum: "",
           interpretasiSesudah: "",
-          userId: ModalRoute.of(context)!.settings.arguments as int), // Tambahkan rute ini
+          userId: ModalRoute.of(context)!.settings.arguments as int,
+        ),
         '/export_pembiayaan': (context) => ExportPembiayaanScreen(
           puskesmas: "",
           sebelum: 0,
           sesudah: 0,
           interpretasiSebelum: "",
           interpretasiSesudah: "",
-          userId: ModalRoute.of(context)!.settings.arguments as int), // Tambahkan rute ini
+          userId: ModalRoute.of(context)!.settings.arguments as int,
+        ),
         '/export_alkes': (context) => ExportAlkesScreen(
           puskesmas: "",
           sebelumIndikator1: 0,
@@ -66,7 +69,8 @@ class MyApp extends StatelessWidget {
           interpretasiIndikator2Sebelum: "",
           interpretasiIndikator2Sesudah: "",
           interpretasiAkhir: "",
-          userId: ModalRoute.of(context)!.settings.arguments as int), // Tambahkan rute ini
+          userId: ModalRoute.of(context)!.settings.arguments as int,
+        ),
         '/export_kendaraan': (context) => ExportKendaraanScreen(
           puskesmas: "",
           sebelumIndikator: 0,
@@ -74,7 +78,8 @@ class MyApp extends StatelessWidget {
           interpretasiSebelum: "",
           interpretasiSesudah: "",
           interpretasiAkhir: "",
-          userId: ModalRoute.of(context)!.settings.arguments as int), // Tambahkan rute ini
+          userId: ModalRoute.of(context)!.settings.arguments as int,
+        ),
       },
       onGenerateRoute: (settings) {
         if (settings.name == '/category_selection') {
@@ -83,7 +88,7 @@ class MyApp extends StatelessWidget {
             builder: (context) => CategorySelectionScreen(
               userId: args['userId'],
               kegiatanId: args['kegiatanId'],
-              entryIds: args['entryIds'], // Add entryIds as nullable
+              entryIds: args['entryIds'],
             ),
           );
         } else if (settings.name == '/penilaian') {
@@ -93,7 +98,7 @@ class MyApp extends StatelessWidget {
               userId: args['userId'],
               kegiatanId: args['kegiatanId'],
               id_category: args['id_category'],
-              entryId: args['entryId'], // Add entryId as nullable
+              entryId: args['entryId'],
             ),
           );
         } else if (settings.name == '/penilaian_alkes') {
@@ -103,7 +108,7 @@ class MyApp extends StatelessWidget {
               userId: args['userId'],
               kegiatanId: args['kegiatanId'],
               id_category: args['id_category'],
-              entryId: args['entryId'], // Add entryId as nullable
+              entryId: args['entryId'],
             ),
           );
         } else if (settings.name == '/penilaian_kendaraan') {
@@ -113,7 +118,7 @@ class MyApp extends StatelessWidget {
               userId: args['userId'],
               kegiatanId: args['kegiatanId'],
               id_category: args['id_category'],
-              entryId: args['entryId'], // Add entryId as nullable
+              entryId: args['entryId'],
             ),
           );
         } else if (settings.name == '/penilaian_pembiayaan') {
@@ -123,11 +128,21 @@ class MyApp extends StatelessWidget {
               userId: args['userId'],
               kegiatanId: args['kegiatanId'],
               id_category: args['id_category'],
-              entryId: args['entryId'], // Add entryId as nullable
+              entryId: args['entryId'],
             ),
           );
         } else if (settings.name == '/calendar') {
           return MaterialPageRoute(builder: (context) => CalendarScreen());
+        } else if (settings.name == '/penilaian_sdm') {
+          final args = settings.arguments as Map<String, dynamic>;
+          return MaterialPageRoute(
+            builder: (context) => PenilaianSdmScreen(
+              userId: args['userId'],
+              kegiatanId: args['kegiatanId'],
+              id_category: args['id_category'],
+              entryId: args['entryId'],
+            ),
+          );
         }
         return null;
       },

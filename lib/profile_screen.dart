@@ -14,49 +14,35 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   final DatabaseHelper _dbHelper = DatabaseHelper();
-  Map<String, dynamic>? userData;
-  int puskesmasCount = 0;
 
-  @override
-  void initState() {
-    super.initState();
-    _loadUserData();
-    _loadPuskesmasCount();
-  }
-
-  void _loadUserData() async {
+  Future<Map<String, dynamic>> _loadUserData() async {
     final data = await _dbHelper.getUserData(widget.userId);
-    setState(() {
-      userData = data;
-    });
-  }
-
-  void _loadPuskesmasCount() async {
     final count = await _dbHelper.getPuskesmasSurveyedCount(widget.userId);
-    print('Puskesmas surveyed count: $count');
-    setState(() {
-      puskesmasCount = count;
-    });
-  }
 
-  void _navigateToEditProfile() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => EditProfileScreen(userId: widget.userId, userData: userData!),
-      ),
-    ).then((value) {
-      if (value == true) {
-        _loadUserData();
-        _loadPuskesmasCount(); // Reload count after profile update
-      }
-    });
+    // Create a modifiable copy of the data map
+    final Map<String, dynamic> mutableData = Map<String, dynamic>.from(data ?? {});
+    mutableData['puskesmasCount'] = count;
+
+    return mutableData;
   }
 
   Future<void> _logout() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('userId');
     Navigator.pushReplacementNamed(context, '/logreg');
+  }
+
+  void _navigateToEditProfile(Map<String, dynamic> userData) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditProfileScreen(userId: widget.userId, userData: userData),
+      ),
+    ).then((value) {
+      if (value == true) {
+        setState(() {}); // Refresh the screen when returning
+      }
+    });
   }
 
   @override
@@ -68,53 +54,67 @@ class _ProfileScreenState extends State<ProfileScreen> {
         backgroundColor: Color(0xFFF9D5A7), // Light peach color
         elevation: 0, // No shadow for the AppBar
       ),
-      body: userData == null
-          ? Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              child: Column(
-                children: [
-                  Container(
-                    color: Color(0xFFF9D5A7), // Light peach color
-                    padding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
-                    child: Column(
-                      children: [
-                        CircleAvatar(
-                          radius: 50,
-                          backgroundImage: AssetImage('assets/images/logors.jpg'), // Replace with the actual image
+      body: FutureBuilder<Map<String, dynamic>>(
+        future: _loadUserData(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else if (!snapshot.hasData) {
+            return Center(child: Text('No data available.'));
+          }
+
+          final userData = snapshot.data!;
+          final puskesmasCount = userData['puskesmasCount'];
+
+          return SingleChildScrollView(
+            child: Column(
+              children: [
+                Container(
+                  color: Color(0xFFF9D5A7), // Light peach color
+                  padding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
+                  child: Column(
+                    children: [
+                      CircleAvatar(
+                        radius: 50,
+                        backgroundImage: AssetImage('assets/images/logors.jpg'), // Replace with the actual image
+                      ),
+                      SizedBox(height: 10),
+                      Text(
+                        userData['name'] ?? '',
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
                         ),
-                        SizedBox(height: 10),
-                        Text(
-                          userData!['name'] ?? '',
-                          style: TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                          ),
+                      ),
+                      Text(
+                        userData['email'] ?? '',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.grey,
                         ),
-                        Text(
-                          userData!['email'] ?? '',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.grey,
-                          ),
-                        ),
-                        SizedBox(height: 20),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            _buildInfoCard('Jumlah Puskesmas Di Survei', puskesmasCount.toString()),
-                          ],
-                        ),
-                      ],
-                    ),
+                      ),
+                      SizedBox(height: 20),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          _buildInfoCard('Jumlah Puskesmas Di Survei', puskesmasCount.toString()),
+                        ],
+                      ),
+                    ],
                   ),
-                  SizedBox(height: 20),
-                  _buildMenuSection('Profile', [
-                    _buildMenuItem(Icons.person_outline, 'Profile', _navigateToEditProfile),
-                    _buildMenuItem(Icons.exit_to_app, 'Logout', _logout),
-                  ]),
-                ],
-              ),
+                ),
+                SizedBox(height: 20),
+                _buildMenuSection('Profile', [
+                  _buildMenuItem(Icons.person_outline, 'Profile', () => _navigateToEditProfile(userData)),
+                  _buildMenuItem(Icons.exit_to_app, 'Logout', _logout),
+                ]),
+              ],
             ),
+          );
+        },
+      ),
     );
   }
 
