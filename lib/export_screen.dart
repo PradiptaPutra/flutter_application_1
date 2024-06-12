@@ -10,9 +10,9 @@ import 'package:open_file/open_file.dart';
 import 'package:mailer/mailer.dart';
 import 'package:mailer/smtp_server.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:path/path.dart' as path;
 import 'database_helper.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:fluttertoast/fluttertoast.dart'; // Tambahkan import ini
 
 class ExportScreen extends StatefulWidget {
   final String puskesmas;
@@ -21,6 +21,8 @@ class ExportScreen extends StatefulWidget {
   final String interpretasiSebelum;
   final String interpretasiSesudah;
   final int userId;
+  final int? kegiatanId; // Tambahkan kegiatanId di sini
+  
 
   ExportScreen({
     required this.puskesmas,
@@ -29,6 +31,7 @@ class ExportScreen extends StatefulWidget {
     required this.interpretasiSebelum,
     required this.interpretasiSesudah,
     required this.userId,
+    this.kegiatanId, // Tambahkan kegiatanId di sini
   });
 
   @override
@@ -86,14 +89,12 @@ class _ExportScreenState extends State<ExportScreen> {
 
     final pdf = pw.Document();
 
-    // Add metadata
     pdf.addPage(
       pw.Page(
         build: (context) {
           return pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
-              // Kop surat
               pw.Row(
                 mainAxisAlignment: pw.MainAxisAlignment.center,
                 children: [
@@ -123,7 +124,6 @@ class _ExportScreenState extends State<ExportScreen> {
                 ],
               ),
               pw.Divider(),
-              // Isi surat
               pw.Header(
                 level: 1,
                 text: 'Data Export',
@@ -143,32 +143,30 @@ class _ExportScreenState extends State<ExportScreen> {
     );
 
     try {
-      final directory = Directory('/storage/emulated/0/Download');
-      if (!await directory.exists()) {
-        await directory.create(recursive: true);
+      final directory = await getExternalStorageDirectory();
+      if (directory == null) {
+        print('Error: External storage directory not available');
+        return;
       }
 
-      final pdfPath = path.join(directory.path, 'export.pdf');
+      final pdfPath = '${directory.path}/export.pdf';
       final pdfFile = File(pdfPath);
 
       await pdfFile.writeAsBytes(await pdf.save());
       print('PDF saved to $pdfPath');
 
-      // Open the PDF
       _openPdf(pdfPath);
 
-      // Check connectivity and send email if online
       if (isConnected && emailPenerima != null) {
-        _sendEmail(pdfPath, emailPenerima!);
+        await _sendEmail(pdfPath, emailPenerima!); // Menunggu hingga email terkirim
+        Fluttertoast.showToast(msg: 'Email berhasil dikirim'); // Menampilkan notifikasi
       } else {
         print('Device is offline or email recipient not found. Email will be sent when online.');
-        // Save the file path or email details to be sent later when online
       }
     } catch (e) {
       print('Error while saving PDF: $e');
     }
   }
-
 
   void _openPdf(String filePath) async {
     try {
@@ -187,8 +185,9 @@ class _ExportScreenState extends State<ExportScreen> {
       print('Error while picking file: $e');
     }
   }
+
   Future<void> _sendEmail(String pdfPath, String recipient) async {
-    final smtpServer = gmail('mtsalikhlasberbahh@gmail.com', 'oxtm hpkh ciiq ppan'); // Use your email and password
+    final smtpServer = gmail('mtsalikhlasberbahh@gmail.com', 'oxtm hpkh ciiq ppan');
 
     final message = Message()
       ..from = Address('mtsalikhlasberbahh@gmail.com', 'Your Name')

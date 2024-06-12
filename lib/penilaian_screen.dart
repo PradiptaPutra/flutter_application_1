@@ -26,6 +26,7 @@ class _PenilaianScreenState extends State<PenilaianScreen> {
   String interpretasiSebelum = "";
   String interpretasiSesudah = "";
   String puskesmas = "";
+  String kegiatanId = "";
   bool showInterpretations = true;
 
   @override
@@ -134,33 +135,34 @@ class _PenilaianScreenState extends State<PenilaianScreen> {
     Navigator.pop(context);
   }
 
-  Future<void> _exportData() async {
-    // Dapatkan daftar kegiatan untuk user
-    List<Map<String, dynamic>> kegiatanList = await _dbHelper.getKegiatanForUser(widget.userId);
+ Future<void> _exportData() async {
+  // Dapatkan daftar kegiatan untuk user
+  List<Map<String, dynamic>> kegiatanList = await _dbHelper.getKegiatanForUser(widget.userId);
 
-    // Temukan kegiatan yang sesuai dengan kegiatanId yang diberikan
-    Map<String, dynamic> kegiatan = kegiatanList.firstWhere(
-      (kegiatan) => kegiatan['kegiatan_id'] == widget.kegiatanId,
-      orElse: () => <String, dynamic>{},
-    );
+  // Temukan kegiatan yang sesuai dengan kegiatanId yang diberikan
+  Map<String, dynamic> kegiatan = kegiatanList.firstWhere(
+    (kegiatan) => kegiatan['kegiatan_id'] == widget.kegiatanId,
+    orElse: () => <String, dynamic>{},
+  );
 
-    // Ambil nilai nama_puskesmas dari kegiatan
-    String puskesmas = kegiatan.isNotEmpty ? kegiatan['nama_puskesmas'] : '';
+  // Ambil nilai nama_puskesmas dari kegiatan
+  String puskesmas = kegiatan.isNotEmpty ? kegiatan['nama_puskesmas'] : '';
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ExportScreen(
-          puskesmas: puskesmas,
-          sebelum: totalSkorSebelum.toInt(),
-          sesudah: totalSkorSesudah.toInt(),
-          interpretasiSebelum: interpretasiSebelum,
-          interpretasiSesudah: interpretasiSesudah,
-          userId: widget.userId,
-        ),
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) => ExportScreen(
+        puskesmas: puskesmas,
+        sebelum: totalSkorSebelum.toInt(),
+        sesudah: totalSkorSesudah.toInt(),
+        interpretasiSebelum: interpretasiSebelum,
+        interpretasiSesudah: interpretasiSesudah,
+        userId: widget.userId,
+        kegiatanId: widget.kegiatanId, // Tambahkan kegiatanId di sini
       ),
-    );
-  }
+    ),
+  );
+}
 
   void _showPopup(BuildContext context, String content) {
     showDialog(
