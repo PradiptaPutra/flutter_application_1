@@ -1,7 +1,7 @@
 import 'dart:io';
-import 'dart:typed_data';  // Tambahkan ini
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show rootBundle;  // Tambahkan ini
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:file_picker/file_picker.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:pdf/pdf.dart';
@@ -10,8 +10,9 @@ import 'package:open_file/open_file.dart';
 import 'package:mailer/mailer.dart';
 import 'package:mailer/smtp_server.dart';
 import 'package:sqflite/sqflite.dart';
-import 'database_helper.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:path/path.dart' as path;
+import 'database_helper.dart';
 
 class ExportScreen extends StatefulWidget {
   final String puskesmas;
@@ -142,13 +143,12 @@ class _ExportScreenState extends State<ExportScreen> {
     );
 
     try {
-      final directory = await getExternalStorageDirectory();
-      if (directory == null) {
-        print('Error: External storage directory not available');
-        return;
+      final directory = Directory('/storage/emulated/0/Download');
+      if (!await directory.exists()) {
+        await directory.create(recursive: true);
       }
 
-      final pdfPath = '${directory.path}/export.pdf';
+      final pdfPath = path.join(directory.path, 'export.pdf');
       final pdfFile = File(pdfPath);
 
       await pdfFile.writeAsBytes(await pdf.save());
@@ -186,7 +186,6 @@ class _ExportScreenState extends State<ExportScreen> {
       print('Error while picking file: $e');
     }
   }
-
   Future<void> _sendEmail(String pdfPath, String recipient) async {
     final smtpServer = gmail('mtsalikhlasberbahh@gmail.com', 'oxtm hpkh ciiq ppan'); // Use your email and password
 
