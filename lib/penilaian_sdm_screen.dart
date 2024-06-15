@@ -66,7 +66,7 @@ class _PenilaianSdmScreenState extends State<PenilaianSdmScreen> {
       for (var i = 0; i < data.length; i++) {
         spmControllers.add(TextEditingController());
         sblControllers.add(TextEditingController());
-        sdhControllers.add(TextEditingController());
+                sdhControllers.add(TextEditingController());
         keteranganControllers.add(TextEditingController());
 
         // Adjust SPM values based on dropdownOption
@@ -79,30 +79,28 @@ class _PenilaianSdmScreenState extends State<PenilaianSdmScreen> {
     });
   }
 
-  Future<void> _loadDataEntriesByKegiatan(int? kegiatanId) async {
-    if (kegiatanId != null) {
-      List<Map<String, dynamic>> entries = await _dbHelper.getEntriesByKegiatanId(kegiatanId);
-      if (entries.isNotEmpty) {
-        setState(() {
-          existingEntries = entries;
-          for (var entry in entries) {
-            for (var i = 0; i < data.length; i++) {
-              if (entry['indikator'] == data[i]['nama_indikator']) {
-                if (widget.dropdownOption == 'Non Rawat Inap') {
-                  spmControllers[i].text = data[i]['sub_indikator'] ?? '';
-                } else {
-                  spmControllers[i].text = data[i]['keterangan'] ?? '';
-                }
-                sblControllers[i].text = entry['SBL'] ?? '';
-                sdhControllers[i].text = entry['SDH'] ?? '';
-                keteranganControllers[i].text = entry['keterangan'] ?? '';
-                data[i]['entry_id'] = entry['entry_id'].toString(); // Ensure entry_id is stored as String
+  Future<void> _loadDataEntriesByKegiatan(int kegiatanId) async {
+    List<Map<String, dynamic>> entries = await _dbHelper.getEntriesByKegiatanId(kegiatanId);
+    if (entries.isNotEmpty) {
+      setState(() {
+        existingEntries = entries;
+        for (var entry in entries) {
+          for (var i = 0; i < data.length; i++) {
+            if (entry['indikator'] == data[i]['nama_indikator']) {
+              if (widget.dropdownOption == 'Non Rawat Inap') {
+                spmControllers[i].text = data[i]['sub_indikator'] ?? '';
+              } else {
+                spmControllers[i].text = data[i]['keterangan'] ?? '';
               }
+              sblControllers[i].text = entry['SBL'] ?? '';
+              sdhControllers[i].text = entry['SDH'] ?? '';
+              keteranganControllers[i].text = entry['keterangan'] ?? '';
+              data[i]['entry_id'] = entry['entry_id'].toString(); // Ensure entry_id is stored as String
             }
           }
-          _calculateTotalScore(); // Calculate total score when data is loaded
-        });
-      }
+        }
+        _calculateTotalScore(); // Calculate total score when data is loaded
+      });
     }
   }
 
@@ -212,8 +210,7 @@ class _PenilaianSdmScreenState extends State<PenilaianSdmScreen> {
             TextButton(
               child: Text("Close"),
               onPressed: () {
-                Navigator.of(context).pop;
-
+                Navigator.of(context).pop();
               },
             ),
           ],

@@ -20,7 +20,7 @@ class DatabaseHelper {
     print('Database initialized at path: $path');
     return openDatabase(
       path,
-      version: 10, // Incremented version number
+      version: 11, // Incremented version number
       onCreate: _createDb,
       onUpgrade: _upgradeDb,
     );
@@ -50,6 +50,9 @@ class DatabaseHelper {
         indikator TEXT,
         sub_indikator TEXT,
         kriteria TEXT,
+        SPM TEXT,
+        SBL TEXT,
+        SDH TEXT,
         sebelum TEXT,
         sesudah TEXT,
         sebelum2 TEXT,
@@ -100,6 +103,11 @@ class DatabaseHelper {
     if (oldVersion < 10) {
       await db.execute('ALTER TABLE DataEntry ADD COLUMN sebelum2 TEXT');
       await db.execute('ALTER TABLE DataEntry ADD COLUMN sesudah2 TEXT');
+    }
+    if (oldVersion < 11) {
+      await db.execute('ALTER TABLE DataEntry ADD COLUMN SPM TEXT');
+      await db.execute('ALTER TABLE DataEntry ADD COLUMN SBL TEXT');
+      await db.execute('ALTER TABLE DataEntry ADD COLUMN SDH TEXT');
     }
   }
 
@@ -364,6 +372,7 @@ class DatabaseHelper {
     }
     return 'Data tidak ditemukan';
   }
+
   Future<String> loadRowData2(int rowIndex) async {
     try {
       ByteData data = await rootBundle.load('assets/form_penilaian_bangunan.xlsx');
@@ -383,15 +392,15 @@ class DatabaseHelper {
     return 'Data tidak ditemukan';
   }
 
-Future<List<Map<String, dynamic>>> getDataEntriesForUserHome(int userId) async {
-  final db = await database;
-  final List<Map<String, dynamic>> maps = await db.rawQuery('''
-    SELECT DISTINCT kegiatan_id, nama_puskesmas, dropdown_option
-    FROM Kegiatan 
-    WHERE user_id = ?
-  ''', [userId]);
-  return maps;
-}
+  Future<List<Map<String, dynamic>>> getDataEntriesForUserHome(int userId) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.rawQuery('''
+      SELECT DISTINCT kegiatan_id, nama_puskesmas, dropdown_option
+      FROM Kegiatan 
+      WHERE user_id = ?
+    ''', [userId]);
+    return maps;
+  }
 
   Future<double> getProgressForKegiatan(int kegiatanId) async {
     final db = await database;
@@ -418,7 +427,7 @@ Future<List<Map<String, dynamic>>> getDataEntriesForUserHome(int userId) async {
     }
   }
 
- Future<int> getPuskesmasSurveyedCount(int userId) async {
+  Future<int> getPuskesmasSurveyedCount(int userId) async {
     final db = await database;
     final result = await db.rawQuery('''
       SELECT COUNT(DISTINCT nama_puskesmas) as count
@@ -429,43 +438,17 @@ Future<List<Map<String, dynamic>>> getDataEntriesForUserHome(int userId) async {
     return result[0]['count'] as int;
   }
 
-// Future<void> getFormPenilaianSumberdayaManusia(int rowIndex) async { 
-//   try {
-//     ByteData data = await rootBundle.load('assets/form_penilaian_sumberdaya_manusia.xlsx');
-//     var bytes = data.buffer.asUint8List();
-//     var excel = Excel.decodeBytes(bytes);
-
-//     for (var table in excel.tables.keys) {
-//       var sheet = excel.tables[table];
-//       if (sheet != null && sheet.rows.length > rowIndex) {
-//         var row = sheet.rows[rowIndex];
-//         // Extract relevant data fields from the Excel row
-//         String header1 = row[0]?.value?.toString() ?? ''; // Header1
-//         String namaIndikator = row[1]?.value?.toString() ?? ''; // Nama Indikator
-//         String nonRawatInapSPM = row[2]?.value?.toString() ?? ''; // Non Rawat Inap SPM
-//         String rawatInapSPM = row[3]?.value?.toString() ?? ''; // Rawat Inap SPM
-//         // Print the data
-//         print('Header1: $header1, Nama Indikator: $namaIndikator, Non Rawat Inap SPM: $nonRawatInapSPM, Rawat Inap SPM: $rawatInapSPM');
-//         return; // Exit the function after printing once
-//       }
-//     }
-//   } catch (e) {
-//     print('Error loading Excel row data: $e');
-//   }
-//   print('Data tidak ditemukan');
-// }
-
-Future<String> fetchDropdownOption(int kegiatanId) async {
-  final db = await database;
-  List<Map<String, dynamic>> result = await db.query(
-    'Kegiatan',
-    columns: ['dropdown_option'],
-    where: 'kegiatan_id = ?',
-    whereArgs: [kegiatanId],
-  );
-  if (result.isNotEmpty) {
-    return result.first['dropdown_option'] as String;
-  }
-  return ''; // Return empty string or handle null case as per your requirement
-}  
+  Future<String> fetchDropdownOption(int kegiatanId) async {
+    final db = await database;
+    List<Map<String, dynamic>> result = await db.query(
+      'Kegiatan',
+      columns: ['dropdown_option'],
+      where: 'kegiatan_id = ?',
+      whereArgs: [kegiatanId],
+    );
+    if (result.isNotEmpty) {
+      return result.first['dropdown_option'] as String;
+    }
+    return ''; // Return empty string or handle null case as per your requirement
+  }  
 }
