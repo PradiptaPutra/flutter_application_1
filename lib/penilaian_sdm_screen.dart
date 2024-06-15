@@ -32,10 +32,7 @@ class _PenilaianSdmScreenState extends State<PenilaianSdmScreen> {
   double totalSPM = 0;
   double totalSBL = 0;
   double totalSDH = 0;
-  double totalSkorAkhir = 0;
-  String interpretasiAkhir = "";
-  String puskesmas = "";
-  bool showInterpretations = true;
+    String puskesmas = "";
 
   @override
   void initState() {
@@ -100,12 +97,12 @@ class _PenilaianSdmScreenState extends State<PenilaianSdmScreen> {
             }
           }
         }
-        _calculateTotalScore(); // Calculate total score when data is loaded
+        _calculateTotalScores(); // Calculate total scores when data is loaded
       });
     }
   }
 
-  void _calculateTotalScore() {
+  void _calculateTotalScores() {
     double totalSPMScore = 0;
     double totalSBLScore = 0;
     double totalSDHScore = 0;
@@ -120,20 +117,7 @@ class _PenilaianSdmScreenState extends State<PenilaianSdmScreen> {
       totalSPM = totalSPMScore;
       totalSBL = totalSBLScore;
       totalSDH = totalSDHScore;
-
-      totalSkorAkhir = (totalSBL * 0.5) + (totalSDH * 0.5);
-      interpretasiAkhir = _setInterpretasi(totalSkorAkhir);
     });
-  }
-
-  String _setInterpretasi(double skor) {
-    if (skor > 65) {
-      return "Tinggi/Baik";
-    } else if (skor >= 36 && skor <= 65) {
-      return "Sedang/Cukup";
-    } else {
-      return "Rendah/Kurang";
-    }
   }
 
   Future<void> _saveDataEntry() async {
@@ -189,11 +173,11 @@ class _PenilaianSdmScreenState extends State<PenilaianSdmScreen> {
           sesudahIndikator1: totalSBL,
           sebelumIndikator2: totalSDH,
           sesudahIndikator2: totalSDH,
-          interpretasiIndikator1Sebelum: interpretasiAkhir,
-          interpretasiIndikator1Sesudah: interpretasiAkhir,
-          interpretasiIndikator2Sebelum: interpretasiAkhir,
-          interpretasiIndikator2Sesudah: interpretasiAkhir,
-          interpretasiAkhir: interpretasiAkhir,
+          interpretasiIndikator1Sebelum: '',
+          interpretasiIndikator1Sesudah: '',
+          interpretasiIndikator2Sebelum: '',
+          interpretasiIndikator2Sesudah: '',
+          interpretasiAkhir: '',
           userId: widget.userId,
         ),
       ),
@@ -247,35 +231,43 @@ class _PenilaianSdmScreenState extends State<PenilaianSdmScreen> {
           ? Center(child: CircularProgressIndicator())
           : Column(
               children: [
-                if (totalSkorAkhir > 0) ...[
-                  Padding(
-                    padding: const EdgeInsets.all(10.0),
-                    child: Column(
-                      children: [
-                        Card(
-                          color: interpretasiAkhir == "Tinggi/Baik" ? Colors.green :
-                                  interpretasiAkhir == "Sedang/Cukup" ? Colors.yellow :
-                                  Colors.red,
-                          child: ListTile(
-                            title: Text(
-                              'Interpretasi Akhir: $interpretasiAkhir',
-                              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-                              textAlign: TextAlign.center,
-                            ),
+                Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: Column(
+                    children: [
+                      Card(
+                        color: Colors.white,
+                        child: ListTile(
+                          title: Text(
+                            'Total SPM: $totalSPM',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                            textAlign: TextAlign.center,
                           ),
                         ),
-                        TextButton(
-                          onPressed: () {
-                            setState(() {
-                              showInterpretations = !showInterpretations;
-                            });
-                          },
-                          child: Text(showInterpretations ? 'Hide Interpretations' : 'Show Interpretations'),
+                      ),
+                      Card(
+                        color: Colors.white,
+                        child: ListTile(
+                          title: Text(
+                            'Total SBL: $totalSBL',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                            textAlign: TextAlign.center,
+                          ),
                         ),
-                      ],
-                    ),
+                      ),
+                      Card(
+                        color: Colors.white,
+                        child: ListTile(
+                          title: Text(
+                            'Total SDH: $totalSDH',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
                 Expanded(
                   child: ListView.builder(
                     itemCount: data.length,
@@ -366,7 +358,7 @@ class _PenilaianSdmScreenState extends State<PenilaianSdmScreen> {
                                         border: OutlineInputBorder(),
                                         contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                                       ),
-                                      onChanged: (value) => _calculateTotalScore(),
+                                      onChanged: (value) => _calculateTotalScores(),
                                     ),
                                   ),
                                 ],
@@ -382,7 +374,7 @@ class _PenilaianSdmScreenState extends State<PenilaianSdmScreen> {
                                         border: OutlineInputBorder(),
                                         contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                                       ),
-                                      onChanged: (value) => _calculateTotalScore(),
+                                      onChanged: (value) => _calculateTotalScores(),
                                     ),
                                   ),
                                 ],
@@ -427,5 +419,4 @@ class _PenilaianSdmScreenState extends State<PenilaianSdmScreen> {
     );
   }
 }
-
 
