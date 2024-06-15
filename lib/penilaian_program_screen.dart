@@ -44,6 +44,13 @@ class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
     "4. Program Nasional"
   ];
 
+  final Map<String, int> mainIndicatorSubCounts = {
+    "1. Bidang Keselamatan Pasien": 3,
+    "2. Bidang Kefarmasian dan Penggunaan Obat": 3,
+    "3. Bidang Manajemen Rumah Sakit": 3,
+    "4. Program Nasional": 3,
+  };
+
   @override
   void initState() {
     super.initState();
@@ -188,7 +195,7 @@ class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
           sesudahIndikator1: totalSkorIndikator1Sesudah,
           sebelumIndikator2: totalSkorIndikator2Sebelum,
           sesudahIndikator2: totalSkorIndikator2Sesudah,
-          interpretasiIndikator1Sebelum: interpretasiIndikator1Sebelum,
+                    interpretasiIndikator1Sebelum: interpretasiIndikator1Sebelum,
           interpretasiIndikator1Sesudah: interpretasiIndikator1Sesudah,
           interpretasiIndikator2Sebelum: interpretasiIndikator2Sebelum,
           interpretasiIndikator2Sesudah: interpretasiIndikator2Sesudah,
@@ -361,9 +368,9 @@ class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
     List<Widget> cards = [];
     int mainIndicatorIndex = 0;
     int subIndicatorIndex = 1;
-    int totalSubIndicators = data.length;
 
-    for (int i = 0; i < totalSubIndicators; i++) {
+    for (int i = 0; i < data.length; i++) {
+      // Check if a new main indicator should be displayed
       if (subIndicatorIndex == 1) {
         cards.add(
           Padding(
@@ -376,6 +383,7 @@ class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
         );
       }
 
+      // Add the sub-indicator card
       cards.add(
         Card(
           margin: EdgeInsets.all(10),
@@ -488,7 +496,7 @@ class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
                         decoration: InputDecoration(
                           labelText: 'Indikator ${mainIndicatorIndex + 1}.4 Sesudah',
                           border: OutlineInputBorder(),
-                          contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                          contentPadding: EdgeInsets.symmetric(horizontal: 10,                           vertical: 5),
                         ),
                       ),
                     ),
@@ -513,7 +521,7 @@ class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
       subIndicatorIndex++;
 
       // If we have reached the end of the sub-indicators for a main indicator, reset the sub-indicator index and move to the next main indicator
-      if (subIndicatorIndex > 10) {
+       if (subIndicatorIndex > (mainIndicatorSubCounts[mainIndicators[mainIndicatorIndex]] ?? 0)) {
         subIndicatorIndex = 1;
         mainIndicatorIndex++;
 
@@ -527,3 +535,5 @@ class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
     return cards;
   }
 }
+
+
