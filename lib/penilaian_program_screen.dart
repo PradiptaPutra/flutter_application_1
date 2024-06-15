@@ -35,7 +35,14 @@ class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
   String interpretasiAkhir = "";
   String puskesmas = "";
   bool showInterpretations = true;
-  bool isDataSaved = false;  // New boolean state to track if data is saved
+  bool isDataSaved = false;
+
+  final List<String> mainIndicators = [
+    "1. Bidang Keselamatan Pasien",
+    "2. Bidang Kefarmasian dan Penggunaan Obat",
+    "3. Bidang Manajemen Rumah Sakit",
+    "4. Program Nasional"
+  ];
 
   @override
   void initState() {
@@ -73,11 +80,11 @@ class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
               sebelum2Controllers[i].text = entry['sebelum2'] ?? '';
               sesudah2Controllers[i].text = entry['sesudah2'] ?? '';
               keteranganControllers[i].text = entry['keterangan'] ?? '';
-              data[i]['entry_id'] = entry['entry_id'].toString();  // Ensure entry_id is stored as String
+              data[i]['entry_id'] = entry['entry_id'].toString();
             }
           }
         }
-        _calculateTotalScore(); // Hitung total skor saat data entry dimuat
+        _calculateTotalScore();
       });
     }
   }
@@ -124,16 +131,13 @@ class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
   }
 
   Future<void> _saveDataEntry() async {
-    // Dapatkan daftar kegiatan untuk user
     List<Map<String, dynamic>> kegiatanList = await _dbHelper.getKegiatanForUser(widget.userId);
 
-    // Temukan kegiatan yang sesuai dengan kegiatanId yang diberikan
     Map<String, dynamic> kegiatan = kegiatanList.firstWhere(
       (kegiatan) => kegiatan['kegiatan_id'] == widget.kegiatanId,
       orElse: () => <String, dynamic>{},
     );
 
-    // Ambil nilai nama_puskesmas dari kegiatan
     puskesmas = kegiatan.isNotEmpty ? kegiatan['nama_puskesmas'] : '';
 
     for (var i = 0; i < data.length; i++) {
@@ -144,6 +148,7 @@ class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
         'puskesmas': puskesmas,
         'indikator': data[i]['nama_indikator'],
         'sub_indikator': data[i]['sub_indikator'],
+        'kriteria': data[i]['kriteria'],
         'sebelum': sebelumControllers[i].text,
         'sesudah': sesudahControllers[i].text,
         'sebelum2': sebelum2Controllers[i].text,
@@ -160,21 +165,18 @@ class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
 
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Data berhasil disimpan')));
     setState(() {
-      isDataSaved = true;  // Set the state to true after data is saved
+      isDataSaved = true;
     });
   }
 
   Future<void> _exportData() async {
-    // Dapatkan daftar kegiatan untuk user
     List<Map<String, dynamic>> kegiatanList = await _dbHelper.getKegiatanForUser(widget.userId);
 
-    // Temukan kegiatan yang sesuai dengan kegiatanId yang diberikan
     Map<String, dynamic> kegiatan = kegiatanList.firstWhere(
       (kegiatan) => kegiatan['kegiatan_id'] == widget.kegiatanId,
       orElse: () => <String, dynamic>{},
     );
 
-    // Ambil nilai nama_puskesmas dari kegiatan
     String puskesmas = kegiatan.isNotEmpty ? kegiatan['nama_puskesmas'] : '';
 
     Navigator.push(
@@ -192,7 +194,7 @@ class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
           interpretasiIndikator2Sesudah: interpretasiIndikator2Sesudah,
           interpretasiAkhir: interpretasiAkhir,
           userId: widget.userId,
-          kegiatanId: widget.kegiatanId, // Tambahkan kegiatanId di sini         
+          kegiatanId: widget.kegiatanId,
         ),
       ),
     );
@@ -246,9 +248,9 @@ class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
       ),
       body: data.isEmpty
           ? Center(child: CircularProgressIndicator())
-          : Column(
+          : ListView(
               children: [
-                if (totalSkorAkhir > 0) ...[
+                if (totalSkorAkhir > 0)
                   Padding(
                     padding: const EdgeInsets.all(10.0),
                     child: Column(
@@ -265,56 +267,59 @@ class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
                             ),
                           ),
                         ),
-                        if (showInterpretations) ...[
-                          Card(
-                            color: interpretasiIndikator1Sebelum == "Tinggi/Baik" ? Colors.green :
-                                    interpretasiIndikator1Sebelum == "Sedang/Cukup" ? Colors.yellow :
-                                    Colors.red,
-                            child: ListTile(
-                              title: Text(
-                                'Interpretasi Indikator 1 Sebelum: $interpretasiIndikator1Sebelum',
-                                style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-                                textAlign: TextAlign.center,
+                        if (showInterpretations)
+                          Column(
+                            children: [
+                              Card(
+                                color: interpretasiIndikator1Sebelum == "Tinggi/Baik" ? Colors.green :
+                                        interpretasiIndikator1Sebelum == "Sedang/Cukup" ? Colors.yellow :
+                                        Colors.red,
+                                child: ListTile(
+                                  title: Text(
+                                    'Interpretasi Indikator 1 Sebelum: $interpretasiIndikator1Sebelum',
+                                    style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
                               ),
-                            ),
-                          ),
-                          Card(
-                            color: interpretasiIndikator1Sesudah == "Tinggi/Baik" ? Colors.green :
-                                    interpretasiIndikator1Sesudah == "Sedang/Cukup" ? Colors.yellow :
-                                    Colors.red,
-                            child: ListTile(
-                              title: Text(
-                                'Interpretasi Indikator 1 Sesudah: $interpretasiIndikator1Sesudah',
-                                style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-                                textAlign: TextAlign.center,
+                              Card(
+                                color: interpretasiIndikator1Sesudah == "Tinggi/Baik" ? Colors.green :
+                                        interpretasiIndikator1Sesudah == "Sedang/Cukup" ? Colors.yellow :
+                                        Colors.red,
+                                child: ListTile(
+                                  title: Text(
+                                    'Interpretasi Indikator 1 Sesudah: $interpretasiIndikator1Sesudah',
+                                    style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
                               ),
-                            ),
-                          ),
-                          Card(
-                            color: interpretasiIndikator2Sebelum == "Tinggi/Baik" ? Colors.green :
-                                    interpretasiIndikator2Sebelum == "Sedang/Cukup" ? Colors.yellow :
-                                    Colors.red,
-                            child: ListTile(
-                              title: Text(
-                                'Interpretasi Indikator 2 Sebelum: $interpretasiIndikator2Sebelum',
-                                style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-                                textAlign: TextAlign.center,
+                              Card(
+                                color: interpretasiIndikator2Sebelum == "Tinggi/Baik" ? Colors.green :
+                                        interpretasiIndikator2Sebelum == "Sedang/Cukup" ? Colors.yellow :
+                                        Colors.red,
+                                child: ListTile(
+                                  title: Text(
+                                    'Interpretasi Indikator 2 Sebelum: $interpretasiIndikator2Sebelum',
+                                    style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
                               ),
-                            ),
-                          ),
-                          Card(
-                            color: interpretasiIndikator2Sesudah == "Tinggi/Baik" ? Colors.green :
-                                    interpretasiIndikator2Sesudah == "Sedang/Cukup" ? Colors.yellow :
-                                    Colors.red,
-                            child: ListTile(
-                              title: Text(
-                                'Interpretasi Indikator 2 Sesudah: $interpretasiIndikator2Sesudah',
-                                style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-                                textAlign: TextAlign.center,
+                              Card(
+                                color: interpretasiIndikator2Sesudah == "Tinggi/Baik" ? Colors.green :
+                                        interpretasiIndikator2Sesudah == "Sedang/Cukup" ? Colors.yellow :
+                                        Colors.red,
+                                child: ListTile(
+                                  title: Text(
+                                    'Interpretasi Indikator 2 Sesudah: $interpretasiIndikator2Sesudah',
+                                    style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
                               ),
-                            ),
+                            ],
                           ),
-                        ],
                         TextButton(
                           onPressed: () {
                             setState(() {
@@ -326,148 +331,7 @@ class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
                       ],
                     ),
                   ),
-                ],
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: data.length,
-                    itemBuilder: (context, index) {
-                      return Card(
-                        margin: EdgeInsets.all(10),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        color: Colors.white,
-                        child: Padding(
-                          padding: const EdgeInsets.all(10.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(8),
-                                    child: Image.asset(
-                                      'assets/images/logors.jpg', // Ganti dengan path gambar Anda
-                                      width: 50,
-                                      height: 50,
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ),
-                                  SizedBox(width: 10),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          data[index]["nama_indikator"] ?? '',
-                                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                                        ),
-                                        Text(
-                                          data[index]["sub_indikator"] ?? '',
-                                          style: TextStyle(fontSize: 14, color: Colors.grey),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Column(
-                                    children: [
-                                      Row(
-                                        children: [
-                                          IconButton(
-                                            icon: Icon(
-                                              Icons.visibility,
-                                              color: Colors.blue,
-                                            ),
-                                            onPressed: () async {
-                                              _showPopup(context, data[index]["kriteria"] ?? '');
-                                            },
-                                          ),
-                                          IconButton(
-                                            icon: Icon(
-                                              Icons.help_outline,
-                                              color: Colors.orange,
-                                            ),
-                                            onPressed: () async {
-                                              _showPopup(context, data[index]["keterangan"] ?? '');
-                                            },
-                                          ),
-                                        ],
-                                      ),
-                                      SizedBox(height: 4),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                              SizedBox(height: 10),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: TextField(
-                                      controller: sebelumControllers[index],
-                                      decoration: InputDecoration(
-                                        labelText: 'Indikator 1 Sebelum',
-                                        border: OutlineInputBorder(),
-                                        contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                                      ),
-                                      onChanged: (value) => _calculateTotalScore(),
-                                    ),
-                                  ),
-                                  SizedBox(width: 10),
-                                  Expanded(
-                                    child: TextField(
-                                      controller: sesudahControllers[index],
-                                      decoration: InputDecoration(
-                                        labelText: 'Indikator 1 Sesudah',
-                                        border: OutlineInputBorder(),
-                                        contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                                      ),
-                                      onChanged: (value) => _calculateTotalScore(),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              SizedBox(height: 10),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: TextField(
-                                      controller: sebelum2Controllers[index],
-                                      decoration: InputDecoration(
-                                        labelText: 'Indikator 2 Sebelum',
-                                        border: OutlineInputBorder(),
-                                        contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                                      ),
-                                    ),
-                                  ),
-                                  SizedBox(width: 10),
-                                  Expanded(
-                                    child: TextField(
-                                      controller: sesudah2Controllers[index],
-                                      decoration: InputDecoration(
-                                        labelText: 'Indikator 2 Sesudah',
-                                        border: OutlineInputBorder(),
-                                        contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              SizedBox(height: 10),
-                              TextField(
-                                controller: keteranganControllers[index],
-                                decoration: InputDecoration(
-                                  labelText: 'Keterangan',
-                                  border: OutlineInputBorder(),
-                                  contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
+                ..._buildIndicatorCards(),
               ],
             ),
       floatingActionButton: Row(
@@ -480,16 +344,186 @@ class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
             backgroundColor: Colors.blue,
           ),
           SizedBox(width: 10),
-          if (isDataSaved) 
-          FloatingActionButton.extended(
-            onPressed: _exportData,
-            label: Text('Export'),
-            icon: Icon(Icons.import_export),
-            backgroundColor: Colors.green,
-          ),
+          if (isDataSaved)
+            FloatingActionButton.extended(
+              onPressed: _exportData,
+              label: Text('Export'),
+              icon: Icon(Icons.import_export),
+              backgroundColor: Colors.green,
+            ),
         ],
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
+  }
+
+  List<Widget> _buildIndicatorCards() {
+    List<Widget> cards = [];
+    int mainIndicatorIndex = 0;
+    int subIndicatorIndex = 1;
+    int totalSubIndicators = data.length;
+
+    for (int i = 0; i < totalSubIndicators; i++) {
+      if (subIndicatorIndex == 1) {
+        cards.add(
+          Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: Text(
+              mainIndicators[mainIndicatorIndex],
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+          ),
+        );
+      }
+
+      cards.add(
+        Card(
+          margin: EdgeInsets.all(10),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          color: Colors.white,
+          child: Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.asset(
+                        'assets/images/logors.jpg',
+                        width: 50,
+                        height: 50,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '${mainIndicatorIndex + 1}.$subIndicatorIndex ${data[i]["nama_indikator"] ?? ''}',
+                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Column(
+                      children: [
+                        Row(
+                          children: [
+                            IconButton(
+                              icon: Icon(
+                                Icons.visibility,
+                                color: Colors.blue,
+                              ),
+                              onPressed: () async {
+                                _showPopup(context, data[i]["kriteria"] ?? '');
+                              },
+                            ),
+                            IconButton(
+                              icon: Icon(
+                                Icons.help_outline,
+                                color: Colors.orange,
+                              ),
+                              onPressed: () async {
+                                _showPopup(context, data[i]["sub_indikator"] ?? '');
+                              },
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 4),
+                      ],
+                    ),
+                  ],
+                ),
+                SizedBox(height: 10),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: sebelumControllers[i],
+                        decoration: InputDecoration(
+                          labelText: 'Indikator ${mainIndicatorIndex + 1}.1 Sebelum',
+                          border: OutlineInputBorder(),
+                          contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                        ),
+                        onChanged: (value) => _calculateTotalScore(),
+                      ),
+                    ),
+                    SizedBox(width: 10),
+                    Expanded(
+                      child: TextField(
+                        controller: sesudahControllers[i],
+                        decoration: InputDecoration(
+                          labelText: 'Indikator ${mainIndicatorIndex + 1}.2 Sesudah',
+                          border: OutlineInputBorder(),
+                          contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                        ),
+                        onChanged: (value) => _calculateTotalScore(),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 10),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: sebelum2Controllers[i],
+                        decoration: InputDecoration(
+                          labelText: 'Indikator ${mainIndicatorIndex + 1}.3 Sebelum',
+                          border: OutlineInputBorder(),
+                          contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 10),
+                    Expanded(
+                      child: TextField(
+                        controller: sesudah2Controllers[i],
+                        decoration: InputDecoration(
+                          labelText: 'Indikator ${mainIndicatorIndex + 1}.4 Sesudah',
+                          border: OutlineInputBorder(),
+                          contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 10),
+                TextField(
+                  controller: keteranganControllers[i],
+                  decoration: InputDecoration(
+                    labelText: 'Keterangan',
+                    border: OutlineInputBorder(),
+                    contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      // Increment the sub-indicator index
+      subIndicatorIndex++;
+
+      // If we have reached the end of the sub-indicators for a main indicator, reset the sub-indicator index and move to the next main indicator
+      if (subIndicatorIndex > 10) {
+        subIndicatorIndex = 1;
+        mainIndicatorIndex++;
+
+        // Ensure we don't exceed the main indicators
+        if (mainIndicatorIndex >= mainIndicators.length) {
+          break;
+        }
+      }
+    }
+
+    return cards;
   }
 }
