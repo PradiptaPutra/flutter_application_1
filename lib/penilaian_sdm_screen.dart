@@ -9,7 +9,13 @@ class PenilaianSdmScreen extends StatefulWidget {
   final int? entryId;
   final String dropdownOption;
 
-  PenilaianSdmScreen({this.kegiatanId, required this.id_category, required this.userId, this.entryId, required this.dropdownOption});
+  PenilaianSdmScreen({
+    this.kegiatanId,
+    required this.id_category,
+    required this.userId,
+    this.entryId,
+    required this.dropdownOption,
+  });
 
   @override
   _PenilaianSdmScreenState createState() => _PenilaianSdmScreenState();
@@ -34,14 +40,27 @@ class _PenilaianSdmScreenState extends State<PenilaianSdmScreen> {
   @override
   void initState() {
     super.initState();
-    _loadExcelData();
+    _fetchDropdownOptionAndLoadExcelData();
     if (widget.kegiatanId != null) {
       _loadDataEntriesByKegiatan(widget.kegiatanId!);
     }
   }
 
-  Future<void> _loadExcelData() async {
-    List<Map<String, dynamic>> excelData = await _dbHelper.loadExcelDataDirectly('assets/form_penilaian_sumberdaya_manusia.xlsx');
+  Future<void> _fetchDropdownOptionAndLoadExcelData() async {
+    String dropdownOption = await _fetchDropdownOption(widget.kegiatanId);
+    await _loadExcelData(dropdownOption);
+  }
+
+  Future<String> _fetchDropdownOption(int? kegiatanId) async {
+    String dropdownOption = await _dbHelper.fetchDropdownOption(kegiatanId ?? 0); // Handle null case
+    return dropdownOption;
+  }
+
+  Future<void> _loadExcelData(String dropdownOption) async {
+    List<Map<String, dynamic>> excelData =
+        await _dbHelper.loadExcelDataDirectly('assets/form_penilaian_sumberdaya_manusia.xlsx');
+    print('Excel Data: $excelData'); // Check what data is loaded
+
     setState(() {
       data = excelData;
       for (var i = 0; i < data.length; i++) {
@@ -50,38 +69,40 @@ class _PenilaianSdmScreenState extends State<PenilaianSdmScreen> {
         sdhControllers.add(TextEditingController());
         keteranganControllers.add(TextEditingController());
 
-        // Atur nilai SPM berdasarkan dropdownOption
-        if (widget.dropdownOption == 'Non Rawat Inap') {
-          spmControllers[i].text = data[i]['non_rawat_inap_spm'] ?? '';
+        // Adjust SPM values based on dropdownOption
+        if (dropdownOption == 'Non Rawat Inap') {
+          spmControllers[i].text = data[i]['sub_indikator'] ?? '';
         } else {
-          spmControllers[i].text = data[i]['rawat_inap_spm'] ?? '';
+          spmControllers[i].text = data[i]['keterangan'] ?? '';
         }
       }
     });
   }
 
-  Future<void> _loadDataEntriesByKegiatan(int kegiatanId) async {
-    List<Map<String, dynamic>> entries = await _dbHelper.getEntriesByKegiatanId(kegiatanId);
-    if (entries.isNotEmpty) {
-      setState(() {
-        existingEntries = entries;
-        for (var entry in entries) {
-          for (var i = 0; i < data.length; i++) {
-            if (entry['indikator'] == data[i]['nama_indikator']) {
-              if (widget.dropdownOption == 'Non Rawat Inap') {
-                spmControllers[i].text = data[i]['non_rawat_inap_spm'] ?? '';
-              } else {
-                spmControllers[i].text = data[i]['rawat_inap_spm'] ?? '';
+  Future<void> _loadDataEntriesByKegiatan(int? kegiatanId) async {
+    if (kegiatanId != null) {
+      List<Map<String, dynamic>> entries = await _dbHelper.getEntriesByKegiatanId(kegiatanId);
+      if (entries.isNotEmpty) {
+        setState(() {
+          existingEntries = entries;
+          for (var entry in entries) {
+            for (var i = 0; i < data.length; i++) {
+              if (entry['indikator'] == data[i]['nama_indikator']) {
+                if (widget.dropdownOption == 'Non Rawat Inap') {
+                  spmControllers[i].text = data[i]['sub_indikator'] ?? '';
+                } else {
+                  spmControllers[i].text = data[i]['keterangan'] ?? '';
+                }
+                sblControllers[i].text = entry['SBL'] ?? '';
+                sdhControllers[i].text = entry['SDH'] ?? '';
+                keteranganControllers[i].text = entry['keterangan'] ?? '';
+                data[i]['entry_id'] = entry['entry_id'].toString(); // Ensure entry_id is stored as String
               }
-              sblControllers[i].text = entry['SBL'] ?? '';
-              sdhControllers[i].text = entry['SDH'] ?? '';
-              keteranganControllers[i].text = entry['keterangan'] ?? '';
-              data[i]['entry_id'] = entry['entry_id'].toString();  // Ensure entry_id is stored as String
             }
           }
-        }
-        _calculateTotalScore(); // Hitung total skor saat data entry dimuat
-      });
+          _calculateTotalScore(); // Calculate total score when data is loaded
+        });
+      }
     }
   }
 
@@ -191,7 +212,8 @@ class _PenilaianSdmScreenState extends State<PenilaianSdmScreen> {
             TextButton(
               child: Text("Close"),
               onPressed: () {
-                Navigator.of(context).pop();
+                Navigator.of(context).pop;
+
               },
             ),
           ],

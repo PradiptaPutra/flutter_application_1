@@ -429,31 +429,43 @@ Future<List<Map<String, dynamic>>> getDataEntriesForUserHome(int userId) async {
     return result[0]['count'] as int;
   }
 
-Future<String> getFormPenilaianSumberdayaManusia(int rowIndex) async {
-  try {
-    ByteData data = await rootBundle.load('assets/form_penilaian_sumberdaya_manusia.xlsx');
-    var bytes = data.buffer.asUint8List();
-    var excel = Excel.decodeBytes(bytes);
+// Future<void> getFormPenilaianSumberdayaManusia(int rowIndex) async { 
+//   try {
+//     ByteData data = await rootBundle.load('assets/form_penilaian_sumberdaya_manusia.xlsx');
+//     var bytes = data.buffer.asUint8List();
+//     var excel = Excel.decodeBytes(bytes);
 
-    for (var table in excel.tables.keys) {
-      var sheet = excel.tables[table];
-      if (sheet != null && sheet.rows.length > rowIndex) {
-        var row = sheet.rows[rowIndex];
-        // Extract relevant data fields from the Excel row
-        String header1 = row[0]?.value?.toString() ?? ''; // Header1
-        String namaIndikator = row[1]?.value?.toString() ?? ''; // Nama Indikator
-        String nonRawatInapSPM = row[2]?.value?.toString() ?? ''; // Non Rawat Inap SPM
-        String rawatInapSPM = row[3]?.value?.toString() ?? ''; // Rawat Inap SPM
-        // Format the data as required
-        return '$header1: $namaIndikator, Non Rawat Inap SPM: $nonRawatInapSPM, Rawat Inap SPM: $rawatInapSPM';
-      }
-    }
-  } catch (e) {
-    print('Error loading Excel row data: $e');
+//     for (var table in excel.tables.keys) {
+//       var sheet = excel.tables[table];
+//       if (sheet != null && sheet.rows.length > rowIndex) {
+//         var row = sheet.rows[rowIndex];
+//         // Extract relevant data fields from the Excel row
+//         String header1 = row[0]?.value?.toString() ?? ''; // Header1
+//         String namaIndikator = row[1]?.value?.toString() ?? ''; // Nama Indikator
+//         String nonRawatInapSPM = row[2]?.value?.toString() ?? ''; // Non Rawat Inap SPM
+//         String rawatInapSPM = row[3]?.value?.toString() ?? ''; // Rawat Inap SPM
+//         // Print the data
+//         print('Header1: $header1, Nama Indikator: $namaIndikator, Non Rawat Inap SPM: $nonRawatInapSPM, Rawat Inap SPM: $rawatInapSPM');
+//         return; // Exit the function after printing once
+//       }
+//     }
+//   } catch (e) {
+//     print('Error loading Excel row data: $e');
+//   }
+//   print('Data tidak ditemukan');
+// }
+
+Future<String> fetchDropdownOption(int kegiatanId) async {
+  final db = await database;
+  List<Map<String, dynamic>> result = await db.query(
+    'Kegiatan',
+    columns: ['dropdown_option'],
+    where: 'kegiatan_id = ?',
+    whereArgs: [kegiatanId],
+  );
+  if (result.isNotEmpty) {
+    return result.first['dropdown_option'] as String;
   }
-  return 'Data tidak ditemukan';
-}
-
-
-  
+  return ''; // Return empty string or handle null case as per your requirement
+}  
 }
