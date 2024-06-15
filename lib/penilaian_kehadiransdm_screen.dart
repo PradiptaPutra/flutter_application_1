@@ -18,6 +18,7 @@ class _PenilaianKehadiransdmScreenState extends State<PenilaianKehadiransdmScree
   final DatabaseHelper _dbHelper = DatabaseHelper();
   final List<TextEditingController> sebelumControllers = [];
   final List<TextEditingController> sesudahControllers = [];
+  final List<TextEditingController> skorControllers = []; // New controller for Skor
   final List<TextEditingController> keteranganControllers = [];
   List<Map<String, dynamic>> data = [];
   List<Map<String, dynamic>> existingEntries = [];
@@ -46,6 +47,7 @@ class _PenilaianKehadiransdmScreenState extends State<PenilaianKehadiransdmScree
       for (var i = 0; i < data.length; i++) {
         sebelumControllers.add(TextEditingController());
         sesudahControllers.add(TextEditingController());
+        skorControllers.add(TextEditingController()); // Initialize skorControllers
         keteranganControllers.add(TextEditingController());
       }
     });
@@ -71,13 +73,39 @@ class _PenilaianKehadiransdmScreenState extends State<PenilaianKehadiransdmScree
     }
   }
 
-  void _calculateTotalScore() {
+ Future<void> _calculateTotalScore() async {
     double totalSebelum = 0;
     double totalSesudah = 0;
 
     for (var i = 0; i < sebelumControllers.length; i++) {
-      totalSebelum += double.tryParse(sebelumControllers[i].text) ?? 0;
-      totalSesudah += double.tryParse(sesudahControllers[i].text) ?? 0;
+      double sebelumValue = double.tryParse(sebelumControllers[i].text) ?? 0;
+      double sesudahValue = double.tryParse(sesudahControllers[i].text) ?? 0;
+
+      // Ambil nilai SDH dari database
+      double? sdhValue = await _dbHelper.getSdhValue(widget.kegiatanId, 22, data[i]['nama_indikator']);
+      print("SDH Value for indikator ${data[i]['nama_indikator']}: $sdhValue");
+
+      if (sdhValue != null && sdhValue != 0) {
+        // Menghitung persentase skor
+        int persentaseSkor = ((sesudahValue * 100) / sdhValue).round();
+        int skorValue;
+
+        // Tentukan nilai skor berdasarkan persentase
+        if (persentaseSkor > 80) {
+          skorValue = 2;
+        } else if (persentaseSkor >= 50 && persentaseSkor <= 80) {
+          skorValue = 1;
+        } else {
+          skorValue = 0;
+        }
+
+        skorControllers[i].text = skorValue.toString();
+      } else {
+        skorControllers[i].text = "0";
+      }
+
+      totalSebelum += sebelumValue;
+      totalSesudah += sesudahValue;
     }
 
     setState(() {
@@ -87,7 +115,10 @@ class _PenilaianKehadiransdmScreenState extends State<PenilaianKehadiransdmScree
       totalSkorSesudah = totalSesudah * 4.15;
       interpretasiSesudah = _setInterpretasi(totalSkorSesudah);
     });
-  }
+}
+
+
+
 
   String _setInterpretasi(double skor) {
     if (skor > 65) {
@@ -100,16 +131,13 @@ class _PenilaianKehadiransdmScreenState extends State<PenilaianKehadiransdmScree
   }
 
   Future<void> _saveDataEntry() async {
-    // Dapatkan daftar kegiatan untuk user
     List<Map<String, dynamic>> kegiatanList = await _dbHelper.getKegiatanForUser(widget.userId);
 
-    // Temukan kegiatan yang sesuai dengan kegiatanId yang diberikan
     Map<String, dynamic> kegiatan = kegiatanList.firstWhere(
       (kegiatan) => kegiatan['kegiatan_id'] == widget.kegiatanId,
       orElse: () => <String, dynamic>{},
     );
 
-    // Ambil nilai nama_puskesmas dari kegiatan
     puskesmas = kegiatan.isNotEmpty ? kegiatan['nama_puskesmas'] : '';
 
     for (var i = 0; i < data.length; i++) {
@@ -122,14 +150,24 @@ class _PenilaianKehadiransdmScreenState extends State<PenilaianKehadiransdmScree
         'sub_indikator': data[i]['sub_indikator'],
         'sebelum': sebelumControllers[i].text,
         'sesudah': sesudahControllers[i].text,
-        'keterangan': keteranganControllers[i].text, // Tambahkan keterangan
+        'keterangan': keteranganControllers[i].text,
       };
 
-      if (data[i].containsKey('entry_id')) {
-        entry['entry_id'] = int.parse(data[i]['entry_id']);
-      }
+      // Check if the entry already exists
+      List<Map<String, dynamic>> existingEntry = await _dbHelper.getEntriesByKegiatanIdAndIndikator(
+        widget.kegiatanId!,
+        widget.id_category,
+        data[i]['nama_indikator'],
+      );
 
-      await _dbHelper.saveDataEntry(entry);
+      if (existingEntry.isNotEmpty) {
+        // If entry exists, update it
+        entry['entry_id'] = existingEntry[0]['entry_id'];
+        await _dbHelper.updateDataEntry(entry);
+      } else {
+        // If entry does not exist, insert a new one
+        await _dbHelper.saveDataEntry(entry);
+      }
     }
 
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Data berhasil disimpan')));
@@ -137,19 +175,17 @@ class _PenilaianKehadiransdmScreenState extends State<PenilaianKehadiransdmScree
     setState(() {
       isDataSaved = true;  // Set the state to true after data is saved
     });
-  }
+}
+
 
   Future<void> _exportData() async {
-    // Dapatkan daftar kegiatan untuk user
     List<Map<String, dynamic>> kegiatanList = await _dbHelper.getKegiatanForUser(widget.userId);
 
-    // Temukan kegiatan yang sesuai dengan kegiatanId yang diberikan
     Map<String, dynamic> kegiatan = kegiatanList.firstWhere(
       (kegiatan) => kegiatan['kegiatan_id'] == widget.kegiatanId,
       orElse: () => <String, dynamic>{},
     );
 
-    // Ambil nilai nama_puskesmas dari kegiatan
     String puskesmas = kegiatan.isNotEmpty ? kegiatan['nama_puskesmas'] : '';
 
     Navigator.push(
@@ -194,6 +230,9 @@ class _PenilaianKehadiransdmScreenState extends State<PenilaianKehadiransdmScree
       controller.dispose();
     }
     for (var controller in sesudahControllers) {
+      controller.dispose();
+    }
+    for (var controller in skorControllers) {
       controller.dispose();
     }
     for (var controller in keteranganControllers) {
@@ -371,6 +410,24 @@ class _PenilaianKehadiransdmScreenState extends State<PenilaianKehadiransdmScree
                                       ),
                                       onChanged: (value) =>
                                           _calculateTotalScore(),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 10),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: TextField(
+                                      controller: skorControllers[index],
+                                      decoration: InputDecoration(
+                                        labelText: 'Skor',
+                                        border: OutlineInputBorder(),
+                                        contentPadding:
+                                            EdgeInsets.symmetric(
+                                                horizontal: 10, vertical: 5),
+                                      ),
+                                      readOnly: true, // Set skor field to read-only
                                     ),
                                   ),
                                 ],

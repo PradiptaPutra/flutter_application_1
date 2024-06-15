@@ -90,6 +90,7 @@ class _PenilaianSdmScreenState extends State<PenilaianSdmScreen> {
               } else {
                 spmControllers[i].text = data[i]['keterangan'] ?? '';
               }
+              spmControllers[i].text = entry['SPM'] ?? '';
               sblControllers[i].text = entry['SBL'] ?? '';
               sdhControllers[i].text = entry['SDH'] ?? '';
               keteranganControllers[i].text = entry['keterangan'] ?? '';

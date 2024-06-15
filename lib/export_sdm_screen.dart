@@ -11,6 +11,9 @@ import 'package:mailer/mailer.dart';
 import 'package:mailer/smtp_server.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'database_helper.dart';
+import 'package:fluttertoast/fluttertoast.dart'; // Tambahkan import ini
+import 'package:permission_handler/permission_handler.dart';
+import 'package:path/path.dart' as path;
 
 class ExportSdmScreen extends StatefulWidget {
   final String puskesmas;
@@ -18,6 +21,7 @@ class ExportSdmScreen extends StatefulWidget {
   final double totalSBL;
   final double totalSDH;
   final int userId;
+  final int? kegiatanId; // Tambahkan kegiatanId di sini
 
   ExportSdmScreen({
     required this.puskesmas,
@@ -25,6 +29,7 @@ class ExportSdmScreen extends StatefulWidget {
     required this.totalSBL,
     required this.totalSDH,
     required this.userId,
+    this.kegiatanId, // Tambahkan kegiatanId di sini
   });
 
   @override
@@ -69,48 +74,48 @@ class _ExportSdmScreenState extends State<ExportSdmScreen> {
   }
 
   Future<void> _savePdf() async {
-    if (logoData == null) {
-      print('Logo not loaded');
-      return;
-    }
+  if (logoData == null) {
+    print('Logo not loaded');
+    return;
+  }
 
-    final pdf = pw.Document();
+  final pdf = pw.Document();
 
-    pdf.addPage(
-      pw.Page(
-        build: (context) {
-          return pw.Column(
-            crossAxisAlignment: pw.CrossAxisAlignment.start,
-            children: [
-              pw.Row(
-                mainAxisAlignment: pw.MainAxisAlignment.center,
-                children: [
-                  pw.Image(
-                    pw.MemoryImage(logoData!),
-                    width: 100,
-                    height: 100,
-                  ),
-                  pw.SizedBox(width: 20),
-                  pw.Column(
-                    crossAxisAlignment: pw.CrossAxisAlignment.start,
-                    children: [
-                      pw.Text(
-                        'Puskesmas: ${widget.puskesmas}',
-                        style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold),
-                      ),
-                      pw.Text(
-                        'Jl. Puskesmas No.123, Bangun Jaya, Kec. Bangun',
-                        style: pw.TextStyle(fontSize: 12),
-                      ),
-                      pw.Text(
-                        'Telp: (021) 12345678 | Email: info@puskesmasbangunjaya.id',
-                        style: pw.TextStyle(fontSize: 12),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              pw.Divider(),
+  pdf.addPage(
+    pw.Page(
+      build: (context) {
+        return pw.Column(
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          children: [
+            pw.Row(
+              mainAxisAlignment: pw.MainAxisAlignment.center,
+              children: [
+                pw.Image(
+                  pw.MemoryImage(logoData!),
+                  width: 100,
+                  height: 100,
+                ),
+                pw.SizedBox(width: 20),
+                pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    pw.Text(
+                      'Puskesmas: ${widget.puskesmas}',
+                      style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold),
+                    ),
+                    pw.Text(
+                      'Jl. Puskesmas No.123, Bangun Jaya, Kec. Bangun',
+                      style: pw.TextStyle(fontSize: 12),
+                    ),
+                    pw.Text(
+                      'Telp: (021) 12345678 | Email: info@puskesmasbangunjaya.id',
+                      style: pw.TextStyle(fontSize: 12),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            pw.Divider(),
               pw.Header(level: 1, text: 'Data Export'),
               pw.Text('Puskesmas: ${widget.puskesmas}'),
               pw.Text('Total SPM: ${widget.totalSPM}'),
@@ -119,36 +124,49 @@ class _ExportSdmScreenState extends State<ExportSdmScreen> {
               pw.Text('Catatan: $catatan'),
               pw.Text('Upaya / Kegiatan: $upayaKegiatan'),
               pw.Text('Estimasi Biaya: $estimasiBiaya'),
-            ],
-          );
-        },
-      ),
-    );
+          ],
+        );
+      },
+    ),
+  );
 
-    try {
-      final directory = await getExternalStorageDirectory();
-      if (directory == null) {
-        print('Error: External storage directory not available');
-        return;
-      }
-
-      final pdfPath = '${directory.path}/export.pdf';
-      final pdfFile = File(pdfPath);
-
-      await pdfFile.writeAsBytes(await pdf.save());
-      print('PDF saved to $pdfPath');
-
-      _openPdf(pdfPath);
-
-      if (isConnected && emailPenerima != null) {
-        _sendEmail(pdfPath, emailPenerima!);
-      } else {
-        print('Device is offline or email recipient not found. Email will be sent when online.');
-      }
-    } catch (e) {
-      print('Error while saving PDF: $e');
+  try {
+    // Request storage permission
+    var status = await Permission.storage.request();
+    if (!status.isGranted) {
+      print('Permission not granted');
+      return;
     }
+
+    // Get the Downloads directory
+    final downloadsDir = Directory('/storage/emulated/0/Download');
+    String fileName = 'JumlahSDM_${widget.puskesmas}.pdf'; // Default file name format
+
+    // Update file name if id_category equals 11
+    if (widget.kegiatanId != null && widget.kegiatanId == 11) {
+      fileName = 'JumlahSDM_${widget.puskesmas}.pdf';
+    }
+
+    final pdfPath = path.join(downloadsDir.path, fileName);
+    final pdfFile = File(pdfPath);
+
+    await pdfFile.writeAsBytes(await pdf.save());
+    print('PDF saved to $pdfPath');
+
+    Fluttertoast.showToast(msg: 'PDF saved to $pdfPath');
+
+    _openPdf(pdfPath);
+
+    if (isConnected && emailPenerima != null) {
+      await _sendEmail(pdfPath, emailPenerima!);
+      Fluttertoast.showToast(msg: 'Email successfully sent');
+    } else {
+      print('Device is offline or email recipient not found. Email will be sent when online.');
+    }
+  } catch (e) {
+    print('Error while saving PDF: $e');
   }
+}
 
   void _openPdf(String filePath) async {
     try {

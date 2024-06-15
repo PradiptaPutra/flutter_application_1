@@ -150,15 +150,15 @@ class DatabaseHelper {
     await db.insert('DataEntry', dataEntry, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
-  Future<void> updateDataEntry(int entryId, Map<String, dynamic> dataEntry) async {
-    final db = await database;
-    await db.update(
-      'DataEntry',
-      dataEntry,
-      where: 'entry_id = ?',
-      whereArgs: [entryId],
-    );
-  }
+  // Future<void> updateDataEntry(int entryId, Map<String, dynamic> dataEntry) async {
+  //   final db = await database;
+  //   await db.update(
+  //     'DataEntry',
+  //     dataEntry,
+  //     where: 'entry_id = ?',
+  //     whereArgs: [entryId],
+  //   );
+  // }
 
   Future<void> saveDataEntry(Map<String, dynamic> dataEntry) async {
     final db = await database;
@@ -311,7 +311,48 @@ class DatabaseHelper {
     }
     return excelData;
   }
+Future<double?> getSdhValue(int? kegiatanId, int categoryId, String indikator) async {
+    final db = await database;
 
+    print('Query Arguments - kegiatanId: $kegiatanId, categoryId: $categoryId, indikator: $indikator');
+
+    List<Map<String, dynamic>> result = await db.query(
+      'dataentry',
+      columns: ['SDH'],
+      where: 'kegiatan_id = ? AND id_category = ? AND indikator = ?',
+      whereArgs: [kegiatanId, categoryId, indikator],
+      limit: 1,
+    );
+
+    print('Query Result: $result');
+
+    if (result.isNotEmpty && result[0]['SDH'] != null) {
+      // Convert the SDH value from String to double
+      return double.tryParse(result[0]['SDH'].toString());
+    }
+    return null;
+}
+
+  Future<List<Map<String, dynamic>>> getEntriesByKegiatanIdAndIndikator(int kegiatanId, int categoryId, String indikator) async {
+    final db = await database;
+
+    return await db.query(
+      'dataentry',
+      where: 'kegiatan_id = ? AND id_category = ? AND indikator = ?',
+      whereArgs: [kegiatanId, categoryId, indikator],
+    );
+  }
+
+  Future<int> updateDataEntry(Map<String, dynamic> entry) async {
+    final db = await database;
+
+    return await db.update(
+      'dataentry',
+      entry,
+      where: 'entry_id = ?',
+      whereArgs: [entry['entry_id']],
+    );
+  }
   Future<List<Map<String, dynamic>>> loadExcelDataDirectly2(String assetPath) async {
     List<Map<String, dynamic>> excelData = [];
     try {
