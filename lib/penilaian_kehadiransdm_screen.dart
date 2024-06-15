@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
 import 'database_helper.dart';
-import 'export_pembiayaan_screen.dart';
+import 'export_kehadiransdm_screen.dart';
 
-class PenilaianPembiayaanScreen extends StatefulWidget {
+class PenilaianKehadiransdmScreen extends StatefulWidget {
   final int? kegiatanId;
   final int id_category;
   final int userId;
   final int? entryId;
 
-  PenilaianPembiayaanScreen({this.kegiatanId, required this.id_category, required this.userId, this.entryId});
+  PenilaianKehadiransdmScreen({this.kegiatanId, required this.id_category, required this.userId, this.entryId});
 
   @override
-  _PenilaianPembiayaanScreenState createState() => _PenilaianPembiayaanScreenState();
+  _PenilaianKehadiransdmScreenState createState() => _PenilaianKehadiransdmScreenState();
 }
 
-class _PenilaianPembiayaanScreenState extends State<PenilaianPembiayaanScreen> {
+class _PenilaianKehadiransdmScreenState extends State<PenilaianKehadiransdmScreen> {
   final DatabaseHelper _dbHelper = DatabaseHelper();
   final List<TextEditingController> sebelumControllers = [];
   final List<TextEditingController> sesudahControllers = [];
@@ -40,7 +40,7 @@ class _PenilaianPembiayaanScreenState extends State<PenilaianPembiayaanScreen> {
   }
 
   Future<void> _loadExcelData() async {
-    List<Map<String, dynamic>> excelData = await _dbHelper.loadExcelDataDirectly('assets/form_penilaian_pembiayaan.xlsx');
+    List<Map<String, dynamic>> excelData = await _dbHelper.loadExcelDataDirectly('assets/form_penilaian_kehadiransdm.xlsx');
     setState(() {
       data = excelData;
       for (var i = 0; i < data.length; i++) {
@@ -51,34 +51,25 @@ class _PenilaianPembiayaanScreenState extends State<PenilaianPembiayaanScreen> {
     });
   }
 
- Future<void> _loadDataEntriesByKegiatan(int kegiatanId) async {
-  try {
+  Future<void> _loadDataEntriesByKegiatan(int kegiatanId) async {
     List<Map<String, dynamic>> entries = await _dbHelper.getEntriesByKegiatanId(kegiatanId);
     if (entries.isNotEmpty) {
       setState(() {
         existingEntries = entries;
-        print('Data Entries Loaded: $existingEntries'); // Tambahkan print statement di sini
         for (var entry in entries) {
-          // Convert sub_indikator to string for consistent comparison
-          String entrySubIndikator = entry['sub_indikator'].toString();
-          int index = data.indexWhere((item) => item['sub_indikator'].toString() == entrySubIndikator);
-          if (index != -1) {
-            sebelumControllers[index].text = entry['sebelum'] ?? '';
-            sesudahControllers[index].text = entry['sesudah'] ?? '';
-            keteranganControllers[index].text = entry['keterangan'] ?? '';
-            data[index]['entry_id'] = entry['entry_id'].toString();
+          for (var i = 0; i < data.length; i++) {
+            if (entry['indikator'] == data[i]['nama_indikator']) {
+              sebelumControllers[i].text = entry['sebelum'] ?? '';
+              sesudahControllers[i].text = entry['sesudah'] ?? '';
+              keteranganControllers[i].text = entry['keterangan'] ?? '';
+              data[i]['entry_id'] = entry['entry_id'].toString();  // Ensure entry_id is stored as String
+            }
           }
         }
-        _calculateTotalScore(); // Hitung kembali skor total setelah memuat entri data
+        _calculateTotalScore(); // Hitung total skor saat data entry dimuat
       });
     }
-  } catch (e) {
-    print('Error loading data entries: $e');
   }
-}
-
-
-
 
   void _calculateTotalScore() {
     double totalSebelum = 0;
@@ -164,7 +155,7 @@ class _PenilaianPembiayaanScreenState extends State<PenilaianPembiayaanScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ExportPembiayaanScreen(
+        builder: (context) => ExportKehadiransdmScreen(
           puskesmas: puskesmas,
           sebelum: totalSkorSebelum.toInt(),
           sesudah: totalSkorSesudah.toInt(),
@@ -313,11 +304,6 @@ class _PenilaianPembiayaanScreenState extends State<PenilaianPembiayaanScreen> {
                                           style: TextStyle(
                                               fontSize: 16,
                                               fontWeight: FontWeight.bold),
-                                        ),
-                                        Text(
-                                          data[index]["sub_indikator"] ?? '',
-                                          style: TextStyle(
-                                              fontSize: 14, color: Colors.grey),
                                         ),
                                       ],
                                     ),

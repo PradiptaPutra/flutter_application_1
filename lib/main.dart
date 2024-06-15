@@ -13,8 +13,12 @@ import 'penilaian_alkes_screen.dart';
 import 'penilaian_kendaraan_screen.dart';
 import 'penilaian_pembiayaan_screen.dart';
 import 'penilaian_program_screen.dart';
+import 'penilaian_isiansdm_screen.dart';
+import 'penilaian_kehadiransdm_screen.dart';
 import 'calender_screen.dart';
 import 'export_screen.dart';
+import 'export_isiansdm_screen.dart';
+import 'export_kehadiransdm_screen.dart';
 import 'export_alkes_screen.dart';
 import 'export_kendaraan_screen.dart';
 import 'export_pembiayaan_screen.dart';
@@ -45,6 +49,22 @@ class MyApp extends StatelessWidget {
         '/dashboard': (context) => DashboardScreen(userId: ModalRoute.of(context)!.settings.arguments as int),
         '/data_entry': (context) => DataEntryForm(userId: ModalRoute.of(context)!.settings.arguments as int),
         '/export': (context) => ExportScreen(
+          puskesmas: "",
+          sebelum: 0,
+          sesudah: 0,
+          interpretasiSebelum: "",
+          interpretasiSesudah: "",
+          userId: ModalRoute.of(context)!.settings.arguments as int,
+        ),
+        '/export_isiansdm': (context) => ExportIsiansdmScreen(
+          puskesmas: "",
+          sebelum: 0,
+          sesudah: 0,
+          interpretasiSebelum: "",
+          interpretasiSesudah: "",
+          userId: ModalRoute.of(context)!.settings.arguments as int,
+        ),
+        '/export_kehadiransdm': (context) => ExportKehadiransdmScreen(
           puskesmas: "",
           sebelum: 0,
           sesudah: 0,
@@ -115,7 +135,30 @@ class MyApp extends StatelessWidget {
               entryId: args['entryId'],
             ),
           );
-        } else if (settings.name == '/penilaian_alkes') {
+          } else if (settings.name == '/penilaian_isiansdm') {
+          final args = settings.arguments as Map<String, dynamic>;
+          return MaterialPageRoute(
+            builder: (context) => PenilaianIsiansdmScreen(
+              userId: args['userId'],
+              kegiatanId: args['kegiatanId'],
+              id_category: args['id_category'],
+              entryId: args['entryId'],
+            ),
+          );
+        
+        } 
+         else if (settings.name == '/penilaian_kehadiransdm') {
+          final args = settings.arguments as Map<String, dynamic>;
+          return MaterialPageRoute(
+            builder: (context) => PenilaianKehadiransdmScreen(
+              userId: args['userId'],
+              kegiatanId: args['kegiatanId'],
+              id_category: args['id_category'],
+              entryId: args['entryId'],
+            ),
+          );
+        
+        }else if (settings.name == '/penilaian_alkes') {
           final args = settings.arguments as Map<String, dynamic>;
           return MaterialPageRoute(
             builder: (context) => PenilaianAlkesScreen(

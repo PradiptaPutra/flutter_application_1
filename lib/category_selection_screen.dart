@@ -1,16 +1,64 @@
 import 'package:flutter/material.dart';
+import 'database_helper.dart';
 
-class CategorySelectionScreen extends StatelessWidget {
+class CategorySelectionScreen extends StatefulWidget {
   final int userId;
   final int? kegiatanId;
-  final List<int>? entryIds; // Make entryIds nullable
+  final List<int>? entryIds;
 
   CategorySelectionScreen({required this.userId, this.kegiatanId, this.entryIds});
 
   @override
-  Widget build(BuildContext context) {
-    print('kegiatanId: $kegiatanId');
+  _CategorySelectionScreenState createState() => _CategorySelectionScreenState();
+}
 
+class _CategorySelectionScreenState extends State<CategorySelectionScreen> {
+  bool _isDataKehadiranEnabled = false;
+  final DatabaseHelper _dbHelper = DatabaseHelper();
+
+  @override
+  void initState() {
+    super.initState();
+    _checkDataKehadiran();
+  }
+
+  Future<void> _checkDataKehadiran() async {
+    if (widget.kegiatanId != null) {
+      bool exists = await _checkEntryExists(widget.kegiatanId!, 22);
+      setState(() {
+        _isDataKehadiranEnabled = exists;
+      });
+    }
+  }
+
+  Future<bool> _checkEntryExists(int kegiatanId, int categoryId) async {
+    // Simulasi pemanggilan database untuk mendapatkan entri berdasarkan kegiatanId
+    List<Map<String, dynamic>> entries = await _dbHelper.getEntriesByKegiatanId(kegiatanId);
+    return entries.any((entry) => entry['id_category'] == categoryId);
+  }
+
+  void _showInfoDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Informasi"),
+          content: Text("Silahkan Isi penilaian Data Ketenagaaan Puskesmas terlebih dahulu!"),
+          actions: [
+            TextButton(
+              child: Text("OK"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Select Category'),
@@ -29,10 +77,10 @@ class CategorySelectionScreen extends StatelessWidget {
                     context,
                     '/penilaian',
                     arguments: {
-                      'userId': userId,
-                      'kegiatanId': kegiatanId,
-                      'entryIds': entryIds, // Pass the list of entry IDs, can be null
-                      'id_category': 11, // id_category for Fasilitas Pelayanan Kesehatan
+                      'userId': widget.userId,
+                      'kegiatanId': widget.kegiatanId,
+                      'entryIds': widget.entryIds,
+                      'id_category': 11,
                     },
                   );
                 },
@@ -44,10 +92,10 @@ class CategorySelectionScreen extends StatelessWidget {
                     context,
                     '/penilaian_alkes',
                     arguments: {
-                      'userId': userId,
-                      'kegiatanId': kegiatanId,
-                      'entryIds': entryIds, // Pass the list of entry IDs, can be null
-                      'id_category': 12, // id_category for Fasilitas Pelayanan Kesehatan
+                      'userId': widget.userId,
+                      'kegiatanId': widget.kegiatanId,
+                      'entryIds': widget.entryIds,
+                      'id_category': 12,
                     },
                   );
                 },
@@ -59,33 +107,79 @@ class CategorySelectionScreen extends StatelessWidget {
                     context,
                     '/penilaian_kendaraan',
                     arguments: {
-                      'userId': userId,
-                      'kegiatanId': kegiatanId,
-                      'entryIds': entryIds, // Pass the list of entry IDs, can be null
-                      'id_category': 13, // id_category for Fasilitas Pelayanan Kesehatan
+                      'userId': widget.userId,
+                      'kegiatanId': widget.kegiatanId,
+                      'entryIds': widget.entryIds,
+                      'id_category': 13,
                     },
                   );
                 },
               ),
             ],
           ),
-          ListTile(
-            leading: Icon(Icons.person, color: Theme.of(context).primaryColor),
+          ExpansionTile(
+            leading: Icon(Icons.local_hospital, color: Theme.of(context).primaryColor),
             title: Text('SDM Kesehatan'),
-            subtitle: Text('Deskripsi singkat'),
-            trailing: Icon(Icons.arrow_forward_ios),
-            onTap: () {
-              Navigator.pushNamed(
-                context,
-                '/penilaian_sdm',
-                arguments: {
-                  'userId': userId,
-                  'kegiatanId': kegiatanId,
-                  'entryIds': entryIds, // Pass the list of entry IDs, can be null
-                  'id_category': 2, // id_category for SDM Kesehatan
+            subtitle: Text('Klik untuk melihat lebih lanjut'),
+            children: [
+              ListTile(
+                title: Text('Sumber Daya Manusia'),
+                onTap: () {
+                  Navigator.pushNamed(
+                    context,
+                    '/penilaian_isiansdm',
+                    arguments: {
+                      'userId': widget.userId,
+                      'kegiatanId': widget.kegiatanId,
+                      'entryIds': widget.entryIds,
+                      'id_category': 21,
+                    },
+                  );
                 },
-              );
-            },
+              ),
+              ListTile(
+                title: Text('Data Ketenagaan Puskesmas'),
+                onTap: () {
+                  Navigator.pushNamed(
+                    context,
+                    '/penilaian_sdm',
+                    arguments: {
+                      'userId': widget.userId,
+                      'kegiatanId': widget.kegiatanId,
+                      'entryIds': widget.entryIds,
+                      'id_category': 22,
+                    },
+                  );
+                },
+              ),
+              ListTile(
+                title: Row(
+                  children: [
+                    Text('Data Kehadiran Tenaga Kesehatan'),
+                    if (!_isDataKehadiranEnabled)
+                      IconButton(
+                        icon: Icon(Icons.help_outline),
+                        onPressed: () => _showInfoDialog(context),
+                      ),
+                  ],
+                ),
+                onTap: _isDataKehadiranEnabled
+                    ? () {
+                        Navigator.pushNamed(
+                          context,
+                          '/penilaian_kehadiransdm',
+                          arguments: {
+                            'userId': widget.userId,
+                            'kegiatanId': widget.kegiatanId,
+                            'entryIds': widget.entryIds,
+                            'id_category': 23,
+                          },
+                        );
+                      }
+                    : null,
+                enabled: _isDataKehadiranEnabled,
+              ),
+            ],
           ),
           ListTile(
             leading: Icon(Icons.favorite, color: Theme.of(context).primaryColor),
@@ -97,10 +191,10 @@ class CategorySelectionScreen extends StatelessWidget {
                 context,
                 '/penilaian_program',
                 arguments: {
-                  'userId': userId,
-                  'kegiatanId': kegiatanId,
-                  'entryIds': entryIds, // Pass the list of entry IDs, can be null
-                  'id_category': 3, // id_category for Program Kesehatan
+                  'userId': widget.userId,
+                  'kegiatanId': widget.kegiatanId,
+                  'entryIds': widget.entryIds,
+                  'id_category': 3,
                 },
               );
             },
@@ -115,10 +209,10 @@ class CategorySelectionScreen extends StatelessWidget {
                 context,
                 '/penilaian_pembiayaan',
                 arguments: {
-                  'userId': userId,
-                  'kegiatanId': kegiatanId,
-                  'entryIds': entryIds, // Pass the list of entry IDs, can be null
-                  'id_category': 4, // id_category for Pembiayaan Kesehatan
+                  'userId': widget.userId,
+                  'kegiatanId': widget.kegiatanId,
+                  'entryIds': widget.entryIds,
+                  'id_category': 4,
                 },
               );
             },
