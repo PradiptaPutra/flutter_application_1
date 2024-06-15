@@ -208,6 +208,7 @@ class MyApp extends StatelessWidget {
               kegiatanId: args['kegiatanId'],
               id_category: args['id_category'],
               entryId: args['entryId'],
+              dropdownOption: 'Non Rawat Inap', // Pass the required parameter
             ),
           );
         }

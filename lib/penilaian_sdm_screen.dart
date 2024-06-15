@@ -7,8 +7,9 @@ class PenilaianSdmScreen extends StatefulWidget {
   final int id_category;
   final int userId;
   final int? entryId;
+  final String dropdownOption;
 
-  PenilaianSdmScreen({this.kegiatanId, required this.id_category, required this.userId, this.entryId});
+  PenilaianSdmScreen({this.kegiatanId, required this.id_category, required this.userId, this.entryId, required this.dropdownOption});
 
   @override
   _PenilaianSdmScreenState createState() => _PenilaianSdmScreenState();
@@ -16,22 +17,16 @@ class PenilaianSdmScreen extends StatefulWidget {
 
 class _PenilaianSdmScreenState extends State<PenilaianSdmScreen> {
   final DatabaseHelper _dbHelper = DatabaseHelper();
-  final List<TextEditingController> sebelumControllers = [];
-  final List<TextEditingController> sesudahControllers = [];
-  final List<TextEditingController> sebelum2Controllers = [];
-  final List<TextEditingController> sesudah2Controllers = [];
+  final List<TextEditingController> spmControllers = [];
+  final List<TextEditingController> sblControllers = [];
+  final List<TextEditingController> sdhControllers = [];
   final List<TextEditingController> keteranganControllers = [];
   List<Map<String, dynamic>> data = [];
   List<Map<String, dynamic>> existingEntries = [];
-  double totalSkorIndikator1Sebelum = 0;
-  double totalSkorIndikator1Sesudah = 0;
-  double totalSkorIndikator2Sebelum = 0;
-  double totalSkorIndikator2Sesudah = 0;
+  double totalSPM = 0;
+  double totalSBL = 0;
+  double totalSDH = 0;
   double totalSkorAkhir = 0;
-  String interpretasiIndikator1Sebelum = "";
-  String interpretasiIndikator1Sesudah = "";
-  String interpretasiIndikator2Sebelum = "";
-  String interpretasiIndikator2Sesudah = "";
   String interpretasiAkhir = "";
   String puskesmas = "";
   bool showInterpretations = true;
@@ -50,11 +45,17 @@ class _PenilaianSdmScreenState extends State<PenilaianSdmScreen> {
     setState(() {
       data = excelData;
       for (var i = 0; i < data.length; i++) {
-        sebelumControllers.add(TextEditingController());
-        sesudahControllers.add(TextEditingController());
-        sebelum2Controllers.add(TextEditingController());
-        sesudah2Controllers.add(TextEditingController());
+        spmControllers.add(TextEditingController());
+        sblControllers.add(TextEditingController());
+        sdhControllers.add(TextEditingController());
         keteranganControllers.add(TextEditingController());
+
+        // Atur nilai SPM berdasarkan dropdownOption
+        if (widget.dropdownOption == 'Non Rawat Inap') {
+          spmControllers[i].text = data[i]['non_rawat_inap_spm'] ?? '';
+        } else {
+          spmControllers[i].text = data[i]['rawat_inap_spm'] ?? '';
+        }
       }
     });
   }
@@ -66,11 +67,14 @@ class _PenilaianSdmScreenState extends State<PenilaianSdmScreen> {
         existingEntries = entries;
         for (var entry in entries) {
           for (var i = 0; i < data.length; i++) {
-            if (entry['sub_indikator'] == data[i]['sub_indikator']) {
-              sebelumControllers[i].text = entry['sebelum'] ?? '';
-              sesudahControllers[i].text = entry['sesudah'] ?? '';
-              sebelum2Controllers[i].text = entry['sebelum2'] ?? '';
-              sesudah2Controllers[i].text = entry['sesudah2'] ?? '';
+            if (entry['indikator'] == data[i]['nama_indikator']) {
+              if (widget.dropdownOption == 'Non Rawat Inap') {
+                spmControllers[i].text = data[i]['non_rawat_inap_spm'] ?? '';
+              } else {
+                spmControllers[i].text = data[i]['rawat_inap_spm'] ?? '';
+              }
+              sblControllers[i].text = entry['SBL'] ?? '';
+              sdhControllers[i].text = entry['SDH'] ?? '';
               keteranganControllers[i].text = entry['keterangan'] ?? '';
               data[i]['entry_id'] = entry['entry_id'].toString();  // Ensure entry_id is stored as String
             }
@@ -81,36 +85,23 @@ class _PenilaianSdmScreenState extends State<PenilaianSdmScreen> {
     }
   }
 
-  // Remaining code for _calculateTotalScore, _saveDataEntry, _exportData, _showPopup, and dispose methods remains the same.
-
-
   void _calculateTotalScore() {
-    double totalIndikator1Sebelum = 0;
-    double totalIndikator1Sesudah = 0;
-    double totalIndikator2Sebelum = 0;
-    double totalIndikator2Sesudah = 0;
+    double totalSPMScore = 0;
+    double totalSBLScore = 0;
+    double totalSDHScore = 0;
 
-    for (var i = 0; i < sebelumControllers.length; i++) {
-      totalIndikator1Sebelum += double.tryParse(sebelumControllers[i].text) ?? 0;
-      totalIndikator1Sesudah += double.tryParse(sesudahControllers[i].text) ?? 0;
-      totalIndikator2Sebelum += double.tryParse(sebelum2Controllers[i].text) ?? 0;
-      totalIndikator2Sesudah += double.tryParse(sesudah2Controllers[i].text) ?? 0;
+    for (var i = 0; i < spmControllers.length; i++) {
+      totalSPMScore += double.tryParse(spmControllers[i].text) ?? 0;
+      totalSBLScore += double.tryParse(sblControllers[i].text) ?? 0;
+      totalSDHScore += double.tryParse(sdhControllers[i].text) ?? 0;
     }
 
     setState(() {
-      totalSkorIndikator1Sebelum = totalIndikator1Sebelum * 4.35 / 2;
-      interpretasiIndikator1Sebelum = _setInterpretasi(totalSkorIndikator1Sebelum);
+      totalSPM = totalSPMScore;
+      totalSBL = totalSBLScore;
+      totalSDH = totalSDHScore;
 
-      totalSkorIndikator1Sesudah = totalIndikator1Sesudah * 4.35 / 2;
-      interpretasiIndikator1Sesudah = _setInterpretasi(totalSkorIndikator1Sesudah);
-
-      totalSkorIndikator2Sebelum = totalIndikator2Sebelum * 5.9 / 2;
-      interpretasiIndikator2Sebelum = _setInterpretasi(totalSkorIndikator2Sebelum);
-
-      totalSkorIndikator2Sesudah = totalIndikator2Sesudah * 5.9 / 2;
-      interpretasiIndikator2Sesudah = _setInterpretasi(totalSkorIndikator2Sesudah);
-
-      totalSkorAkhir = (totalSkorIndikator1Sesudah * 0.5) + (totalSkorIndikator2Sesudah * 0.5);
+      totalSkorAkhir = (totalSBL * 0.5) + (totalSDH * 0.5);
       interpretasiAkhir = _setInterpretasi(totalSkorAkhir);
     });
   }
@@ -126,16 +117,13 @@ class _PenilaianSdmScreenState extends State<PenilaianSdmScreen> {
   }
 
   Future<void> _saveDataEntry() async {
-    // Dapatkan daftar kegiatan untuk user
     List<Map<String, dynamic>> kegiatanList = await _dbHelper.getKegiatanForUser(widget.userId);
 
-    // Temukan kegiatan yang sesuai dengan kegiatanId yang diberikan
     Map<String, dynamic> kegiatan = kegiatanList.firstWhere(
       (kegiatan) => kegiatan['kegiatan_id'] == widget.kegiatanId,
       orElse: () => <String, dynamic>{},
     );
 
-    // Ambil nilai nama_puskesmas dari kegiatan
     puskesmas = kegiatan.isNotEmpty ? kegiatan['nama_puskesmas'] : '';
 
     for (var i = 0; i < data.length; i++) {
@@ -145,11 +133,9 @@ class _PenilaianSdmScreenState extends State<PenilaianSdmScreen> {
         'id_category': widget.id_category,
         'puskesmas': puskesmas,
         'indikator': data[i]['nama_indikator'],
-        'sub_indikator': data[i]['sub_indikator'],
-        'sebelum': sebelumControllers[i].text,
-        'sesudah': sesudahControllers[i].text,
-        'sebelum2': sebelum2Controllers[i].text,
-        'sesudah2': sesudah2Controllers[i].text,
+        'SPM': spmControllers[i].text,
+        'SBL': sblControllers[i].text,
+        'SDH': sdhControllers[i].text,
         'keterangan': keteranganControllers[i].text,
       };
 
@@ -165,16 +151,13 @@ class _PenilaianSdmScreenState extends State<PenilaianSdmScreen> {
   }
 
   Future<void> _exportData() async {
-    // Dapatkan daftar kegiatan untuk user
     List<Map<String, dynamic>> kegiatanList = await _dbHelper.getKegiatanForUser(widget.userId);
 
-    // Temukan kegiatan yang sesuai dengan kegiatanId yang diberikan
     Map<String, dynamic> kegiatan = kegiatanList.firstWhere(
       (kegiatan) => kegiatan['kegiatan_id'] == widget.kegiatanId,
       orElse: () => <String, dynamic>{},
     );
 
-    // Ambil nilai nama_puskesmas dari kegiatan
     String puskesmas = kegiatan.isNotEmpty ? kegiatan['nama_puskesmas'] : '';
 
     Navigator.push(
@@ -182,14 +165,14 @@ class _PenilaianSdmScreenState extends State<PenilaianSdmScreen> {
       MaterialPageRoute(
         builder: (context) => ExportSdmScreen(
           puskesmas: puskesmas,
-          sebelumIndikator1: totalSkorIndikator1Sebelum,
-          sesudahIndikator1: totalSkorIndikator1Sesudah,
-          sebelumIndikator2: totalSkorIndikator2Sebelum,
-          sesudahIndikator2: totalSkorIndikator2Sesudah,
-          interpretasiIndikator1Sebelum: interpretasiIndikator1Sebelum,
-          interpretasiIndikator1Sesudah: interpretasiIndikator1Sesudah,
-          interpretasiIndikator2Sebelum: interpretasiIndikator2Sebelum,
-          interpretasiIndikator2Sesudah: interpretasiIndikator2Sesudah,
+          sebelumIndikator1: totalSPM,
+          sesudahIndikator1: totalSBL,
+          sebelumIndikator2: totalSDH,
+          sesudahIndikator2: totalSDH,
+          interpretasiIndikator1Sebelum: interpretasiAkhir,
+          interpretasiIndikator1Sesudah: interpretasiAkhir,
+          interpretasiIndikator2Sebelum: interpretasiAkhir,
+          interpretasiIndikator2Sesudah: interpretasiAkhir,
           interpretasiAkhir: interpretasiAkhir,
           userId: widget.userId,
         ),
@@ -219,16 +202,13 @@ class _PenilaianSdmScreenState extends State<PenilaianSdmScreen> {
 
   @override
   void dispose() {
-    for (var controller in sebelumControllers) {
+    for (var controller in spmControllers) {
       controller.dispose();
     }
-    for (var controller in sesudahControllers) {
+    for (var controller in sblControllers) {
       controller.dispose();
     }
-    for (var controller in sebelum2Controllers) {
-      controller.dispose();
-    }
-    for (var controller in sesudah2Controllers) {
+    for (var controller in sdhControllers) {
       controller.dispose();
     }
     for (var controller in keteranganControllers) {
@@ -264,56 +244,6 @@ class _PenilaianSdmScreenState extends State<PenilaianSdmScreen> {
                             ),
                           ),
                         ),
-                        if (showInterpretations) ...[
-                          Card(
-                            color: interpretasiIndikator1Sebelum == "Tinggi/Baik" ? Colors.green :
-                                    interpretasiIndikator1Sebelum == "Sedang/Cukup" ? Colors.yellow :
-                                    Colors.red,
-                            child: ListTile(
-                              title: Text(
-                                'Interpretasi Indikator 1 Sebelum: $interpretasiIndikator1Sebelum',
-                                style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                          ),
-                          Card(
-                            color: interpretasiIndikator1Sesudah == "Tinggi/Baik" ? Colors.green :
-                                    interpretasiIndikator1Sesudah == "Sedang/Cukup" ? Colors.yellow :
-                                    Colors.red,
-                            child: ListTile(
-                              title: Text(
-                                'Interpretasi Indikator 1 Sesudah: $interpretasiIndikator1Sesudah',
-                                style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                          ),
-                          Card(
-                            color: interpretasiIndikator2Sebelum == "Tinggi/Baik" ? Colors.green :
-                                    interpretasiIndikator2Sebelum == "Sedang/Cukup" ? Colors.yellow :
-                                    Colors.red,
-                            child: ListTile(
-                              title: Text(
-                                'Interpretasi Indikator 2 Sebelum: $interpretasiIndikator2Sebelum',
-                                style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                          ),
-                          Card(
-                            color: interpretasiIndikator2Sesudah == "Tinggi/Baik" ? Colors.green :
-                                    interpretasiIndikator2Sesudah == "Sedang/Cukup" ? Colors.yellow :
-                                    Colors.red,
-                            child: ListTile(
-                              title: Text(
-                                'Interpretasi Indikator 2 Sesudah: $interpretasiIndikator2Sesudah',
-                                style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                          ),
-                        ],
                         TextButton(
                           onPressed: () {
                             setState(() {
@@ -346,7 +276,7 @@ class _PenilaianSdmScreenState extends State<PenilaianSdmScreen> {
                                   ClipRRect(
                                     borderRadius: BorderRadius.circular(8),
                                     child: Image.asset(
-                                      'assets/images/logors.jpg', // Ganti dengan path gambar Anda
+                                      'assets/images/logors.jpg',
                                       width: 50,
                                       height: 50,
                                       fit: BoxFit.cover,
@@ -360,10 +290,6 @@ class _PenilaianSdmScreenState extends State<PenilaianSdmScreen> {
                                         Text(
                                           data[index]["nama_indikator"] ?? '',
                                           style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                                        ),
-                                        Text(
-                                          data[index]["sub_indikator"] ?? '',
-                                          style: TextStyle(fontSize: 14, color: Colors.grey),
                                         ),
                                       ],
                                     ),
@@ -402,21 +328,21 @@ class _PenilaianSdmScreenState extends State<PenilaianSdmScreen> {
                                 children: [
                                   Expanded(
                                     child: TextField(
-                                      controller: sebelumControllers[index],
+                                      controller: spmControllers[index],
                                       decoration: InputDecoration(
-                                        labelText: 'Indikator 1 Sebelum',
+                                        labelText: 'SPM',
                                         border: OutlineInputBorder(),
                                         contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                                       ),
-                                      onChanged: (value) => _calculateTotalScore(),
+                                      readOnly: true, // Prevent user from editing this field
                                     ),
                                   ),
                                   SizedBox(width: 10),
                                   Expanded(
                                     child: TextField(
-                                      controller: sesudahControllers[index],
+                                      controller: sblControllers[index],
                                       decoration: InputDecoration(
-                                        labelText: 'Indikator 1 Sesudah',
+                                        labelText: 'SBL',
                                         border: OutlineInputBorder(),
                                         contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                                       ),
@@ -430,23 +356,13 @@ class _PenilaianSdmScreenState extends State<PenilaianSdmScreen> {
                                 children: [
                                   Expanded(
                                     child: TextField(
-                                      controller: sebelum2Controllers[index],
+                                      controller: sdhControllers[index],
                                       decoration: InputDecoration(
-                                        labelText: 'Indikator 2 Sebelum',
+                                        labelText: 'SDH',
                                         border: OutlineInputBorder(),
                                         contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                                       ),
-                                    ),
-                                  ),
-                                  SizedBox(width: 10),
-                                  Expanded(
-                                    child: TextField(
-                                      controller: sesudah2Controllers[index],
-                                      decoration: InputDecoration(
-                                        labelText: 'Indikator 2 Sesudah',
-                                        border: OutlineInputBorder(),
-                                        contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                                      ),
+                                      onChanged: (value) => _calculateTotalScore(),
                                     ),
                                   ),
                                 ],
