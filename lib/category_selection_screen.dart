@@ -22,6 +22,13 @@ class _CategorySelectionScreenState extends State<CategorySelectionScreen> {
     _checkDataKehadiran();
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Call _checkDataKehadiran when returning to this screen
+    _checkDataKehadiran();
+  }
+
   Future<void> _checkDataKehadiran() async {
     if (widget.kegiatanId != null) {
       bool exists = await _checkEntryExists(widget.kegiatanId!, 22);
@@ -82,7 +89,7 @@ class _CategorySelectionScreenState extends State<CategorySelectionScreen> {
                       'entryIds': widget.entryIds,
                       'id_category': 11,
                     },
-                  );
+                  ).then((_) => _checkDataKehadiran());
                 },
               ),
               ListTile(
@@ -97,7 +104,7 @@ class _CategorySelectionScreenState extends State<CategorySelectionScreen> {
                       'entryIds': widget.entryIds,
                       'id_category': 12,
                     },
-                  );
+                  ).then((_) => _checkDataKehadiran());
                 },
               ),
               ListTile(
@@ -112,7 +119,7 @@ class _CategorySelectionScreenState extends State<CategorySelectionScreen> {
                       'entryIds': widget.entryIds,
                       'id_category': 13,
                     },
-                  );
+                  ).then((_) => _checkDataKehadiran());
                 },
               ),
             ],
@@ -134,7 +141,7 @@ class _CategorySelectionScreenState extends State<CategorySelectionScreen> {
                       'entryIds': widget.entryIds,
                       'id_category': 21,
                     },
-                  );
+                  ).then((_) => _checkDataKehadiran());
                 },
               ),
               ListTile(
@@ -149,7 +156,7 @@ class _CategorySelectionScreenState extends State<CategorySelectionScreen> {
                       'entryIds': widget.entryIds,
                       'id_category': 22,
                     },
-                  );
+                  ).then((_) => _checkDataKehadiran());
                 },
               ),
               ListTile(
@@ -174,7 +181,7 @@ class _CategorySelectionScreenState extends State<CategorySelectionScreen> {
                             'entryIds': widget.entryIds,
                             'id_category': 23,
                           },
-                        );
+                        ).then((_) => _checkDataKehadiran());
                       }
                     : null,
                 enabled: _isDataKehadiranEnabled,
@@ -196,7 +203,7 @@ class _CategorySelectionScreenState extends State<CategorySelectionScreen> {
                   'entryIds': widget.entryIds,
                   'id_category': 3,
                 },
-              );
+              ).then((_) => _checkDataKehadiran());
             },
           ),
           ListTile(
@@ -214,7 +221,7 @@ class _CategorySelectionScreenState extends State<CategorySelectionScreen> {
                   'entryIds': widget.entryIds,
                   'id_category': 4,
                 },
-              );
+              ).then((_) => _checkDataKehadiran());
             },
           ),
         ],
