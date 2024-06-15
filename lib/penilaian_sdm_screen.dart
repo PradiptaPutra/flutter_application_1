@@ -32,7 +32,7 @@ class _PenilaianSdmScreenState extends State<PenilaianSdmScreen> {
   double totalSPM = 0;
   double totalSBL = 0;
   double totalSDH = 0;
-    String puskesmas = "";
+  String puskesmas = "";
 
   @override
   void initState() {
@@ -169,15 +169,9 @@ class _PenilaianSdmScreenState extends State<PenilaianSdmScreen> {
       MaterialPageRoute(
         builder: (context) => ExportSdmScreen(
           puskesmas: puskesmas,
-          sebelumIndikator1: totalSPM,
-          sesudahIndikator1: totalSBL,
-          sebelumIndikator2: totalSDH,
-          sesudahIndikator2: totalSDH,
-          interpretasiIndikator1Sebelum: '',
-          interpretasiIndikator1Sesudah: '',
-          interpretasiIndikator2Sebelum: '',
-          interpretasiIndikator2Sesudah: '',
-          interpretasiAkhir: '',
+          totalSPM: totalSPM,
+          totalSBL: totalSBL,
+          totalSDH: totalSDH,
           userId: widget.userId,
         ),
       ),
@@ -419,4 +413,3 @@ class _PenilaianSdmScreenState extends State<PenilaianSdmScreen> {
     );
   }
 }
-

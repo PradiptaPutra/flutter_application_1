@@ -14,28 +14,16 @@ import 'database_helper.dart';
 
 class ExportSdmScreen extends StatefulWidget {
   final String puskesmas;
-  final double sebelumIndikator1;
-  final double sesudahIndikator1;
-  final double sebelumIndikator2;
-  final double sesudahIndikator2;
-  final String interpretasiIndikator1Sebelum;
-  final String interpretasiIndikator1Sesudah;
-  final String interpretasiIndikator2Sebelum;
-  final String interpretasiIndikator2Sesudah;
-  final String interpretasiAkhir;
+  final double totalSPM;
+  final double totalSBL;
+  final double totalSDH;
   final int userId;
 
   ExportSdmScreen({
     required this.puskesmas,
-    required this.sebelumIndikator1,
-    required this.sesudahIndikator1,
-    required this.sebelumIndikator2,
-    required this.sesudahIndikator2,
-    required this.interpretasiIndikator1Sebelum,
-    required this.interpretasiIndikator1Sesudah,
-    required this.interpretasiIndikator2Sebelum,
-    required this.interpretasiIndikator2Sesudah,
-    required this.interpretasiAkhir,
+    required this.totalSPM,
+    required this.totalSBL,
+    required this.totalSDH,
     required this.userId,
   });
 
@@ -61,15 +49,9 @@ class _ExportSdmScreenState extends State<ExportSdmScreen> {
 
   Future<void> _checkConnectivity() async {
     var connectivityResult = await (Connectivity().checkConnectivity());
-    if (connectivityResult != ConnectivityResult.none) {
-      setState(() {
-        isConnected = true;
-      });
-    } else {
-      setState(() {
-        isConnected = false;
-      });
-    }
+    setState(() {
+      isConnected = connectivityResult != ConnectivityResult.none;
+    });
   }
 
   Future<void> _fetchEmailPenerima() async {
@@ -94,14 +76,12 @@ class _ExportSdmScreenState extends State<ExportSdmScreen> {
 
     final pdf = pw.Document();
 
-    // Add metadata
     pdf.addPage(
       pw.Page(
         build: (context) {
           return pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
-              // Kop surat
               pw.Row(
                 mainAxisAlignment: pw.MainAxisAlignment.center,
                 children: [
@@ -115,7 +95,7 @@ class _ExportSdmScreenState extends State<ExportSdmScreen> {
                     crossAxisAlignment: pw.CrossAxisAlignment.start,
                     children: [
                       pw.Text(
-                        ('Puskesmas: ${widget.puskesmas}'),
+                        'Puskesmas: ${widget.puskesmas}',
                         style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold),
                       ),
                       pw.Text(
@@ -131,21 +111,11 @@ class _ExportSdmScreenState extends State<ExportSdmScreen> {
                 ],
               ),
               pw.Divider(),
-              // Isi surat
-              pw.Header(
-                level: 1,
-                text: 'Data Export',
-              ),
+              pw.Header(level: 1, text: 'Data Export'),
               pw.Text('Puskesmas: ${widget.puskesmas}'),
-              pw.Text('Indikator 1 Sebelum: ${widget.sebelumIndikator1}'),
-              pw.Text('Indikator 1 Sesudah: ${widget.sesudahIndikator1}'),
-              pw.Text('Interpretasi Indikator 1 Sebelum: ${widget.interpretasiIndikator1Sebelum}'),
-              pw.Text('Interpretasi Indikator 1 Sesudah: ${widget.interpretasiIndikator1Sesudah}'),
-              pw.Text('Indikator 2 Sebelum: ${widget.sebelumIndikator2}'),
-              pw.Text('Indikator 2 Sesudah: ${widget.sesudahIndikator2}'),
-              pw.Text('Interpretasi Indikator 2 Sebelum: ${widget.interpretasiIndikator2Sebelum}'),
-              pw.Text('Interpretasi Indikator 2 Sesudah: ${widget.interpretasiIndikator2Sesudah}'),
-              pw.Text('Interpretasi Akhir: ${widget.interpretasiAkhir}'),
+              pw.Text('Total SPM: ${widget.totalSPM}'),
+              pw.Text('Total SBL: ${widget.totalSBL}'),
+              pw.Text('Total SDH: ${widget.totalSDH}'),
               pw.Text('Catatan: $catatan'),
               pw.Text('Upaya / Kegiatan: $upayaKegiatan'),
               pw.Text('Estimasi Biaya: $estimasiBiaya'),
@@ -168,15 +138,12 @@ class _ExportSdmScreenState extends State<ExportSdmScreen> {
       await pdfFile.writeAsBytes(await pdf.save());
       print('PDF saved to $pdfPath');
 
-      // Open the PDF
       _openPdf(pdfPath);
 
-      // Check connectivity and send email if online
       if (isConnected && emailPenerima != null) {
         _sendEmail(pdfPath, emailPenerima!);
       } else {
         print('Device is offline or email recipient not found. Email will be sent when online.');
-        // Save the file path or email details to be sent later when online
       }
     } catch (e) {
       print('Error while saving PDF: $e');
@@ -202,10 +169,10 @@ class _ExportSdmScreenState extends State<ExportSdmScreen> {
   }
 
   Future<void> _sendEmail(String pdfPath, String recipient) async {
-    final smtpServer = gmail('mtsalikhlasberbahh@gmail.com', 'oxtm hpkh ciiq ppan'); // Use your email and password
+    final smtpServer = gmail('your-email@gmail.com', 'your-password');
 
     final message = Message()
-      ..from = Address('mtsalikhlasberbahh@gmail.com', 'Your Name')
+      ..from = Address('your-email@gmail.com', 'Your Name')
       ..recipients.add(recipient)
       ..subject = 'Lampiran PDF'
       ..text = 'Silakan temukan lampiran PDF.'
@@ -244,52 +211,16 @@ class _ExportSdmScreenState extends State<ExportSdmScreen> {
               children: [
                 Column(
                   children: [
-                    Text('Indikator 1 Sebelum', style: TextStyle(fontSize: 18)),
-                    Text(widget.sebelumIndikator1.toString(),
+                    Text('Total SPM', style: TextStyle(fontSize: 18)),
+                    Text(widget.totalSPM.toString(),
                         style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                    SizedBox(height: 5),
-                    Text('Interpretasi', style: TextStyle(fontSize: 16)),
-                    Text(widget.interpretasiIndikator1Sebelum,
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                   ],
                 ),
                 Column(
                   children: [
-                    Text('Indikator 1 Sesudah', style: TextStyle(fontSize: 18)),
-                    Text(widget.sesudahIndikator1.toString(),
+                    Text('Total SBL', style: TextStyle(fontSize: 18)),
+                    Text(widget.totalSBL.toString(),
                         style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                    SizedBox(height: 5),
-                    Text('Interpretasi', style: TextStyle(fontSize: 16)),
-                    Text(widget.interpretasiIndikator1Sesudah,
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                  ],
-                ),
-              ],
-            ),
-            SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                Column(
-                  children: [
-                    Text('Indikator 2 Sebelum', style: TextStyle(fontSize: 18)),
-                    Text(widget.sebelumIndikator2.toString(),
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                    SizedBox(height: 5),
-                    Text('Interpretasi', style: TextStyle(fontSize: 16)),
-                    Text(widget.interpretasiIndikator2Sebelum,
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                  ],
-                ),
-                Column(
-                  children: [
-                    Text('Indikator 2 Sesudah', style: TextStyle(fontSize: 18)),
-                    Text(widget.sesudahIndikator2.toString(),
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                    SizedBox(height: 5),
-                    Text('Interpretasi', style: TextStyle(fontSize: 16)),
-                    Text(widget.interpretasiIndikator2Sesudah,
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                   ],
                 ),
               ],
@@ -297,8 +228,8 @@ class _ExportSdmScreenState extends State<ExportSdmScreen> {
             SizedBox(height: 20),
             Column(
               children: [
-                Text('Interpretasi Akhir', style: TextStyle(fontSize: 18)),
-                Text(widget.interpretasiAkhir,
+                Text('Total SDH', style: TextStyle(fontSize: 18)),
+                Text(widget.totalSDH.toString(),
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               ],
             ),
