@@ -26,7 +26,9 @@ class _PenilaianPembiayaanScreenState extends State<PenilaianPembiayaanScreen> {
   String interpretasiSebelum = "";
   String interpretasiSesudah = "";
   String puskesmas = "";
+  String kegiatanId = "";
   bool showInterpretations = true;
+  bool isDataSaved = false;  // New boolean state to track if data is saved
 
   @override
   void initState() {
@@ -49,25 +51,30 @@ class _PenilaianPembiayaanScreenState extends State<PenilaianPembiayaanScreen> {
     });
   }
 
-  Future<void> _loadDataEntriesByKegiatan(int kegiatanId) async {
+ Future<void> _loadDataEntriesByKegiatan(int kegiatanId) async {
+  try {
     List<Map<String, dynamic>> entries = await _dbHelper.getEntriesByKegiatanId(kegiatanId);
     if (entries.isNotEmpty) {
       setState(() {
         existingEntries = entries;
         for (var entry in entries) {
-          for (var i = 0; i < data.length; i++) {
-            if (entry['sub_indikator'] == data[i]['sub_indikator']) {
-              sebelumControllers[i].text = entry['sebelum'] ?? '';
-              sesudahControllers[i].text = entry['sesudah'] ?? '';
-              keteranganControllers[i].text = entry['keterangan'] ?? '';
-              data[i]['entry_id'] = entry['entry_id'].toString();  // Ensure entry_id is stored as String
-            }
+          // Temukan indeks yang sesuai di dalam data menggunakan sub_indikator
+          int index = data.indexWhere((item) => item['sub_indikator'] == entry['sub_indikator']);
+          if (index != -1) {
+            sebelumControllers[index].text = entry['sebelum'] ?? '';
+            sesudahControllers[index].text = entry['sesudah'] ?? '';
+            keteranganControllers[index].text = entry['keterangan'] ?? '';
+            data[index]['entry_id'] = entry['entry_id'].toString();
           }
         }
-        _calculateTotalScore(); // Hitung total skor saat data entry dimuat
+        _calculateTotalScore(); // Hitung kembali skor total setelah memuat entri data
       });
     }
+  } catch (e) {
+    print('Error loading data entries: $e');
   }
+}
+
 
   void _calculateTotalScore() {
     double totalSebelum = 0;
@@ -131,7 +138,10 @@ class _PenilaianPembiayaanScreenState extends State<PenilaianPembiayaanScreen> {
     }
 
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Data berhasil disimpan')));
-    Navigator.pop(context);
+
+    setState(() {
+      isDataSaved = true;  // Set the state to true after data is saved
+    });
   }
 
   Future<void> _exportData() async {
@@ -157,6 +167,7 @@ class _PenilaianPembiayaanScreenState extends State<PenilaianPembiayaanScreen> {
           interpretasiSebelum: interpretasiSebelum,
           interpretasiSesudah: interpretasiSesudah,
           userId: widget.userId,
+          kegiatanId: widget.kegiatanId, // Tambahkan kegiatanId di sini
         ),
       ),
     );
@@ -403,12 +414,13 @@ class _PenilaianPembiayaanScreenState extends State<PenilaianPembiayaanScreen> {
             backgroundColor: Colors.blue,
           ),
           SizedBox(width: 10),
-          FloatingActionButton.extended(
-            onPressed: _exportData,
-            label: Text('Export'),
-            icon: Icon(Icons.import_export),
-            backgroundColor: Colors.green,
-          ),
+          if (isDataSaved)  // Show Export button only if data is saved
+            FloatingActionButton.extended(
+              onPressed: _exportData,
+              label: Text('Export'),
+              icon: Icon(Icons.import_export),
+              backgroundColor: Colors.green,
+            ),
         ],
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,

@@ -35,6 +35,7 @@ class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
   String interpretasiAkhir = "";
   String puskesmas = "";
   bool showInterpretations = true;
+  bool isDataSaved = false;  // New boolean state to track if data is saved
 
   @override
   void initState() {
@@ -158,7 +159,9 @@ class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
     }
 
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Data berhasil disimpan')));
-    Navigator.pop(context);
+    setState(() {
+      isDataSaved = true;  // Set the state to true after data is saved
+    });
   }
 
   Future<void> _exportData() async {
@@ -189,6 +192,7 @@ class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
           interpretasiIndikator2Sesudah: interpretasiIndikator2Sesudah,
           interpretasiAkhir: interpretasiAkhir,
           userId: widget.userId,
+          kegiatanId: widget.kegiatanId, // Tambahkan kegiatanId di sini         
         ),
       ),
     );
@@ -476,6 +480,7 @@ class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
             backgroundColor: Colors.blue,
           ),
           SizedBox(width: 10),
+          if (isDataSaved) 
           FloatingActionButton.extended(
             onPressed: _exportData,
             label: Text('Export'),

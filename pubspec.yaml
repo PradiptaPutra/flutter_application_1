@@ -45,6 +45,7 @@ dependencies:
   mailer: ^5.0.0
   connectivity_plus: ^2.3.5
   fluttertoast: any
+  permission_handler: ^10.0.0+1
   
 
 dev_dependencies:

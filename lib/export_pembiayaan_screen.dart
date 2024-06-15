@@ -12,6 +12,9 @@ import 'package:mailer/smtp_server.dart';
 import 'package:sqflite/sqflite.dart';
 import 'database_helper.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:fluttertoast/fluttertoast.dart'; // Tambahkan import ini
+import 'package:permission_handler/permission_handler.dart';
+import 'package:path/path.dart' as path;
 
 class ExportPembiayaanScreen extends StatefulWidget {
   final String puskesmas;
@@ -20,6 +23,7 @@ class ExportPembiayaanScreen extends StatefulWidget {
   final String interpretasiSebelum;
   final String interpretasiSesudah;
   final int userId;
+  final int? kegiatanId; // Tambahkan kegiatanId di sini
 
   ExportPembiayaanScreen({
     required this.puskesmas,
@@ -28,6 +32,7 @@ class ExportPembiayaanScreen extends StatefulWidget {
     required this.interpretasiSebelum,
     required this.interpretasiSesudah,
     required this.userId,
+    this.kegiatanId,
   });
 
   @override
@@ -142,32 +147,42 @@ class _ExportPembiayaanScreenState extends State<ExportPembiayaanScreen> {
     );
 
     try {
-      final directory = await getExternalStorageDirectory();
-      if (directory == null) {
-        print('Error: External storage directory not available');
-        return;
-      }
-
-      final pdfPath = '${directory.path}/export.pdf';
-      final pdfFile = File(pdfPath);
-
-      await pdfFile.writeAsBytes(await pdf.save());
-      print('PDF saved to $pdfPath');
-
-      // Open the PDF
-      _openPdf(pdfPath);
-
-      // Check connectivity and send email if online
-      if (isConnected && emailPenerima != null) {
-        _sendEmail(pdfPath, emailPenerima!);
-      } else {
-        print('Device is offline or email recipient not found. Email will be sent when online.');
-        // Save the file path or email details to be sent later when online
-      }
-    } catch (e) {
-      print('Error while saving PDF: $e');
+    // Request storage permission
+    var status = await Permission.storage.request();
+    if (!status.isGranted) {
+      print('Permission not granted');
+      return;
     }
+
+    // Get the Downloads directory
+    final downloadsDir = Directory('/storage/emulated/0/Download');
+    String fileName = 'Pembiayaan_${widget.puskesmas}.pdf'; // Default file name format
+
+    // Update file name if id_category equals 11
+    if (widget.kegiatanId != null && widget.kegiatanId == 4) {
+      fileName = 'Pembiayaan_${widget.puskesmas}.pdf';
+    }
+
+    final pdfPath = path.join(downloadsDir.path, fileName);
+    final pdfFile = File(pdfPath);
+
+    await pdfFile.writeAsBytes(await pdf.save());
+    print('PDF saved to $pdfPath');
+
+    Fluttertoast.showToast(msg: 'PDF saved to $pdfPath');
+
+    _openPdf(pdfPath);
+
+    if (isConnected && emailPenerima != null) {
+      await _sendEmail(pdfPath, emailPenerima!);
+      Fluttertoast.showToast(msg: 'Email successfully sent');
+    } else {
+      print('Device is offline or email recipient not found. Email will be sent when online.');
+    }
+  } catch (e) {
+    print('Error while saving PDF: $e');
   }
+}
 
   void _openPdf(String filePath) async {
     try {

@@ -28,6 +28,7 @@ class _PenilaianScreenState extends State<PenilaianScreen> {
   String puskesmas = "";
   String kegiatanId = "";
   bool showInterpretations = true;
+  bool isDataSaved = false;  // New boolean state to track if data is saved
 
   @override
   void initState() {
@@ -132,37 +133,40 @@ class _PenilaianScreenState extends State<PenilaianScreen> {
     }
 
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Data berhasil disimpan')));
-    Navigator.pop(context);
+
+    setState(() {
+      isDataSaved = true;  // Set the state to true after data is saved
+    });
   }
 
- Future<void> _exportData() async {
-  // Dapatkan daftar kegiatan untuk user
-  List<Map<String, dynamic>> kegiatanList = await _dbHelper.getKegiatanForUser(widget.userId);
+  Future<void> _exportData() async {
+    // Dapatkan daftar kegiatan untuk user
+    List<Map<String, dynamic>> kegiatanList = await _dbHelper.getKegiatanForUser(widget.userId);
 
-  // Temukan kegiatan yang sesuai dengan kegiatanId yang diberikan
-  Map<String, dynamic> kegiatan = kegiatanList.firstWhere(
-    (kegiatan) => kegiatan['kegiatan_id'] == widget.kegiatanId,
-    orElse: () => <String, dynamic>{},
-  );
+    // Temukan kegiatan yang sesuai dengan kegiatanId yang diberikan
+    Map<String, dynamic> kegiatan = kegiatanList.firstWhere(
+      (kegiatan) => kegiatan['kegiatan_id'] == widget.kegiatanId,
+      orElse: () => <String, dynamic>{},
+    );
 
-  // Ambil nilai nama_puskesmas dari kegiatan
-  String puskesmas = kegiatan.isNotEmpty ? kegiatan['nama_puskesmas'] : '';
+    // Ambil nilai nama_puskesmas dari kegiatan
+    String puskesmas = kegiatan.isNotEmpty ? kegiatan['nama_puskesmas'] : '';
 
-  Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (context) => ExportScreen(
-        puskesmas: puskesmas,
-        sebelum: totalSkorSebelum.toInt(),
-        sesudah: totalSkorSesudah.toInt(),
-        interpretasiSebelum: interpretasiSebelum,
-        interpretasiSesudah: interpretasiSesudah,
-        userId: widget.userId,
-        kegiatanId: widget.kegiatanId, // Tambahkan kegiatanId di sini
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ExportScreen(
+          puskesmas: puskesmas,
+          sebelum: totalSkorSebelum.toInt(),
+          sesudah: totalSkorSesudah.toInt(),
+          interpretasiSebelum: interpretasiSebelum,
+          interpretasiSesudah: interpretasiSesudah,
+          userId: widget.userId,
+          kegiatanId: widget.kegiatanId, // Tambahkan kegiatanId di sini
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 
   void _showPopup(BuildContext context, String content) {
     showDialog(
@@ -405,12 +409,13 @@ class _PenilaianScreenState extends State<PenilaianScreen> {
             backgroundColor: Colors.blue,
           ),
           SizedBox(width: 10),
-          FloatingActionButton.extended(
-            onPressed: _exportData,
-            label: Text('Export'),
-            icon: Icon(Icons.import_export),
-            backgroundColor: Colors.green,
-          ),
+          if (isDataSaved)  // Show Export button only if data is saved
+            FloatingActionButton.extended(
+              onPressed: _exportData,
+              label: Text('Export'),
+              icon: Icon(Icons.import_export),
+              backgroundColor: Colors.green,
+            ),
         ],
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
