@@ -52,13 +52,14 @@ class _PenilaianSdmScreenState extends State<PenilaianSdmScreen> {
   }
 
   Future<String> _fetchDropdownOption(int? kegiatanId) async {
-    String dropdownOption = await _dbHelper.fetchDropdownOption(kegiatanId ?? 0); // Handle null case
-    return dropdownOption;
+    if (kegiatanId != null) {
+      return await _dbHelper.fetchDropdownOption(kegiatanId);
+    }
+    return widget.dropdownOption; // Default to provided dropdownOption if kegiatanId is null
   }
 
   Future<void> _loadExcelData(String dropdownOption) async {
-    List<Map<String, dynamic>> excelData =
-        await _dbHelper.loadExcelDataDirectly('assets/form_penilaian_sumberdaya_manusia.xlsx');
+    List<Map<String, dynamic>> excelData = await _dbHelper.loadExcelDataDirectly('assets/form_penilaian_sumberdaya_manusia.xlsx');
     print('Excel Data: $excelData'); // Check what data is loaded
 
     setState(() {
@@ -66,7 +67,7 @@ class _PenilaianSdmScreenState extends State<PenilaianSdmScreen> {
       for (var i = 0; i < data.length; i++) {
         spmControllers.add(TextEditingController());
         sblControllers.add(TextEditingController());
-                sdhControllers.add(TextEditingController());
+        sdhControllers.add(TextEditingController());
         keteranganControllers.add(TextEditingController());
 
         // Adjust SPM values based on dropdownOption
@@ -426,3 +427,5 @@ class _PenilaianSdmScreenState extends State<PenilaianSdmScreen> {
     );
   }
 }
+
+
