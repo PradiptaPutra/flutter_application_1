@@ -12,13 +12,14 @@ class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
       'nama_indikator': '1. Program Upaya Kesehatan Masyarakat Esensial',
       'sub_indikator': '1.1 Pelayanan promosi kesehatan',
       'kriteria': [
-        'Penyuluhan PHBS',
+        'Penyuluhan',
         'PHBS',
         'Pemberdayaan masyarakat',
         'UKS',
       ],
       'selected_kriteria': '',
       'input_data': {},
+      'panduan_pertanyaan': '1. Adakah pemegang programnya?\n2. Bagaimana capaian program-program promosi kesehatan sebelum dan sesudah bencana?\n3. Bagaimana keberlanjutan program pada situasi bencana?\n4. Apakah ada perencanaan dan penganggaran program?'
     },
     {
       'nama_indikator': '1. Program Upaya Kesehatan Masyarakat Esensial',
@@ -31,8 +32,176 @@ class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
       ],
       'selected_kriteria': '',
       'input_data': {},
+       'panduan_pertanyaan': '1. Adakah pemegang programnya?\n2. Bagaimana capaian program-program promosi kesehatan sebelum dan sesudah bencana?\n3. Bagaimana keberlanjutan program pada situasi bencana?\n4. Apakah ada perencanaan dan penganggaran program?'
     },
     // Tambahkan data lainnya di sini
+    {
+      'nama_indikator': '1. Program Upaya Kesehatan Masyarakat Esensial',
+      'sub_indikator': '1.3 Pelayanan kesehatan ibu, anak, dan keluarga berencana',
+      'kriteria': [
+        'ANC',
+        'Persalinan',
+        'PONED',
+        'cakupan KB',
+        'Kesehatan reproduksi kelompok rentan',
+        'Posyandu',
+        'ODHA',
+      ],
+      'selected_kriteria': '',
+      'input_data': {},
+      'panduan_pertanyaan': '1. Adakah pemegang programnya?\n2. Bagaimana capaian program-program promosi kesehatan sebelum dan sesudah bencana?\n3. Bagaimana keberlanjutan program pada situasi bencana?\n4. Apakah ada perencanaan dan penganggaran program?'
+    },
+    {
+      'nama_indikator': '1. Program Upaya Kesehatan Masyarakat Esensial',
+      'sub_indikator': '1.4 Pelayanan gizi',
+      'kriteria': [
+        'Penilaian status gizi kelompok rentan',
+        'PMT',
+        'PMBA',
+      ],
+      'selected_kriteria': '',
+      'input_data': {},
+      'panduan_pertanyaan': '1. Adakah pemegang programnya?\n2. Bagaimana capaian program-program promosi kesehatan sebelum dan sesudah bencana?\n3. Bagaimana keberlanjutan program pada situasi bencana?\n4. Apakah ada perencanaan dan penganggaran program?'
+    },
+    {
+      'nama_indikator': '1. Program Upaya Kesehatan Masyarakat Esensial',
+      'sub_indikator': '1.5 Pelaporan pencegahan dan pengendalian penyakit',
+      'kriteria': [
+        'SKdR target kelengkapan, ketepatan, dan respon alert',
+        'Laporan KLB <24 jam',
+      ],
+      'selected_kriteria': '',
+      'input_data': {},
+    },
+    {
+      'nama_indikator': '1. Program Upaya Kesehatan Masyarakat Esensial',
+      'sub_indikator': '1.6 Penyakit menular',
+      'kriteria': [
+        'HIV/AIDS',
+        'Frambusia',
+        'Tuberculosis',
+        'Malaria',
+        'Demam Berdarah',
+        'Influenza',
+        'Flu burung',
+        'Kusta',
+        'Filariasis',
+        'Leptopirosis',
+        'Polio',
+        'Campak',
+        'Difteri',
+        'Pertusis',
+        'Hepatitis B',
+        'Tetanus',
+      ],
+      'selected_kriteria': '',
+      'input_data': {},
+    },
+    {
+      'nama_indikator': '1. Program Upaya Kesehatan Masyarakat Esensial',
+      'sub_indikator': '1.7 Penyakit tidak menular',
+      'kriteria': [
+        'Hipertensi',
+        'Diabetes Melitus',
+        'Penyakit Paru obstruksi Kronik (PPOK)',
+        'Perokok',
+        'Kesehatan Jiwa',
+      ],
+      'selected_kriteria': '',
+      'input_data': {},
+    },
+    {
+      'nama_indikator': '1. Program Upaya Kesehatan Masyarakat Esensial',
+      'sub_indikator': '1.8 Penyakit Endemis Imunisasi',
+      'kriteria': [
+        'Penyakit endemis imunisasi',
+      ],
+      'selected_kriteria': '',
+      'input_data': {},
+    },
+     {
+      'nama_indikator': '2. Program Jejaring',
+      'sub_indikator': '2.1 Puskesmas pembantu',
+      'kriteria': [
+        'Puskesmas pembantu',
+      ],
+      'selected_kriteria': '',
+      'input_data': {},
+    },
+     {
+      'nama_indikator': '2. Program Jejaring',
+      'sub_indikator': '2.2 Puskesmas keliling',
+      'kriteria': [
+        'Puskesmas keliling',
+      ],
+      'selected_kriteria': '',
+      'input_data': {},
+    },
+     {
+      'nama_indikator': '2. Program Jejaring',
+      'sub_indikator': '2.3 Posyandu',
+      'kriteria': [
+        'Posyandu',
+      ],
+      'selected_kriteria': '',
+      'input_data': {},
+    },
+    {
+      'nama_indikator': '3. Program Upaya Kesehatan Perorangan',
+      'sub_indikator': '3.1 Rawat Jalan',
+      'kriteria': [
+        'Rawat Jalan',
+      ],
+      'selected_kriteria': '',
+      'input_data': {},
+    },
+    {
+      'nama_indikator': '3. Program Upaya Kesehatan Perorangan',
+      'sub_indikator': '3.2 Pelayanan gawat darurat',
+      'kriteria': [
+        'Pelayanan gawat darurat',
+      ],
+      'selected_kriteria': '',
+      'input_data': {},
+    },
+    {
+      'nama_indikator': '3. Program Upaya Kesehatan Perorangan',
+      'sub_indikator': '3.3 Rawat inap',
+      'kriteria': [
+        'Rawat inap',
+      ],
+      'selected_kriteria': '',
+      'input_data': {},
+    },
+     {
+      'nama_indikator': '4. Program penyelenggaraan kegiatan puskesmas',
+      'sub_indikator': '4.1 Manajemen puskesmas',
+      'kriteria': [
+        'Manajemen puskesmas',
+      ],
+      'selected_kriteria': '',
+      'input_data': {},
+    },
+     {
+      'nama_indikator': '4. Program penyelenggaraan kegiatan puskesmas',
+      'sub_indikator': '4.2 Pelayanan Kefarmasian',
+      'kriteria': [
+        'Pelayanan kefarmasian',
+      ],
+      'selected_kriteria': '',
+      'input_data': {},
+    },
+     {
+      'nama_indikator': '4. Program penyelenggaraan kegiatan puskesmas',
+      'sub_indikator': '4.3 Pelayanan Laboratorium',
+      'kriteria': [
+        'Pelayanan Laboratorium',
+      ],
+      'selected_kriteria': '',
+      'input_data': {},
+    },
+    
+    
   ];
 
   @override
@@ -145,6 +314,7 @@ class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
                                   color: Colors.blue,
                                 ),
                                 onPressed: () {
+                                  
                                   // Aksi saat tombol visibility ditekan
                                 },
                               ),
@@ -154,6 +324,23 @@ class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
                                   color: Colors.orange,
                                 ),
                                 onPressed: () {
+                                  showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: Text('Panduan Pertanyaan'),
+                            content: Text(data[index]['panduan_pertanyaan']),
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                  },
+                                child: Text('Tutup'),
+                              ),
+                              ],
+                          );
+                          },
+                      );
                                   // Aksi saat tombol help ditekan
                                 },
                               ),
