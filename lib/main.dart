@@ -176,10 +176,12 @@ class MyApp extends StatelessWidget {
           final args = settings.arguments as Map<String, dynamic>;
           return MaterialPageRoute(
             builder: (context) => PenilaianProgramScreen(
-              // userId: args['userId'],
-              // kegiatanId: args['kegiatanId'],
-              // id_category: args['id_category'],
-              // entryId: args['entryId'],
+              userId: args['userId'],
+              kegiatanId: args['kegiatanId'],
+              id_category: args['id_category'],
+              entryId: args['entryId'],
+              puskesmas: "",
+
             ),
           );
         } else if (settings.name == '/penilaian_pembiayaan') {

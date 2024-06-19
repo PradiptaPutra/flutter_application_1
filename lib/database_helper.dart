@@ -20,7 +20,7 @@ class DatabaseHelper {
     print('Database initialized at path: $path');
     return openDatabase(
       path,
-      version: 11, // Incremented version number
+      version: 12, // Incremented version number
       onCreate: _createDb,
       onUpgrade: _upgradeDb,
     );
@@ -57,6 +57,10 @@ class DatabaseHelper {
         sesudah TEXT,
         sebelum2 TEXT,
         sesudah2 TEXT,
+        indikator1 TEXT,
+        indikator2 TEXT,
+        indikator3 TEXT,
+        indikator4 TEXT,
         keterangan TEXT,
         FOREIGN KEY(user_id) REFERENCES Pengguna(user_id),
         FOREIGN KEY(kegiatan_id) REFERENCES Kegiatan(kegiatan_id)
@@ -109,6 +113,12 @@ class DatabaseHelper {
       await db.execute('ALTER TABLE DataEntry ADD COLUMN SBL TEXT');
       await db.execute('ALTER TABLE DataEntry ADD COLUMN SDH TEXT');
     }
+    if (oldVersion < 12) {
+      await db.execute('ALTER TABLE DataEntry ADD COLUMN indikator1 TEXT');
+      await db.execute('ALTER TABLE DataEntry ADD COLUMN indikator2 TEXT');
+      await db.execute('ALTER TABLE DataEntry ADD COLUMN indikator3 TEXT');
+      await db.execute('ALTER TABLE DataEntry ADD COLUMN indikator4 TEXT');
+    }
   }
 
   Future<void> insertPengguna(Map<String, dynamic> pengguna) async {
@@ -149,16 +159,6 @@ class DatabaseHelper {
     final db = await database;
     await db.insert('DataEntry', dataEntry, conflictAlgorithm: ConflictAlgorithm.replace);
   }
-
-  // Future<void> updateDataEntry(int entryId, Map<String, dynamic> dataEntry) async {
-  //   final db = await database;
-  //   await db.update(
-  //     'DataEntry',
-  //     dataEntry,
-  //     where: 'entry_id = ?',
-  //     whereArgs: [entryId],
-  //   );
-  // }
 
   Future<void> saveDataEntry(Map<String, dynamic> dataEntry) async {
     final db = await database;
@@ -311,7 +311,8 @@ class DatabaseHelper {
     }
     return excelData;
   }
-Future<double?> getSdhValue(int? kegiatanId, int categoryId, String indikator) async {
+
+  Future<double?> getSdhValue(int? kegiatanId, int categoryId, String indikator) async {
     final db = await database;
 
     print('Query Arguments - kegiatanId: $kegiatanId, categoryId: $categoryId, indikator: $indikator');
@@ -331,7 +332,7 @@ Future<double?> getSdhValue(int? kegiatanId, int categoryId, String indikator) a
       return double.tryParse(result[0]['SDH'].toString());
     }
     return null;
-}
+  }
 
   Future<List<Map<String, dynamic>>> getEntriesByKegiatanIdAndIndikator(int kegiatanId, int categoryId, String indikator) async {
     final db = await database;
@@ -353,6 +354,7 @@ Future<double?> getSdhValue(int? kegiatanId, int categoryId, String indikator) a
       whereArgs: [entry['entry_id']],
     );
   }
+
   Future<List<Map<String, dynamic>>> loadExcelDataDirectly2(String assetPath) async {
     List<Map<String, dynamic>> excelData = [];
     try {
@@ -491,5 +493,5 @@ Future<double?> getSdhValue(int? kegiatanId, int categoryId, String indikator) a
       return result.first['dropdown_option'] as String;
     }
     return ''; // Return empty string or handle null case as per your requirement
-  }  
+  }
 }

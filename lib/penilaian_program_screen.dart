@@ -1,7 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'database_helper.dart'; // Pastikan ini sesuai dengan path file DatabaseHelper
 
 class PenilaianProgramScreen extends StatefulWidget {
+  final int? kegiatanId;
+  final int id_category;
+  final int userId;
+  final int? entryId;
+  final String puskesmas;
+
+  PenilaianProgramScreen({
+    this.kegiatanId,
+    required this.id_category,
+    required this.userId,
+    this.entryId,
+    required this.puskesmas,
+  });
+
   @override
   _PenilaianProgramScreenState createState() => _PenilaianProgramScreenState();
 }
@@ -18,7 +33,7 @@ class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
         'UKS',
       ],
       'selected_kriteria': '',
-      'input_data': {},
+      'input_data': <String, Map<String, String>>{},
       'panduan_pertanyaan': '1. Adakah pemegang programnya?\n2. Bagaimana capaian program-program promosi kesehatan sebelum dan sesudah bencana?\n3. Bagaimana keberlanjutan program pada situasi bencana?\n4. Apakah ada perencanaan dan penganggaran program?'
     },
     {
@@ -31,7 +46,7 @@ class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
         'Penyehatan lingkungan',
       ],
       'selected_kriteria': '',
-      'input_data': {},
+      'input_data': <String, Map<String, String>>{},
        'panduan_pertanyaan': '1. Adakah pemegang programnya?\n2. Bagaimana capaian program-program promosi kesehatan sebelum dan sesudah bencana?\n3. Bagaimana keberlanjutan program pada situasi bencana?\n4. Apakah ada perencanaan dan penganggaran program?'
     },
     // Tambahkan data lainnya di sini
@@ -204,26 +219,58 @@ class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
     
   ];
 
+  final DatabaseHelper _databaseHelper = DatabaseHelper();
+  
+  get i_ => null;
+  
+  get index_ => null;
+
   @override
   void initState() {
     super.initState();
     _loadData();
+    _loadDataFromDB();
   }
 
   Future<void> _loadData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     for (int i = 0; i < data.length; i++) {
-      String? selectedKriteria = prefs.getString('selected_kriteria_$i');
+      String? selectedKriteria = prefs.getString('selected_kriteria_${widget.kegiatanId}_$i');
       setState(() {
         data[i]['selected_kriteria'] = selectedKriteria ?? '';
       });
       if (selectedKriteria != null && selectedKriteria.isNotEmpty) {
         setState(() {
           data[i]['input_data'][selectedKriteria] = {
-            'indikator1': prefs.getString('indikator1_${i}_$selectedKriteria') ?? '',
-            'indikator2': prefs.getString('indikator2_${i}_$selectedKriteria') ?? '',
-            'indikator3': prefs.getString('indikator3_${i}_$selectedKriteria') ?? '',
-            'indikator4': prefs.getString('indikator4_${i}_$selectedKriteria') ?? '',
+            'indikator1': prefs.getString('indikator1_${widget.kegiatanId}_$i_$selectedKriteria') ?? '',
+            'indikator2': prefs.getString('indikator2_${widget.kegiatanId}_$i_$selectedKriteria') ?? '',
+            'indikator3': prefs.getString('indikator3_${widget.kegiatanId}_$i_$selectedKriteria') ?? '',
+            'indikator4': prefs.getString('indikator4_${widget.kegiatanId}_$i_$selectedKriteria') ?? '',
+          };
+        });
+      }
+    }
+  }
+
+  Future<void> _loadDataFromDB() async {
+    for (int i = 0; i < data.length; i++) {
+      String namaIndikator = data[i]['nama_indikator'];
+      String subIndikator = data[i]['sub_indikator'];
+      List<Map<String, dynamic>> savedData = await _databaseHelper.getEntriesByKegiatanIdAndIndikator(
+        widget.kegiatanId!,
+        widget.id_category,
+        namaIndikator,
+      );
+
+      for (var entry in savedData) {
+        String kriteria = entry['kriteria'];
+        setState(() {
+          data[i]['selected_kriteria'] = kriteria;
+          data[i]['input_data'][kriteria] = {
+            'indikator1': entry['indikator1'] ?? '',
+            'indikator2': entry['indikator2'] ?? '',
+            'indikator3': entry['indikator3'] ?? '',
+            'indikator4': entry['indikator4'] ?? '',
           };
         });
       }
@@ -233,13 +280,43 @@ class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
   Future<void> _saveData(int index) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String selectedKriteria = data[index]['selected_kriteria'];
-    await prefs.setString('selected_kriteria_$index', selectedKriteria);
     if (selectedKriteria.isNotEmpty) {
-      await prefs.setString('indikator1_${index}_$selectedKriteria', data[index]['input_data'][selectedKriteria]['indikator1']);
-      await prefs.setString('indikator2_${index}_$selectedKriteria', data[index]['input_data'][selectedKriteria]['indikator2']);
-      await prefs.setString('indikator3_${index}_$selectedKriteria', data[index]['input_data'][selectedKriteria]['indikator3']);
-      await prefs.setString('indikator4_${index}_$selectedKriteria', data[index]['input_data'][selectedKriteria]['indikator4']);
+      Map<String, String> inputData = data[index]['input_data'][selectedKriteria]!;
+      await prefs.setString('selected_kriteria_${widget.kegiatanId}_$index', selectedKriteria);
+      await prefs.setString('indikator1_${widget.kegiatanId}_$index_$selectedKriteria', inputData['indikator1'] ?? '');
+      await prefs.setString('indikator2_${widget.kegiatanId}_$index_$selectedKriteria', inputData['indikator2'] ?? '');
+      await prefs.setString('indikator3_${widget.kegiatanId}_$index_$selectedKriteria', inputData['indikator3'] ?? '');
+      await prefs.setString('indikator4_${widget.kegiatanId}_$index_$selectedKriteria', inputData['indikator4'] ?? '');
+
+      // Simpan ke database hanya jika ada nilai
+      if (inputData['indikator1']!.isNotEmpty ||
+          inputData['indikator2']!.isNotEmpty ||
+          inputData['indikator3']!.isNotEmpty ||
+          inputData['indikator4']!.isNotEmpty) {
+        Map<String, dynamic> dataEntry = {
+          'user_id': widget.userId,
+          'kegiatan_id': widget.kegiatanId,
+          'id_category': widget.id_category,
+          'puskesmas': widget.puskesmas,
+          'indikator': data[index]['nama_indikator'],
+          'sub_indikator': data[index]['sub_indikator'],
+          'kriteria': selectedKriteria,
+          'indikator1': inputData['indikator1'],
+          'indikator2': inputData['indikator2'],
+          'indikator3': inputData['indikator3'],
+          'indikator4': inputData['indikator4'],
+        };
+
+        await _databaseHelper.saveDataEntry(dataEntry);
+      }
     }
+  }
+
+  Future<void> _saveAllData() async {
+    for (int i = 0; i < data.length; i++) {
+      await _saveData(i);
+    }
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Data has been saved successfully')));
   }
 
   @override
@@ -370,7 +447,7 @@ class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
                       setState(() {
                         data[index]['selected_kriteria'] = newValue ?? '';
                         if (!data[index]['input_data'].containsKey(newValue)) {
-                          data[index]['input_data'][newValue] = {
+                          data[index]['input_data'][newValue!] = {
                             'indikator1': '',
                             'indikator2': '',
                             'indikator3': '',
@@ -447,12 +524,10 @@ class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
           );
         },
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _saveAllData,
+        child: Icon(Icons.save),
+      ),
     );
   }
-}
-
-void main() {
-  runApp(MaterialApp(
-    home: PenilaianProgramScreen(),
-  ));
 }
