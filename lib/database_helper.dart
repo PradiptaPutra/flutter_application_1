@@ -175,6 +175,12 @@ class DatabaseHelper {
     }
   }
 
+
+  Future<void> saveDataEntry2(Map<String, dynamic> dataEntry) async {
+    final db = await database;
+    await db.insert('entries', dataEntry);
+  }
+
   Future<List<Map<String, dynamic>>> getDataEntriesForUser(int userId) async {
     final db = await database;
     final List<Map<String, dynamic>> maps = await db.query(
@@ -338,23 +344,48 @@ class DatabaseHelper {
     final db = await database;
 
     return await db.query(
-      'dataentry',
+      'DataEntry',
       where: 'kegiatan_id = ? AND id_category = ? AND indikator = ?',
       whereArgs: [kegiatanId, categoryId, indikator],
     );
   }
-
-  Future<int> updateDataEntry(Map<String, dynamic> entry) async {
+Future<List<Map<String, dynamic>>> getEntriesByKegiatanIdAndKriteria(int kegiatanId, String kriteria) async {
     final db = await database;
-
-    return await db.update(
-      'dataentry',
-      entry,
-      where: 'entry_id = ?',
-      whereArgs: [entry['entry_id']],
+    return await db.query(
+      'DataEntry',
+      where: 'kegiatan_id = ? AND kriteria = ?',
+      whereArgs: [kegiatanId, kriteria],
     );
   }
 
+  // Future<int> updateDataEntry(Map<String, dynamic> entry) async {
+  //   final db = await database;
+
+  //   return await db.update(
+  //     'dataentry',
+  //     entry,
+  //     where: 'entry_id = ?',
+  //     whereArgs: [entry['entry_id']],
+  //   );
+  // }
+  Future<void> updateDataEntry(Map<String, dynamic> dataEntry) async {
+    final db = await database;
+    await db.update(
+      'DataEntry',
+      dataEntry,
+      where: 'kegiatan_id = ? AND kriteria = ?',
+      whereArgs: [dataEntry['kegiatan_id'], dataEntry['kriteria']],
+    );
+  }
+Future<void> updateDataEntry2(Map<String, dynamic> dataEntry) async {
+    final db = await database;
+    await db.update(
+      'entries',
+      dataEntry,
+      where: 'kegiatan_id = ? AND kriteria = ?',
+      whereArgs: [dataEntry['kegiatan_id'], dataEntry['kriteria']],
+    );
+  }
   Future<List<Map<String, dynamic>>> loadExcelDataDirectly2(String assetPath) async {
     List<Map<String, dynamic>> excelData = [];
     try {
@@ -445,6 +476,15 @@ class DatabaseHelper {
     return maps;
   }
 
+  Future<bool> entryExists(int kegiatanId, String kriteria) async {
+    final db = await database;
+    List<Map<String, dynamic>> result = await db.query(
+      'DataEntry',
+      where: 'kegiatan_id = ? AND kriteria = ?',
+      whereArgs: [kegiatanId, kriteria],
+    );
+    return result.isNotEmpty;
+  }
   Future<double> getProgressForKegiatan(int kegiatanId) async {
     final db = await database;
     final List<Map<String, dynamic>> entries = await db.rawQuery('''

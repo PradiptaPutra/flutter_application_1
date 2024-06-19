@@ -219,74 +219,45 @@ class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
     
   ];
 
-  final DatabaseHelper _databaseHelper = DatabaseHelper();
-  
-  get i_ => null;
-  
-  get index_ => null;
+    final DatabaseHelper _databaseHelper = DatabaseHelper();
 
   @override
   void initState() {
     super.initState();
-    _loadData();
     _loadDataFromDB();
-  }
-
-  Future<void> _loadData() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    for (int i = 0; i < data.length; i++) {
-      String? selectedKriteria = prefs.getString('selected_kriteria_${widget.kegiatanId}_$i');
-      setState(() {
-        data[i]['selected_kriteria'] = selectedKriteria ?? '';
-      });
-      if (selectedKriteria != null && selectedKriteria.isNotEmpty) {
-        setState(() {
-          data[i]['input_data'][selectedKriteria] = {
-            'indikator1': prefs.getString('indikator1_${widget.kegiatanId}_$i_$selectedKriteria') ?? '',
-            'indikator2': prefs.getString('indikator2_${widget.kegiatanId}_$i_$selectedKriteria') ?? '',
-            'indikator3': prefs.getString('indikator3_${widget.kegiatanId}_$i_$selectedKriteria') ?? '',
-            'indikator4': prefs.getString('indikator4_${widget.kegiatanId}_$i_$selectedKriteria') ?? '',
-          };
-        });
-      }
-    }
   }
 
   Future<void> _loadDataFromDB() async {
     for (int i = 0; i < data.length; i++) {
-      String namaIndikator = data[i]['nama_indikator'];
-      String subIndikator = data[i]['sub_indikator'];
-      List<Map<String, dynamic>> savedData = await _databaseHelper.getEntriesByKegiatanIdAndIndikator(
+      String kriteria = data[i]['selected_kriteria'];
+      List<Map<String, dynamic>> savedData = await _databaseHelper.getEntriesByKegiatanIdAndKriteria(
         widget.kegiatanId!,
-        widget.id_category,
-        namaIndikator,
+        kriteria,
       );
 
-      for (var entry in savedData) {
-        String kriteria = entry['kriteria'];
+      if (savedData.isNotEmpty) {
+        for (var entry in savedData) {
+          setState(() {
+            data[i]['input_data'][kriteria] = {
+              'indikator1': entry['indikator1'] ?? '',
+              'indikator2': entry['indikator2'] ?? '',
+              'indikator3': entry['indikator3'] ?? '',
+              'indikator4': entry['indikator4'] ?? '',
+            };
+          });
+        }
+      } else {
         setState(() {
-          data[i]['selected_kriteria'] = kriteria;
-          data[i]['input_data'][kriteria] = {
-            'indikator1': entry['indikator1'] ?? '',
-            'indikator2': entry['indikator2'] ?? '',
-            'indikator3': entry['indikator3'] ?? '',
-            'indikator4': entry['indikator4'] ?? '',
-          };
+          data[i]['input_data'].clear();
         });
       }
     }
   }
 
   Future<void> _saveData(int index) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
     String selectedKriteria = data[index]['selected_kriteria'];
     if (selectedKriteria.isNotEmpty) {
       Map<String, String> inputData = data[index]['input_data'][selectedKriteria]!;
-      await prefs.setString('selected_kriteria_${widget.kegiatanId}_$index', selectedKriteria);
-      await prefs.setString('indikator1_${widget.kegiatanId}_$index_$selectedKriteria', inputData['indikator1'] ?? '');
-      await prefs.setString('indikator2_${widget.kegiatanId}_$index_$selectedKriteria', inputData['indikator2'] ?? '');
-      await prefs.setString('indikator3_${widget.kegiatanId}_$index_$selectedKriteria', inputData['indikator3'] ?? '');
-      await prefs.setString('indikator4_${widget.kegiatanId}_$index_$selectedKriteria', inputData['indikator4'] ?? '');
 
       // Simpan ke database hanya jika ada nilai
       if (inputData['indikator1']!.isNotEmpty ||
@@ -307,7 +278,13 @@ class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
           'indikator4': inputData['indikator4'],
         };
 
-        await _databaseHelper.saveDataEntry(dataEntry);
+        // Periksa apakah data dengan kegiatan_id dan kriteria sudah ada
+        bool exists = await _databaseHelper.entryExists(widget.kegiatanId!, selectedKriteria);
+        if (exists) {
+          await _databaseHelper.updateDataEntry(dataEntry);
+        } else {
+          await _databaseHelper.saveDataEntry(dataEntry);
+        }
       }
     }
   }
@@ -391,7 +368,6 @@ class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
                                   color: Colors.blue,
                                 ),
                                 onPressed: () {
-                                  
                                   // Aksi saat tombol visibility ditekan
                                 },
                               ),
@@ -402,22 +378,22 @@ class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
                                 ),
                                 onPressed: () {
                                   showDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return AlertDialog(
-                            title: Text('Panduan Pertanyaan'),
-                            content: Text(data[index]['panduan_pertanyaan']),
-                            actions: [
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                  },
-                                child: Text('Tutup'),
-                              ),
-                              ],
-                          );
-                          },
-                      );
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return AlertDialog(
+                                        title: Text('Panduan Pertanyaan'),
+                                        content: Text(data[index]['panduan_pertanyaan']),
+                                        actions: [
+                                          TextButton(
+                                            onPressed: () {
+                                              Navigator.of(context).pop();
+                                            },
+                                            child: Text('Tutup'),
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  );
                                   // Aksi saat tombol help ditekan
                                 },
                               ),
@@ -443,7 +419,7 @@ class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
                         child: Text(value),
                       );
                     }).toList(),
-                    onChanged: (String? newValue) {
+                    onChanged: (String? newValue) async {
                       setState(() {
                         data[index]['selected_kriteria'] = newValue ?? '';
                         if (!data[index]['input_data'].containsKey(newValue)) {
@@ -454,7 +430,6 @@ class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
                             'indikator4': '',
                           };
                         }
-                        _saveData(index);
                       });
                     },
                   ),
