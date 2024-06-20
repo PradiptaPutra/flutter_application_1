@@ -22,6 +22,8 @@ class PenilaianProgramScreen extends StatefulWidget {
 }
 
 class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
+  final DatabaseHelper _dbHelper = DatabaseHelper();
+  String puskesmas = "";
   final List<Map<String, dynamic>> data = [
     {
       'nama_indikator': '1. Program Upaya Kesehatan Masyarakat Esensial',
@@ -215,8 +217,6 @@ class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
       'selected_kriteria': '',
       'input_data': {},
     },
-    
-    
   ];
 
   final DatabaseHelper _databaseHelper = DatabaseHelper();
@@ -265,6 +265,14 @@ class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
   }
 
   Future<void> _saveData(int index) async {
+     List<Map<String, dynamic>> kegiatanList = await _dbHelper.getKegiatanForUser(widget.userId);
+
+    Map<String, dynamic> kegiatan = kegiatanList.firstWhere(
+      (kegiatan) => kegiatan['kegiatan_id'] == widget.kegiatanId,
+      orElse: () => <String, dynamic>{},
+    );
+
+    puskesmas = kegiatan.isNotEmpty ? kegiatan['nama_puskesmas'] : '';
     String selectedKriteria = data[index]['selected_kriteria'];
     if (selectedKriteria.isNotEmpty) {
       Map<String, String> inputData = data[index]['input_data'][selectedKriteria]!;
@@ -274,11 +282,14 @@ class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
           inputData['indikator2']!.isNotEmpty ||
           inputData['indikator3']!.isNotEmpty ||
           inputData['indikator4']!.isNotEmpty) {
+
+             // Tambahkan print statement untuk menampilkan widget.puskesmas
+      print('Puskesmas: ${widget.puskesmas}');
         Map<String, dynamic> dataEntry = {
           'user_id': widget.userId,
           'kegiatan_id': widget.kegiatanId,
           'id_category': widget.id_category,
-          'puskesmas': widget.puskesmas,
+          'puskesmas': puskesmas,
           'indikator': data[index]['nama_indikator'],
           'sub_indikator': data[index]['sub_indikator'],
           'kriteria': selectedKriteria,
@@ -304,6 +315,26 @@ class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
       await _saveData(i);
     }
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Data has been saved successfully')));
+  }
+
+  void _showPanduanPertanyaan(String panduanPertanyaan) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Panduan Pertanyaan'),
+          content: Text(panduanPertanyaan),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Tutup'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -486,64 +517,112 @@ class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
                     },
                   ),
                   SizedBox(height: 10),
-                  TextField(
-                    controller: indikator1Controller,
-                    decoration: InputDecoration(
-                      labelText: 'Indikator 1',
-                      border: OutlineInputBorder(),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                    ),
-                    onChanged: (value) {
-                      setState(() {
-                        data[index]['input_data'][selectedKriteria]['indikator1'] = value;
-                      });
-                      _saveData(index);
-                    },
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: indikator1Controller,
+                          decoration: InputDecoration(
+                            labelText: 'Indikator 1',
+                            border: OutlineInputBorder(),
+                            contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                          ),
+                          onChanged: (value) {
+                            setState(() {
+                              data[index]['input_data'][selectedKriteria]['indikator1'] = value;
+                            });
+                            _saveData(index);
+                          },
+                        ),
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.help_outline),
+                        onPressed: () {
+                          _showPanduanPertanyaan(data[index]['panduan_pertanyaan']);
+                        },
+                      ),
+                    ],
                   ),
                   SizedBox(height: 10),
-                  TextField(
-                    controller: indikator2Controller,
-                    decoration: InputDecoration(
-                      labelText: 'Indikator 2',
-                      border: OutlineInputBorder(),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                    ),
-                    onChanged: (value) {
-                      setState(() {
-                        data[index]['input_data'][selectedKriteria]['indikator2'] = value;
-                      });
-                      _saveData(index);
-                    },
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: indikator2Controller,
+                          decoration: InputDecoration(
+                            labelText: 'Indikator 2',
+                            border: OutlineInputBorder(),
+                            contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                          ),
+                          onChanged: (value) {
+                            setState(() {
+                              data[index]['input_data'][selectedKriteria]['indikator2'] = value;
+                            });
+                            _saveData(index);
+                          },
+                        ),
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.help_outline),
+                        onPressed: () {
+                          _showPanduanPertanyaan(data[index]['panduan_pertanyaan']);
+                        },
+                      ),
+                    ],
                   ),
                   SizedBox(height: 10),
-                  TextField(
-                    controller: indikator3Controller,
-                    decoration: InputDecoration(
-                      labelText: 'Indikator 3',
-                      border: OutlineInputBorder(),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                    ),
-                    onChanged: (value) {
-                      setState(() {
-                        data[index]['input_data'][selectedKriteria]['indikator3'] = value;
-                      });
-                      _saveData(index);
-                    },
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: indikator3Controller,
+                          decoration: InputDecoration(
+                            labelText: 'Indikator 3',
+                            border: OutlineInputBorder(),
+                            contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                          ),
+                          onChanged: (value) {
+                            setState(() {
+                              data[index]['input_data'][selectedKriteria]['indikator3'] = value;
+                            });
+                            _saveData(index);
+                          },
+                        ),
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.help_outline),
+                        onPressed: () {
+                          _showPanduanPertanyaan(data[index]['panduan_pertanyaan']);
+                        },
+                      ),
+                    ],
                   ),
                   SizedBox(height: 10),
-                  TextField(
-                    controller: indikator4Controller,
-                    decoration: InputDecoration(
-                      labelText: 'Indikator 4',
-                      border: OutlineInputBorder(),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                    ),
-                    onChanged: (value) {
-                      setState(() {
-                        data[index]['input_data'][selectedKriteria]['indikator4'] = value;
-                      });
-                      _saveData(index);
-                    },
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: indikator4Controller,
+                          decoration: InputDecoration(
+                            labelText: 'Indikator 4',
+                            border: OutlineInputBorder(),
+                            contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                          ),
+                          onChanged: (value) {
+                            setState(() {
+                              data[index]['input_data'][selectedKriteria]['indikator4'] = value;
+                            });
+                            _saveData(index);
+                          },
+                        ),
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.help_outline),
+                        onPressed: () {
+                          _showPanduanPertanyaan(data[index]['panduan_pertanyaan']);
+                        },
+                      ),
+                    ],
                   ),
                 ],
               ),
