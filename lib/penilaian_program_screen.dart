@@ -36,7 +36,11 @@ class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
       ],
       'selected_kriteria': '',
       'input_data': <String, Map<String, String>>{},
-      'panduan_pertanyaan': '1. Adakah pemegang programnya?\n2. Bagaimana capaian program-program promosi kesehatan sebelum dan sesudah bencana?\n3. Bagaimana keberlanjutan program pada situasi bencana?\n4. Apakah ada perencanaan dan penganggaran program?'
+      'panduan_pertanyaan': '1. Adakah pemegang programnya?\n2. Bagaimana capaian program-program promosi kesehatan sebelum dan sesudah bencana?\n3. Bagaimana keberlanjutan program pada situasi bencana?\n4. Apakah ada perencanaan dan penganggaran program?',
+      'indikator1help': 'Pemegang program  \n - Ada = 2 \n - Tidak ada tetapi \n ada pengganti = 1 \n - Tidak ada dan tidak ada pengganti = 0',
+      'indikator2help': 'Capaian program sebelum dan sesudah bencana \n - peningkatan = 2 \n - Jika sama = 1 \n - penurunan = 0',
+      'indikator3help': 'Situasi program pascabencana \n - Terus berjalan = 2 \n - Sedikit tehambat tetapi terus diupayakan berjalan = 1 \n - tidak berjalan =0',
+      'indikator4help': 'Rencana program \n - Rencana jelas, terukur, dan terencana di anggaran = 2 \n  - Rencana program yang kurang jelas, belum terukur, dan hanya terencana sebagian = 1 \n - Tidak memiliki rencana, tidak terukur dan tidak terencana dianggaran = 0'
     },
     {
       'nama_indikator': '1. Program Upaya Kesehatan Masyarakat Esensial',
@@ -337,6 +341,25 @@ class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
     );
   }
 
+void _showPanduanIndikator(String panduanPertanyaan) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Panduan Indikator '),
+          content: Text(panduanPertanyaan),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Tutup'),
+            ),
+          ],
+        );
+      },
+    );
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -538,7 +561,7 @@ class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
                       IconButton(
                         icon: Icon(Icons.help_outline),
                         onPressed: () {
-                          _showPanduanPertanyaan(data[index]['panduan_pertanyaan']);
+                          _showPanduanIndikator(data[index]['indikator1help']);
                         },
                       ),
                     ],
@@ -565,7 +588,7 @@ class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
                       IconButton(
                         icon: Icon(Icons.help_outline),
                         onPressed: () {
-                          _showPanduanPertanyaan(data[index]['panduan_pertanyaan']);
+                          _showPanduanIndikator(data[index]['indikator2help']);
                         },
                       ),
                     ],
@@ -592,7 +615,7 @@ class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
                       IconButton(
                         icon: Icon(Icons.help_outline),
                         onPressed: () {
-                          _showPanduanPertanyaan(data[index]['panduan_pertanyaan']);
+                          _showPanduanIndikator(data[index]['indikator3help']);
                         },
                       ),
                     ],
@@ -619,7 +642,7 @@ class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
                       IconButton(
                         icon: Icon(Icons.help_outline),
                         onPressed: () {
-                          _showPanduanPertanyaan(data[index]['panduan_pertanyaan']);
+                          _showPanduanIndikator(data[index]['indikator4help']);
                         },
                       ),
                     ],
