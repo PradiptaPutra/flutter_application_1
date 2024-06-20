@@ -219,7 +219,7 @@ class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
     
   ];
 
-    final DatabaseHelper _databaseHelper = DatabaseHelper();
+  final DatabaseHelper _databaseHelper = DatabaseHelper();
 
   @override
   void initState() {
@@ -229,27 +229,37 @@ class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
 
   Future<void> _loadDataFromDB() async {
     for (int i = 0; i < data.length; i++) {
-      String kriteria = data[i]['selected_kriteria'];
-      List<Map<String, dynamic>> savedData = await _databaseHelper.getEntriesByKegiatanIdAndKriteria(
-        widget.kegiatanId!,
-        kriteria,
-      );
+      for (String kriteria in data[i]['kriteria']) {
+        List<Map<String, dynamic>> savedData = await _databaseHelper.getEntriesByKegiatanIdAndKriteria(
+          widget.kegiatanId!,
+          kriteria,
+          data[i]['nama_indikator'], // Tambahkan argumen ketiga yang diperlukan
+        );
 
-      if (savedData.isNotEmpty) {
-        for (var entry in savedData) {
+        print('Kriteria: $kriteria');
+        print('Saved Data: $savedData');
+
+        if (savedData.isNotEmpty) {
+          for (var entry in savedData) {
+            setState(() {
+              data[i]['input_data'][kriteria] = {
+                'indikator1': entry['indikator1']?.toString() ?? '',
+                'indikator2': entry['indikator2']?.toString() ?? '',
+                'indikator3': entry['indikator3']?.toString() ?? '',
+                'indikator4': entry['indikator4']?.toString() ?? '',
+              };
+            });
+          }
+        } else {
           setState(() {
             data[i]['input_data'][kriteria] = {
-              'indikator1': entry['indikator1'] ?? '',
-              'indikator2': entry['indikator2'] ?? '',
-              'indikator3': entry['indikator3'] ?? '',
-              'indikator4': entry['indikator4'] ?? '',
+              'indikator1': '',
+              'indikator2': '',
+              'indikator3': '',
+              'indikator4': '',
             };
           });
         }
-      } else {
-        setState(() {
-          data[i]['input_data'].clear();
-        });
       }
     }
   }
@@ -319,6 +329,12 @@ class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
                   'indikator3': '',
                   'indikator4': '',
                 };
+
+          // TextEditingControllers untuk setiap field indikator
+          TextEditingController indikator1Controller = TextEditingController(text: inputData['indikator1']);
+          TextEditingController indikator2Controller = TextEditingController(text: inputData['indikator2']);
+          TextEditingController indikator3Controller = TextEditingController(text: inputData['indikator3']);
+          TextEditingController indikator4Controller = TextEditingController(text: inputData['indikator4']);
 
           return Card(
             margin: EdgeInsets.all(10),
@@ -422,20 +438,56 @@ class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
                     onChanged: (String? newValue) async {
                       setState(() {
                         data[index]['selected_kriteria'] = newValue ?? '';
-                        if (!data[index]['input_data'].containsKey(newValue)) {
-                          data[index]['input_data'][newValue!] = {
-                            'indikator1': '',
-                            'indikator2': '',
-                            'indikator3': '',
-                            'indikator4': '',
-                          };
-                        }
                       });
+
+                      // Update input data dengan data dari database
+                      if (newValue != null) {
+                        List<Map<String, dynamic>> savedData = await _databaseHelper.getEntriesByKegiatanIdAndKriteria(
+                          widget.kegiatanId!,
+                          newValue,
+                          data[index]['nama_indikator'], // Tambahkan argumen ketiga yang diperlukan
+                        );
+
+                        print('New Kriteria: $newValue');
+                        print('Saved Data: $savedData');
+
+                        if (savedData.isNotEmpty) {
+                          for (var entry in savedData) {
+                            setState(() {
+                              data[index]['input_data'][newValue] = {
+                                'indikator1': entry['indikator1']?.toString() ?? '',
+                                'indikator2': entry['indikator2']?.toString() ?? '',
+                                'indikator3': entry['indikator3']?.toString() ?? '',
+                                'indikator4': entry['indikator4']?.toString() ?? '',
+                              };
+                            });
+                          }
+                          // Perbarui nilai TextEditingController
+                          indikator1Controller.text = data[index]['input_data'][newValue]['indikator1'] ?? '';
+                          indikator2Controller.text = data[index]['input_data'][newValue]['indikator2'] ?? '';
+                          indikator3Controller.text = data[index]['input_data'][newValue]['indikator3'] ?? '';
+                          indikator4Controller.text = data[index]['input_data'][newValue]['indikator4'] ?? '';
+                        } else {
+                          setState(() {
+                            data[index]['input_data'][newValue] = {
+                              'indikator1': '',
+                              'indikator2': '',
+                              'indikator3': '',
+                              'indikator4': '',
+                            };
+                          });
+                          // Reset nilai TextEditingController
+                          indikator1Controller.text = '';
+                          indikator2Controller.text = '';
+                          indikator3Controller.text = '';
+                          indikator4Controller.text = '';
+                        }
+                      }
                     },
                   ),
                   SizedBox(height: 10),
                   TextField(
-                    controller: TextEditingController(text: inputData['indikator1']),
+                    controller: indikator1Controller,
                     decoration: InputDecoration(
                       labelText: 'Indikator 1',
                       border: OutlineInputBorder(),
@@ -444,13 +496,13 @@ class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
                     onChanged: (value) {
                       setState(() {
                         data[index]['input_data'][selectedKriteria]['indikator1'] = value;
-                        _saveData(index);
                       });
+                      _saveData(index);
                     },
                   ),
                   SizedBox(height: 10),
                   TextField(
-                    controller: TextEditingController(text: inputData['indikator2']),
+                    controller: indikator2Controller,
                     decoration: InputDecoration(
                       labelText: 'Indikator 2',
                       border: OutlineInputBorder(),
@@ -459,13 +511,13 @@ class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
                     onChanged: (value) {
                       setState(() {
                         data[index]['input_data'][selectedKriteria]['indikator2'] = value;
-                        _saveData(index);
                       });
+                      _saveData(index);
                     },
                   ),
                   SizedBox(height: 10),
                   TextField(
-                    controller: TextEditingController(text: inputData['indikator3']),
+                    controller: indikator3Controller,
                     decoration: InputDecoration(
                       labelText: 'Indikator 3',
                       border: OutlineInputBorder(),
@@ -474,13 +526,13 @@ class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
                     onChanged: (value) {
                       setState(() {
                         data[index]['input_data'][selectedKriteria]['indikator3'] = value;
-                        _saveData(index);
                       });
+                      _saveData(index);
                     },
                   ),
                   SizedBox(height: 10),
                   TextField(
-                    controller: TextEditingController(text: inputData['indikator4']),
+                    controller: indikator4Controller,
                     decoration: InputDecoration(
                       labelText: 'Indikator 4',
                       border: OutlineInputBorder(),
@@ -489,8 +541,8 @@ class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
                     onChanged: (value) {
                       setState(() {
                         data[index]['input_data'][selectedKriteria]['indikator4'] = value;
-                        _saveData(index);
                       });
+                      _saveData(index);
                     },
                   ),
                 ],

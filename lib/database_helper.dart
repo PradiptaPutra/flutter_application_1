@@ -349,12 +349,13 @@ class DatabaseHelper {
       whereArgs: [kegiatanId, categoryId, indikator],
     );
   }
-Future<List<Map<String, dynamic>>> getEntriesByKegiatanIdAndKriteria(int kegiatanId, String kriteria) async {
+
+Future<List<Map<String, dynamic>>> getEntriesByKegiatanIdAndKriteria(int kegiatanId, String kriteria, String indikator) async {
     final db = await database;
     return await db.query(
       'DataEntry',
-      where: 'kegiatan_id = ? AND kriteria = ?',
-      whereArgs: [kegiatanId, kriteria],
+      where: 'kegiatan_id = ? AND kriteria = ? AND indikator = ?',
+      whereArgs: [kegiatanId, kriteria, indikator],
     );
   }
 
