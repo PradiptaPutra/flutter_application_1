@@ -27,8 +27,9 @@ class _PenilaianScreenState extends State<PenilaianScreen> {
   String interpretasiSesudah = "";
   String puskesmas = "";
   String kegiatanId = "";
-  bool showInterpretations = true;
   bool isDataSaved = false;  // New boolean state to track if data is saved
+  bool showInterpretations = false;
+
 
   @override
   void initState() {

@@ -24,8 +24,17 @@ class PenilaianProgramScreen extends StatefulWidget {
 class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
   final DatabaseHelper _dbHelper = DatabaseHelper();
   String puskesmas = "";
-  double overallSkor = 0.0;  // Initialize with a default value
-  String interpretasiOverall = ""; 
+  double totalIndikator1 = 0.0;
+  double totalIndikator2 = 0.0;
+  double totalIndikator3 = 0.0;
+  double totalIndikator4 = 0.0;
+  String interpretasiIndikator1 = "";
+  String interpretasiIndikator2 = "";
+  String interpretasiIndikator3 = "";
+  String interpretasiIndikator4 = "";
+  String interpretasiOverall = "";
+  bool showInterpretations = false;
+
   final List<Map<String, dynamic>> data = [
     {
       'nama_indikator': '1. Program Upaya Kesehatan Masyarakat Esensial',
@@ -225,26 +234,19 @@ class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
     },
   ];
 
-  final DatabaseHelper _databaseHelper = DatabaseHelper();
-  
 
   @override
   void initState() {
     super.initState();
-      _loadDataFromDB().then((_) {
-      _updateOverallScore();
+    _loadDataFromDB().then((_) {
+      _updateAllScores();
     });
   }
-  void _updateOverallScore() {
-    setState(() {
-      overallSkor = _calculateOverallSkor();
-      interpretasiOverall = _interpretasiSkor(overallSkor);
-    });
-  }
+
   Future<void> _loadDataFromDB() async {
     for (int i = 0; i < data.length; i++) {
       for (String kriteria in data[i]['kriteria']) {
-        List<Map<String, dynamic>> savedData = await _databaseHelper.getEntriesByKegiatanIdAndKriteria(
+        List<Map<String, dynamic>> savedData = await _dbHelper.getEntriesByKegiatanIdAndKriteria(
           widget.kegiatanId!,
           kriteria,
           data[i]['nama_indikator'],
@@ -275,6 +277,50 @@ class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
     }
   }
 
+  void _updateAllScores() {
+    setState(() {
+      totalIndikator1 = _calculateTotalSkorForIndikator(1);
+      totalIndikator2 = _calculateTotalSkorForIndikator(2);
+      totalIndikator3 = _calculateTotalSkorForIndikator(3);
+      totalIndikator4 = _calculateTotalSkorForIndikator(4);
+      interpretasiIndikator1 = _setInterpretasi(totalIndikator1);
+      interpretasiIndikator2 = _setInterpretasi(totalIndikator2);
+      interpretasiIndikator3 = _setInterpretasi(totalIndikator3);
+      interpretasiIndikator4 = _setInterpretasi(totalIndikator4);
+      interpretasiOverall = _setInterpretasi(totalIndikator1 * 0.2 + totalIndikator2 * 0.2 + totalIndikator3 * 0.3 + totalIndikator4 * 0.3);
+    });
+  }
+
+  double _calculateTotalSkorForIndikator(int indikator) {
+    double totalSkor = 0;
+    for (var entry in data) {
+      for (String kriteria in entry['kriteria']) {
+        Map<String, String> inputData = entry['input_data'][kriteria] ?? {
+          'indikator1': '',
+          'indikator2': '',
+          'indikator3': '',
+          'indikator4': '',
+        };
+
+        switch (indikator) {
+          case 1:
+            totalSkor += double.tryParse(inputData['indikator1'] ?? '') ?? 0;
+            break;
+          case 2:
+            totalSkor += double.tryParse(inputData['indikator2'] ?? '') ?? 0;
+            break;
+          case 3:
+            totalSkor += double.tryParse(inputData['indikator3'] ?? '') ?? 0;
+            break;
+          case 4:
+            totalSkor += double.tryParse(inputData['indikator4'] ?? '') ?? 0;
+            break;
+        }
+      }
+    }
+    return totalSkor;
+  }
+
   Future<void> _saveData(int index) async {
     List<Map<String, dynamic>> kegiatanList = await _dbHelper.getKegiatanForUser(widget.userId);
 
@@ -288,7 +334,6 @@ class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
     if (selectedKriteria.isNotEmpty) {
       Map<String, String> inputData = data[index]['input_data'][selectedKriteria]!;
 
-      // Simpan ke database hanya jika ada nilai
       if (inputData['indikator1']!.isNotEmpty ||
           inputData['indikator2']!.isNotEmpty ||
           inputData['indikator3']!.isNotEmpty ||
@@ -308,15 +353,15 @@ class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
           'indikator4': inputData['indikator4'],
         };
 
-        // Periksa apakah data dengan kegiatan_id dan kriteria sudah ada
-        bool exists = await _databaseHelper.entryExists(widget.kegiatanId!, selectedKriteria);
+        bool exists = await _dbHelper.entryExists(widget.kegiatanId!, selectedKriteria);
         if (exists) {
-          await _databaseHelper.updateDataEntry(dataEntry);
+          await _dbHelper.updateDataEntry(dataEntry);
         } else {
-          await _databaseHelper.saveDataEntry(dataEntry);
+          await _dbHelper.saveDataEntry(dataEntry);
         }
       }
     }
+    _updateAllScores(); // Update scores after saving data
   }
 
   Future<void> _saveAllData() async {
@@ -330,8 +375,6 @@ class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        _updateOverallScore(); // Add this line at the beginning of the build method
-
         return AlertDialog(
           title: Text('Panduan Pertanyaan'),
           content: Text(panduanPertanyaan),
@@ -368,395 +411,457 @@ class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
     );
   }
 
-  String _interpretasiSkor(double skor) {
+  String _setInterpretasi(double skor) {
     if (skor > 65) {
-      return "Tinggi";
+      return "Tinggi/Aman";
     } else if (skor >= 36 && skor <= 65) {
-      return "Sedang";
+      return "Sedang/Kurang Aman";
     } else {
-      return "Rendah";
+      return "Rendah/Tidak Aman";
     }
   }
 
-  double _calculateTotalSkor(Map<String, String> inputData) {
-    double indikator1 = double.tryParse(inputData['indikator1'] ?? '') ?? 0;
-    double indikator2 = double.tryParse(inputData['indikator2'] ?? '') ?? 0;
-    double indikator3 = double.tryParse(inputData['indikator3'] ?? '') ?? 0;
-    double indikator4 = double.tryParse(inputData['indikator4'] ?? '') ?? 0;
-
-    return (indikator1 * 0.2) + (indikator2 * 0.2) + (indikator3 * 0.3) + (indikator4 * 0.3);
-  }
-
-    double _calculateOverallSkor() {
-    double totalSkor = 0;
-    int count = 0;
-
-    for (var entry in data) {
-      String selectedKriteria = entry['selected_kriteria'];
-      if (selectedKriteria.isNotEmpty) {
-        Map<String, String> inputData = entry['input_data'][selectedKriteria] ?? {
-          'indikator1': '',
-          'indikator2': '',
-          'indikator3': '',
-          'indikator4': '',
-        };
-        totalSkor += _calculateTotalSkor(inputData);
-        count++;
-      }
-    }
-    return count > 0 ? totalSkor / count : 0;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Penilaian Program'),
-      ),
-      body: ListView.builder(
-        itemCount: data.length,
-        itemBuilder: (context, index) {
-          String selectedKriteria = data[index]['selected_kriteria'];
-          Map<String, String> inputData = selectedKriteria.isNotEmpty
-              ? data[index]['input_data'][selectedKriteria] ?? {
-                  'indikator1': '',
-                  'indikator2': '',
-                  'indikator3': '',
-                  'indikator4': '',
-                }
-              : {
-                  'indikator1': '',
-                  'indikator2': '',
-                  'indikator3': '',
-                  'indikator4': '',
-                };
-
-          // TextEditingControllers untuk setiap field indikator
-          TextEditingController indikator1Controller = TextEditingController(text: inputData['indikator1']);
-          TextEditingController indikator2Controller = TextEditingController(text: inputData['indikator2']);
-          TextEditingController indikator3Controller = TextEditingController(text: inputData['indikator3']);
-          TextEditingController indikator4Controller = TextEditingController(text: inputData['indikator4']);
-
-          double totalSkor = _calculateTotalSkor(inputData);
-          String interpretasi = _interpretasiSkor(totalSkor);
-          double overallSkor = _calculateOverallSkor();
-          String interpretasiOverall = _interpretasiSkor(overallSkor);
-
-
-          return Card(
-            margin: EdgeInsets.all(10),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-            color: Colors.white,
-            child: Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: Image.asset(
-                          'assets/images/logors.jpg',
-                          width: 50,
-                          height: 50,
-                          fit: BoxFit.cover,
-                        ),
+@override
+Widget build(BuildContext context) {
+  return Scaffold(
+    appBar: AppBar(
+      title: Text('Penilaian Program'),
+    ),
+    body: Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: Column(
+            children: [
+              Card(
+                color: interpretasiOverall == "Tinggi/Aman"
+                    ? Colors.green
+                    : interpretasiOverall == "Sedang/Kurang Aman"
+                        ? Colors.yellow
+                        : Colors.red,
+                child: ListTile(
+                  title: Text(
+                    'Total Skor Program: ${(totalIndikator1 * 0.2 + totalIndikator2 * 0.2 + totalIndikator3 * 0.3 + totalIndikator4 * 0.3).toStringAsFixed(2)}',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  subtitle: Text(
+                    'Interpretasi Keseluruhan: $interpretasiOverall',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  setState(() {
+                    showInterpretations = !showInterpretations;
+                  });
+                },
+                child: Text(showInterpretations ? 'Hide Interpretations' : 'Show Interpretations'),
+              ),
+              if (showInterpretations) ...[
+                Card(
+                  color: interpretasiIndikator1 == "Tinggi/Aman"
+                      ? Colors.green
+                      : interpretasiIndikator1 == "Sedang/Kurang Aman"
+                          ? Colors.yellow
+                          : Colors.red,
+                  child: ListTile(
+                    title: Text(
+                      'Indikator 1: $totalIndikator1',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
                       ),
-                      SizedBox(width: 10),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                      textAlign: TextAlign.center,
+                    ),
+                    subtitle: Text(
+                      'Interpretasi: $interpretasiIndikator1',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+                Card(
+                  color: interpretasiIndikator2 == "Tinggi/Aman"
+                      ? Colors.green
+                      : interpretasiIndikator2 == "Sedang/Kurang Aman"
+                          ? Colors.yellow
+                          : Colors.red,
+                  child: ListTile(
+                    title: Text(
+                      'Indikator 2: $totalIndikator2',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    subtitle: Text(
+                      'Interpretasi: $interpretasiIndikator2',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+                Card(
+                  color: interpretasiIndikator3 == "Tinggi/Aman"
+                      ? Colors.green
+                      : interpretasiIndikator3 == "Sedang/Kurang Aman"
+                          ? Colors.yellow
+                          : Colors.red,
+                  child: ListTile(
+                    title: Text(
+                      'Indikator 3: $totalIndikator3',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    subtitle: Text(
+                      'Interpretasi: $interpretasiIndikator3',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+                Card(
+                  color: interpretasiIndikator4 == "Tinggi/Aman"
+                      ? Colors.green
+                      : interpretasiIndikator4 == "Sedang/Kurang Aman"
+                          ? Colors.yellow
+                          : Colors.red,
+                  child: ListTile(
+                    title: Text(
+                      'Indikator 4: $totalIndikator4',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    subtitle: Text(
+                      'Interpretasi: $interpretasiIndikator4',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+          Expanded(
+            child: ListView.builder(
+              itemCount: data.length,
+              itemBuilder: (context, index) {
+                String selectedKriteria = data[index]['selected_kriteria'];
+                Map<String, String> inputData = selectedKriteria.isNotEmpty
+                    ? data[index]['input_data'][selectedKriteria] ?? {
+                        'indikator1': '',
+                        'indikator2': '',
+                        'indikator3': '',
+                        'indikator4': '',
+                      }
+                    : {
+                        'indikator1': '',
+                        'indikator2': '',
+                        'indikator3': '',
+                        'indikator4': '',
+                      };
+
+                TextEditingController indikator1Controller = TextEditingController(text: inputData['indikator1']);
+                TextEditingController indikator2Controller = TextEditingController(text: inputData['indikator2']);
+                TextEditingController indikator3Controller = TextEditingController(text: inputData['indikator3']);
+                TextEditingController indikator4Controller = TextEditingController(text: inputData['indikator4']);
+
+                return Card(
+                  margin: EdgeInsets.all(10),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  color: Colors.white,
+                  child: Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
                           children: [
-                            Text(
-                              '${data[index]['nama_indikator']}',
-                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Image.asset(
+                                'assets/images/logors.jpg',
+                                width: 50,
+                                height: 50,
+                                fit: BoxFit.cover,
+                              ),
                             ),
-                            Text(
-                              '${data[index]['sub_indikator']}',
-                              style: TextStyle(fontSize: 14),
+                            SizedBox(width: 10),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    '${data[index]['nama_indikator']}',
+                                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                  ),
+                                  Text(
+                                    '${data[index]['sub_indikator']}',
+                                    style: TextStyle(fontSize: 14),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Column(
+                              children: [
+                                Row(
+                                  children: [
+                                    IconButton(
+                                      icon: Icon(
+                                        Icons.visibility,
+                                        color: Colors.blue,
+                                      ),
+                                      onPressed: () {
+                                        // Aksi saat tombol visibility ditekan
+                                      },
+                                    ),
+                                    IconButton(
+                                      icon: Icon(
+                                        Icons.help_outline,
+                                        color: Colors.orange,
+                                      ),
+                                      onPressed: () {
+                                        showDialog(
+                                          context: context,
+                                          builder: (BuildContext context) {
+                                            return AlertDialog(
+                                              title: Text('Panduan Pertanyaan'),
+                                              content: Text(data[index]['panduan_pertanyaan']),
+                                              actions: [
+                                                TextButton(
+                                                  onPressed: () {
+                                                    Navigator.of(context).pop();
+                                                  },
+                                                  child: Text('Tutup'),
+                                                ),
+                                              ],
+                                            );
+                                          },
+                                        );
+                                      },
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: 4),
+                              ],
                             ),
                           ],
                         ),
-                      ),
-                      
-                      Column(
-                        children: [
-                          Row(
-                            children: [
-                              IconButton(
-                                icon: Icon(
-                                  Icons.visibility,
-                                  color: Colors.blue,
+                        SizedBox(height: 10),
+                        DropdownButtonFormField<String>(
+                          value: selectedKriteria.isNotEmpty && data[index]['kriteria'].contains(selectedKriteria)
+                              ? selectedKriteria
+                              : null,
+                          decoration: InputDecoration(
+                            labelText: 'Kriteria',
+                            border: OutlineInputBorder(),
+                          ),
+                          items: data[index]['kriteria'].map<DropdownMenuItem<String>>((String value) {
+                            return DropdownMenuItem<String>(
+                              value: value,
+                              child: Text(value),
+                            );
+                          }).toList(),
+                          onChanged: (String? newValue) async {
+                            setState(() {
+                              data[index]['selected_kriteria'] = newValue ?? '';
+                            });
+
+                            if (newValue != null) {
+                              List<Map<String, dynamic>> savedData = await _dbHelper.getEntriesByKegiatanIdAndKriteria(
+                                widget.kegiatanId!,
+                                newValue,
+                                data[index]['nama_indikator'],
+                              );
+
+                              if (savedData.isNotEmpty) {
+                                for (var entry in savedData) {
+                                  setState(() {
+                                    data[index]['input_data'][newValue] = {
+                                      'indikator1': entry['indikator1']?.toString() ?? '',
+                                      'indikator2': entry['indikator2']?.toString() ?? '',
+                                      'indikator3': entry['indikator3']?.toString() ?? '',
+                                      'indikator4': entry['indikator4']?.toString() ?? '',
+                                    };
+                                  });
+                                }
+
+                                indikator1Controller.text = data[index]['input_data'][newValue]['indikator1'] ?? '';
+                                indikator2Controller.text = data[index]['input_data'][newValue]['indikator2'] ?? '';
+                                indikator3Controller.text = data[index]['input_data'][newValue]['indikator3'] ?? '';
+                                indikator4Controller.text = data[index]['input_data'][newValue]['indikator4'] ?? '';
+                              } else {
+                                setState(() {
+                                  data[index]['input_data'][newValue] = {
+                                    'indikator1': '',
+                                    'indikator2': '',
+                                    'indikator3': '',
+                                    'indikator4': '',
+                                  };
+                                });
+
+                                indikator1Controller.text = '';
+                                indikator2Controller.text = '';
+                                indikator3Controller.text = '';
+                                indikator4Controller.text = '';
+                              }
+                            }
+                          },
+                        ),
+                        SizedBox(height: 10),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TextField(
+                                controller: indikator1Controller,
+                                decoration: InputDecoration(
+                                  labelText: 'Indikator 1',
+                                  border: OutlineInputBorder(),
+                                  contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                                 ),
-                                onPressed: () {
-                                  // Aksi saat tombol visibility ditekan
+                                onChanged: (value) {
+                                  setState(() {
+                                    data[index]['input_data'][selectedKriteria]['indikator1'] = value;
+                                  });
+                                  _saveData(index);
                                 },
                               ),
-                              IconButton(
-                                icon: Icon(
-                                  Icons.help_outline,
-                                  color: Colors.orange,
+                            ),
+                            IconButton(
+                              icon: Icon(Icons.help_outline),
+                              onPressed: () {
+                                _showPanduanIndikator(data[index]['indikator1help']);
+                              },
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 10),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TextField(
+                                controller: indikator2Controller,
+                                decoration: InputDecoration(
+                                  labelText: 'Indikator 2',
+                                  border: OutlineInputBorder(),
+                                  contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                                 ),
-                                onPressed: () {
-                                  showDialog(
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      return AlertDialog(
-                                        title: Text('Panduan Pertanyaan'),
-                                        content: Text(data[index]['panduan_pertanyaan']),
-                                        actions: [
-                                          TextButton(
-                                            onPressed: () {
-                                              Navigator.of(context).pop();
-                                            },
-                                            child: Text('Tutup'),
-                                          ),
-                                        ],
-                                      );
-                                    },
-                                  );
-                                  // Aksi saat tombol help ditekan
+                                onChanged: (value) {
+                                  setState(() {
+                                    data[index]['input_data'][selectedKriteria]['indikator2'] = value;
+                                  });
+                                  _saveData(index);
                                 },
                               ),
-                            ],
-                          ),
-                          SizedBox(height: 4),
-                        ],
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 10),
-                  DropdownButtonFormField<String>(
-                    value: selectedKriteria.isNotEmpty && data[index]['kriteria'].contains(selectedKriteria)
-                        ? selectedKriteria
-                        : null, // Mengosongkan nilai awal jika tidak valid
-                    decoration: InputDecoration(
-                      labelText: 'Kriteria',
-                      border: OutlineInputBorder(),
+                            ),
+                            IconButton(
+                              icon: Icon(Icons.help_outline),
+                              onPressed: () {
+                                _showPanduanIndikator(data[index]['indikator2help']);
+                              },
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 10),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TextField(
+                                controller: indikator3Controller,
+                                decoration: InputDecoration(
+                                  labelText: 'Indikator 3',
+                                  border: OutlineInputBorder(),
+                                  contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                ),
+                                onChanged: (value) {
+                                  setState(() {
+                                    data[index]['input_data'][selectedKriteria]['indikator3'] = value;
+                                  });
+                                  _saveData(index);
+                                },
+                              ),
+                            ),
+                            IconButton(
+                              icon: Icon(Icons.help_outline),
+                              onPressed: () {
+                                _showPanduanIndikator(data[index]['indikator3help']);
+                              },
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 10),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TextField(
+                                controller: indikator4Controller,
+                                decoration: InputDecoration(
+                                  labelText: 'Indikator 4',
+                                  border: OutlineInputBorder(),
+                                  contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                ),
+                                onChanged: (value) {
+                                  setState(() {
+                                    data[index]['input_data'][selectedKriteria]['indikator4'] = value;
+                                  });
+                                  _saveData(index);
+                                },
+                              ),
+                            ),
+                            IconButton(
+                              icon: Icon(Icons.help_outline),
+                              onPressed: () {
+                                _showPanduanIndikator(data[index]['indikator4help']);
+                              },
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
-                    items: data[index]['kriteria'].map<DropdownMenuItem<String>>((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
-                      );
-                    }).toList(),
-                    onChanged: (String? newValue) async {
-                      setState(() {
-                        data[index]['selected_kriteria'] = newValue ?? '';
-                      });
-
-                      // Update input data dengan data dari database
-                      if (newValue != null) {
-                        List<Map<String, dynamic>> savedData = await _databaseHelper.getEntriesByKegiatanIdAndKriteria(
-                          widget.kegiatanId!,
-                          newValue,
-                          data[index]['nama_indikator'],
-                        );
-
-                        if (savedData.isNotEmpty) {
-                          for (var entry in savedData) {
-                            setState(() {
-                              data[index]['input_data'][newValue] = {
-                                'indikator1': entry['indikator1']?.toString() ?? '',
-                                'indikator2': entry['indikator2']?.toString() ?? '',
-                                'indikator3': entry['indikator3']?.toString() ?? '',
-                                'indikator4': entry['indikator4']?.toString() ?? '',
-                              };
-                            });
-                          }
-                          // Perbarui nilai TextEditingController
-                          indikator1Controller.text = data[index]['input_data'][newValue]['indikator1'] ?? '';
-                          indikator2Controller.text = data[index]['input_data'][newValue]['indikator2'] ?? '';
-                          indikator3Controller.text = data[index]['input_data'][newValue]['indikator3'] ?? '';
-                          indikator4Controller.text = data[index]['input_data'][newValue]['indikator4'] ?? '';
-                        } else {
-                          setState(() {
-                            data[index]['input_data'][newValue] = {
-                              'indikator1': '',
-                              'indikator2': '',
-                              'indikator3': '',
-                              'indikator4': '',
-                            };
-                          });
-                          // Reset nilai TextEditingController
-                          indikator1Controller.text = '';
-                          indikator2Controller.text = '';
-                          indikator3Controller.text = '';
-                          indikator4Controller.text = '';
-                        }
-                      }
-                    },
                   ),
-                  SizedBox(height: 10),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          controller: indikator1Controller,
-                          decoration: InputDecoration(
-                            labelText: 'Indikator 1',
-                            border: OutlineInputBorder(),
-                            contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                          ),
-                          onChanged: (value) {
-                            setState(() {
-                              data[index]['input_data'][selectedKriteria]['indikator1'] = value;
-                            });
-                            _saveData(index);
-                          },
-                        ),
-                      ),
-                      IconButton(
-                        icon: Icon(Icons.help_outline),
-                        onPressed: () {
-                          _showPanduanIndikator(data[index]['indikator1help']);
-                        },
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 10),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          controller: indikator2Controller,
-                          decoration: InputDecoration(
-                            labelText: 'Indikator 2',
-                            border: OutlineInputBorder(),
-                            contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                          ),
-                          onChanged: (value) {
-                            setState(() {
-                              data[index]['input_data'][selectedKriteria]['indikator2'] = value;
-                            });
-                            _saveData(index);
-                          },
-                        ),
-                      ),
-                      IconButton(
-                        icon: Icon(Icons.help_outline),
-                        onPressed: () {
-                          _showPanduanIndikator(data[index]['indikator2help']);
-                        },
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 10),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          controller: indikator3Controller,
-                          decoration: InputDecoration(
-                            labelText: 'Indikator 3',
-                            border: OutlineInputBorder(),
-                            contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                          ),
-                          onChanged: (value) {
-                            setState(() {
-                              data[index]['input_data'][selectedKriteria]['indikator3'] = value;
-                            });
-                            _saveData(index);
-                          },
-                        ),
-                      ),
-                      IconButton(
-                        icon: Icon(Icons.help_outline),
-                        onPressed: () {
-                          _showPanduanIndikator(data[index]['indikator3help']);
-                        },
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 10),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          controller: indikator4Controller,
-                          decoration: InputDecoration(
-                            labelText: 'Indikator 4',
-                            border: OutlineInputBorder(),
-                            contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                          ),
-                          onChanged: (value) {
-                            setState(() {
-                              data[index]['input_data'][selectedKriteria]['indikator4'] = value;
-                            });
-                            _saveData(index);
-                          },
-                        ),
-                      ),
-                      IconButton(
-                        icon: Icon(Icons.help_outline),
-                        onPressed: () {
-                          _showPanduanIndikator(data[index]['indikator4help']);
-                        },
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 10),
-                  Text(
-                    'Total Skor: ${totalSkor.toStringAsFixed(2)}',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                  Text(
-                    'Interpretasi: $interpretasi',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
-   floatingActionButton: Column(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-      FloatingActionButton(
-            onPressed: () {
-              _saveAllData().then((_) {
-                _updateOverallScore();
-              });
-            },
-            child: Icon(Icons.save),
-          ),
-        SizedBox(height: 10),
-        FloatingActionButton.extended(
-          onPressed: () {
-            showDialog(
-              context: context,
-              builder: (BuildContext context) {
-                return AlertDialog(
-                  title: Text('Total Skor dan Interpretasi'),
-                  content: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Total Skor: ${overallSkor.toStringAsFixed(2)}'),
-                      Text('Interpretasi: $interpretasiOverall'),
-                    ],
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                      child: Text('Tutup'),
-                    ),
-                  ],
                 );
               },
-            );
-          },
-          label: Text('Lihat Total Skor'),
-          icon: Icon(Icons.visibility),
-        ),
-      ],
-    ),
-  );
+            ),
+          ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          _saveAllData();
+        },
+        child: Icon(Icons.save),
+      ),
+    );
   }
-  }
+}

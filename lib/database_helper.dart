@@ -317,7 +317,16 @@ class DatabaseHelper {
     }
     return excelData;
   }
-
+Future<List<Map<String, dynamic>>> getKegiatanForUserSorted(int userId, bool ascending) async {
+    final db = await database;
+    String orderBy = ascending ? 'tanggal_kegiatan ASC' : 'tanggal_kegiatan DESC';
+    return await db.query(
+      'kegiatan',
+      where: 'user_id = ?',
+      whereArgs: [userId],
+      orderBy: orderBy, // Mengurutkan berdasarkan tanggal_kegiatan
+    );
+  }
   Future<double?> getSdhValue(int? kegiatanId, int categoryId, String indikator) async {
     final db = await database;
 

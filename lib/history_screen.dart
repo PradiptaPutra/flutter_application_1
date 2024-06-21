@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart'; // Add this import for date formatting
 import 'database_helper.dart';
-import 'category_selection_screen.dart';
+import 'category_selection_screen.dart'; // Import the CategorySelectionScreen
 
 class HistoryScreen extends StatefulWidget {
   final int userId;
@@ -13,66 +12,36 @@ class HistoryScreen extends StatefulWidget {
 }
 
 class _HistoryScreenState extends State<HistoryScreen> {
-  late DatabaseHelper dbHelper;
-  List<Map<String, dynamic>> kegiatanList = [];
-  bool isAscending = false;
+  bool isAscending = true;
 
-  @override
-  void initState() {
-    super.initState();
-    dbHelper = DatabaseHelper();
-    _fetchAndSortKegiatan();
+  Future<List<Map<String, dynamic>>> _fetchKegiatan(bool ascending) async {
+    DatabaseHelper dbHelper = DatabaseHelper();
+    return await dbHelper.getKegiatanForUserSorted(widget.userId, ascending);
   }
 
-  Future<void> _fetchAndSortKegiatan() async {
-    var fetchedList = await dbHelper.getKegiatanForUser(widget.userId);
+  Future<void> _deleteKegiatan(int kegiatanId) async {
+    DatabaseHelper dbHelper = DatabaseHelper();
+    await dbHelper.deleteKegiatan(kegiatanId);
+    await dbHelper.deleteDataEntriesForKegiatan(kegiatanId);
     setState(() {
-      kegiatanList = fetchedList;
-      _sortList();
+      // Trigger a rebuild to refresh the data
     });
   }
 
-  void _sortList() {
-    kegiatanList.sort((a, b) {
-      DateTime? dateA = _parseDate(a['tanggal_kegiatan']);
-      DateTime? dateB = _parseDate(b['tanggal_kegiatan']);
-      if (dateA == null || dateB == null) return 0;
-      return isAscending ? dateA.compareTo(dateB) : dateB.compareTo(dateA);
-    });
-  }
-    DateTime? _parseDate(String? dateString) {
-    if (dateString == null) return null;
-    try {
-      // Try parsing with different formats
-      return DateTime.parse(dateString);
-    } catch (_) {
-      try {
-        return DateFormat('dd-MM-yyyy').parse(dateString);
-      } catch (_) {
-        try {
-          return DateFormat('MM/dd/yyyy').parse(dateString);
-        } catch (_) {
-          print("Unable to parse date: $dateString");
-          return null;
-        }
-      }
-    }
-  }
-
-  Future<void> _deleteKegiatan(int kegiatanId, String namaPuskesmas) async {
+  Future<void> _confirmDelete(BuildContext context, int kegiatanId) async {
     bool? confirm = await showDialog<bool>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text("Konfirmasi Hapus"),
-          content: Text("Apakah Anda yakin ingin menghapus data untuk $namaPuskesmas?"),
+          content: Text("Apakah Anda yakin ingin menghapus data ini?"),
           actions: <Widget>[
             TextButton(
-              child: Text("Batal"),
+              child: Text("Tidak"),
               onPressed: () => Navigator.of(context).pop(false),
             ),
             TextButton(
-              child: Text("Hapus"),
+              child: Text("Ya"),
               onPressed: () => Navigator.of(context).pop(true),
             ),
           ],
@@ -81,16 +50,18 @@ class _HistoryScreenState extends State<HistoryScreen> {
     );
 
     if (confirm == true) {
-      await dbHelper.deleteKegiatan(kegiatanId);
-      await dbHelper.deleteDataEntriesForKegiatan(kegiatanId);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Data untuk $namaPuskesmas telah dihapus")),
-      );
-      _fetchAndSortKegiatan();
+      await _deleteKegiatan(kegiatanId);
+      Navigator.of(context).pop(); // Close the dialog
     }
   }
 
-    @override
+  void _toggleSort() {
+    setState(() {
+      isAscending = !isAscending;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -99,83 +70,67 @@ class _HistoryScreenState extends State<HistoryScreen> {
         actions: [
           IconButton(
             icon: Icon(Icons.sort),
-            onPressed: () {
-              setState(() {
-                isAscending = !isAscending;
-                _sortList();
-              });
-            },
+            onPressed: _toggleSort,
           )
         ],
       ),
-      body: ListView.separated(
-        itemCount: kegiatanList.length,
-        itemBuilder: (context, index) {
-          var kegiatan = kegiatanList[index];
-          return Dismissible(
-            key: Key(kegiatan['kegiatan_id'].toString()),
-            background: Container(
-              color: Colors.red,
-              alignment: Alignment.centerRight,
-              padding: EdgeInsets.only(right: 20.0),
-              child: Icon(Icons.delete, color: Colors.white),
-            ),
-            direction: DismissDirection.endToStart,
-            onDismissed: (direction) {
-              _deleteKegiatan(kegiatan['kegiatan_id'], kegiatan['nama_puskesmas']);
-            },
-            child: Column(
-              children: [
-                  ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: Color(0xFFFF7043),
-                      child: Icon(Icons.local_hospital, color: Colors.white),
-                    ),
-                    title: Text(kegiatan['nama_puskesmas'] ?? 'Unknown'),
-                    subtitle: Text("${_formatDate(kegiatan['tanggal_kegiatan'])} - ${kegiatan['dropdown_option']}"),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(right: 8.0),
-                          child: Icon(Icons.arrow_forward_ios),
-                        ),
-                        GestureDetector(
-                          onTap: () {
-                            _deleteKegiatan(kegiatan['kegiatan_id'], kegiatan['nama_puskesmas']);
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Icon(Icons.delete, color: Colors.red),
-                          ),
-                        ),
-                      ],
-                    ),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => CategorySelectionScreen(
-                            userId: widget.userId,
-                            kegiatanId: kegiatan['kegiatan_id'],
-                          ),
-                        ),
-                      );
-                    },
+      body: FutureBuilder<List<Map<String, dynamic>>>(
+        future: _fetchKegiatan(isAscending),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text("Error fetching data"));
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return Center(child: Text("No data found"));
+          } else {
+            return ListView.separated(
+              itemCount: snapshot.data!.length,
+              itemBuilder: (context, index) {
+                var kegiatan = snapshot.data![index];
+                return ListTile(
+                  leading: CircleAvatar(
+                    backgroundColor: Color(0xFFFF7043),
+                    child: Icon(Icons.local_hospital, color: Colors.white),
                   ),
-              ],
-            ),
-          );
+                  title: Text(kegiatan['nama_puskesmas'] ?? 'Unknown'),
+                  subtitle: Text("${kegiatan['tanggal_kegiatan']} - ${kegiatan['dropdown_option']}"),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(right: 8.0),
+                        child: Icon(Icons.arrow_forward_ios),
+                      ),
+                      GestureDetector(
+                        onTap: () async {
+                          await _confirmDelete(context, kegiatan['kegiatan_id']);
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Icon(Icons.delete, color: Colors.red),
+                        ),
+                      ),
+                    ],
+                  ),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => CategorySelectionScreen(
+                          userId: widget.userId,
+                          kegiatanId: kegiatan['kegiatan_id'],
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+              separatorBuilder: (context, index) => Divider(),
+            );
+          }
         },
-        separatorBuilder: (context, index) => Divider(),
       ),
     );
-  }
-
-  String _formatDate(String? dateString) {
-    if (dateString == null) return 'Unknown Date';
-    DateTime? date = _parseDate(dateString);
-    if (date == null) return dateString; // Return original string if parsing fails
-    return DateFormat('dd MMM yyyy').format(date);
   }
 }
