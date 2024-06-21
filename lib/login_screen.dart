@@ -100,7 +100,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                   TextFormField(
                     controller: _usernameController,
                     decoration: InputDecoration(
-                      hintText: 'somewhereonearth@gmail.com',
+                      hintText: 'User Name',
                       filled: true,
                       fillColor: Colors.grey[200],
                       border: OutlineInputBorder(

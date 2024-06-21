@@ -24,6 +24,8 @@ class PenilaianProgramScreen extends StatefulWidget {
 class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
   final DatabaseHelper _dbHelper = DatabaseHelper();
   String puskesmas = "";
+  double overallSkor = 0.0;  // Initialize with a default value
+  String interpretasiOverall = ""; 
   final List<Map<String, dynamic>> data = [
     {
       'nama_indikator': '1. Program Upaya Kesehatan Masyarakat Esensial',
@@ -224,24 +226,29 @@ class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
   ];
 
   final DatabaseHelper _databaseHelper = DatabaseHelper();
+  
 
   @override
   void initState() {
     super.initState();
-    _loadDataFromDB();
+      _loadDataFromDB().then((_) {
+      _updateOverallScore();
+    });
   }
-
+  void _updateOverallScore() {
+    setState(() {
+      overallSkor = _calculateOverallSkor();
+      interpretasiOverall = _interpretasiSkor(overallSkor);
+    });
+  }
   Future<void> _loadDataFromDB() async {
     for (int i = 0; i < data.length; i++) {
       for (String kriteria in data[i]['kriteria']) {
         List<Map<String, dynamic>> savedData = await _databaseHelper.getEntriesByKegiatanIdAndKriteria(
           widget.kegiatanId!,
           kriteria,
-          data[i]['nama_indikator'], // Tambahkan argumen ketiga yang diperlukan
+          data[i]['nama_indikator'],
         );
-
-        print('Kriteria: $kriteria');
-        print('Saved Data: $savedData');
 
         if (savedData.isNotEmpty) {
           for (var entry in savedData) {
@@ -269,7 +276,7 @@ class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
   }
 
   Future<void> _saveData(int index) async {
-     List<Map<String, dynamic>> kegiatanList = await _dbHelper.getKegiatanForUser(widget.userId);
+    List<Map<String, dynamic>> kegiatanList = await _dbHelper.getKegiatanForUser(widget.userId);
 
     Map<String, dynamic> kegiatan = kegiatanList.firstWhere(
       (kegiatan) => kegiatan['kegiatan_id'] == widget.kegiatanId,
@@ -287,8 +294,6 @@ class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
           inputData['indikator3']!.isNotEmpty ||
           inputData['indikator4']!.isNotEmpty) {
 
-             // Tambahkan print statement untuk menampilkan widget.puskesmas
-      print('Puskesmas: ${widget.puskesmas}');
         Map<String, dynamic> dataEntry = {
           'user_id': widget.userId,
           'kegiatan_id': widget.kegiatanId,
@@ -325,6 +330,8 @@ class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
+        _updateOverallScore(); // Add this line at the beginning of the build method
+
         return AlertDialog(
           title: Text('Panduan Pertanyaan'),
           content: Text(panduanPertanyaan),
@@ -341,7 +348,7 @@ class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
     );
   }
 
-void _showPanduanIndikator(String panduanPertanyaan) {
+  void _showPanduanIndikator(String panduanPertanyaan) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -360,6 +367,46 @@ void _showPanduanIndikator(String panduanPertanyaan) {
       },
     );
   }
+
+  String _interpretasiSkor(double skor) {
+    if (skor > 65) {
+      return "Tinggi";
+    } else if (skor >= 36 && skor <= 65) {
+      return "Sedang";
+    } else {
+      return "Rendah";
+    }
+  }
+
+  double _calculateTotalSkor(Map<String, String> inputData) {
+    double indikator1 = double.tryParse(inputData['indikator1'] ?? '') ?? 0;
+    double indikator2 = double.tryParse(inputData['indikator2'] ?? '') ?? 0;
+    double indikator3 = double.tryParse(inputData['indikator3'] ?? '') ?? 0;
+    double indikator4 = double.tryParse(inputData['indikator4'] ?? '') ?? 0;
+
+    return (indikator1 * 0.2) + (indikator2 * 0.2) + (indikator3 * 0.3) + (indikator4 * 0.3);
+  }
+
+    double _calculateOverallSkor() {
+    double totalSkor = 0;
+    int count = 0;
+
+    for (var entry in data) {
+      String selectedKriteria = entry['selected_kriteria'];
+      if (selectedKriteria.isNotEmpty) {
+        Map<String, String> inputData = entry['input_data'][selectedKriteria] ?? {
+          'indikator1': '',
+          'indikator2': '',
+          'indikator3': '',
+          'indikator4': '',
+        };
+        totalSkor += _calculateTotalSkor(inputData);
+        count++;
+      }
+    }
+    return count > 0 ? totalSkor / count : 0;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -389,6 +436,12 @@ void _showPanduanIndikator(String panduanPertanyaan) {
           TextEditingController indikator2Controller = TextEditingController(text: inputData['indikator2']);
           TextEditingController indikator3Controller = TextEditingController(text: inputData['indikator3']);
           TextEditingController indikator4Controller = TextEditingController(text: inputData['indikator4']);
+
+          double totalSkor = _calculateTotalSkor(inputData);
+          String interpretasi = _interpretasiSkor(totalSkor);
+          double overallSkor = _calculateOverallSkor();
+          String interpretasiOverall = _interpretasiSkor(overallSkor);
+
 
           return Card(
             margin: EdgeInsets.all(10),
@@ -428,6 +481,7 @@ void _showPanduanIndikator(String panduanPertanyaan) {
                           ],
                         ),
                       ),
+                      
                       Column(
                         children: [
                           Row(
@@ -499,11 +553,8 @@ void _showPanduanIndikator(String panduanPertanyaan) {
                         List<Map<String, dynamic>> savedData = await _databaseHelper.getEntriesByKegiatanIdAndKriteria(
                           widget.kegiatanId!,
                           newValue,
-                          data[index]['nama_indikator'], // Tambahkan argumen ketiga yang diperlukan
+                          data[index]['nama_indikator'],
                         );
-
-                        print('New Kriteria: $newValue');
-                        print('Saved Data: $savedData');
 
                         if (savedData.isNotEmpty) {
                           for (var entry in savedData) {
@@ -647,16 +698,65 @@ void _showPanduanIndikator(String panduanPertanyaan) {
                       ),
                     ],
                   ),
+                  SizedBox(height: 10),
+                  Text(
+                    'Total Skor: ${totalSkor.toStringAsFixed(2)}',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  Text(
+                    'Interpretasi: $interpretasi',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
                 ],
               ),
             ),
           );
         },
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _saveAllData,
-        child: Icon(Icons.save),
-      ),
-    );
+   floatingActionButton: Column(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+      FloatingActionButton(
+            onPressed: () {
+              _saveAllData().then((_) {
+                _updateOverallScore();
+              });
+            },
+            child: Icon(Icons.save),
+          ),
+        SizedBox(height: 10),
+        FloatingActionButton.extended(
+          onPressed: () {
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  title: Text('Total Skor dan Interpretasi'),
+                  content: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Total Skor: ${overallSkor.toStringAsFixed(2)}'),
+                      Text('Interpretasi: $interpretasiOverall'),
+                    ],
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      child: Text('Tutup'),
+                    ),
+                  ],
+                );
+              },
+            );
+          },
+          label: Text('Lihat Total Skor'),
+          icon: Icon(Icons.visibility),
+        ),
+      ],
+    ),
+  );
   }
-}
+  }

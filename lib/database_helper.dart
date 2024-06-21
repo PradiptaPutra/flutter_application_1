@@ -470,7 +470,7 @@ Future<void> updateDataEntry2(Map<String, dynamic> dataEntry) async {
   Future<List<Map<String, dynamic>>> getDataEntriesForUserHome(int userId) async {
     final db = await database;
     final List<Map<String, dynamic>> maps = await db.rawQuery('''
-      SELECT DISTINCT kegiatan_id, nama_puskesmas, dropdown_option
+      SELECT DISTINCT kegiatan_id, nama_puskesmas, dropdown_option , provinsi ,kabupaten_kota
       FROM Kegiatan 
       WHERE user_id = ?
     ''', [userId]);
@@ -489,12 +489,12 @@ Future<void> updateDataEntry2(Map<String, dynamic> dataEntry) async {
   Future<double> getProgressForKegiatan(int kegiatanId) async {
     final db = await database;
     final List<Map<String, dynamic>> entries = await db.rawQuery('''
-      SELECT sebelum, sesudah, sebelum2, sesudah2
+      SELECT sebelum, sesudah, sebelum2, sesudah2,SPM,SBL,SDH,indikator1,indikator2,indikator3,indikator4
       FROM DataEntry
       WHERE kegiatan_id = ?
     ''', [kegiatanId]);
 
-    int totalFields = 4; // Total fields to check (sebelum, sesudah, sebelum2, sesudah2)
+    int totalFields =11; // Total fields to check (sebelum, sesudah, sebelum2, sesudah2)
     int filledFields = 0;
 
     for (var entry in entries) {
@@ -502,6 +502,13 @@ Future<void> updateDataEntry2(Map<String, dynamic> dataEntry) async {
       if (entry['sesudah'] != null && entry['sesudah'].toString().isNotEmpty) filledFields++;
       if (entry['sebelum2'] != null && entry['sebelum2'].toString().isNotEmpty) filledFields++;
       if (entry['sesudah2'] != null && entry['sesudah2'].toString().isNotEmpty) filledFields++;
+      if (entry['SPM'] != null && entry['SPM'].toString().isNotEmpty) filledFields++;
+      if (entry['SBL'] != null && entry['SBL'].toString().isNotEmpty) filledFields++;
+      if (entry['SDH'] != null && entry['SDH'].toString().isNotEmpty) filledFields++;
+      if (entry['indikator1'] != null && entry['indikator1'].toString().isNotEmpty) filledFields++;
+      if (entry['indikator2'] != null && entry['indikator2'].toString().isNotEmpty) filledFields++;
+      if (entry['indikator3'] != null && entry['indikator3'].toString().isNotEmpty) filledFields++;
+      if (entry['indikator4'] != null && entry['indikator4'].toString().isNotEmpty) filledFields++;
     }
 
     if (entries.isNotEmpty) {
@@ -535,4 +542,22 @@ Future<void> updateDataEntry2(Map<String, dynamic> dataEntry) async {
     }
     return ''; // Return empty string or handle null case as per your requirement
   }
+
+  Future<void> deleteKegiatan(int kegiatanId) async {
+  final db = await database;
+  await db.delete(
+    'kegiatan',
+    where: 'kegiatan_id = ?',
+    whereArgs: [kegiatanId],
+  );
+}
+
+Future<void> deleteDataEntriesForKegiatan(int kegiatanId) async {
+  final db = await database;
+  await db.delete(
+    'DataEntry',
+    where: 'kegiatan_id = ?',
+    whereArgs: [kegiatanId],
+  );
+}
 }
