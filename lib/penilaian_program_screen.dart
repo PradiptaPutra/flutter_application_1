@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'database_helper.dart'; // Pastikan ini sesuai dengan path file DatabaseHelper
+import 'export_program_screen.dart';
 
 class PenilaianProgramScreen extends StatefulWidget {
   final int? kegiatanId;
@@ -275,6 +276,35 @@ class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
         }
       }
     }
+  }
+Future<void> _exportData() async {
+    // Dapatkan daftar kegiatan untuk user
+    List<Map<String, dynamic>> kegiatanList = await _dbHelper.getKegiatanForUser(widget.userId);
+
+    // Temukan kegiatan yang sesuai dengan kegiatanId yang diberikan
+    Map<String, dynamic> kegiatan = kegiatanList.firstWhere(
+      (kegiatan) => kegiatan['kegiatan_id'] == widget.kegiatanId,
+      orElse: () => <String, dynamic>{},
+    );
+
+    // Ambil nilai nama_puskesmas dari kegiatan
+    String puskesmas = kegiatan.isNotEmpty ? kegiatan['nama_puskesmas'] : '';
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ExportProgramScreen(
+          puskesmas: puskesmas,
+          totalIndikator1: totalIndikator1.toInt(),
+          totalIndikator2: totalIndikator2.toInt(),
+          totalIndikator3: totalIndikator3.toInt(),
+          totalIndikator4: totalIndikator4.toInt(),
+          interpretasiIndikator1: interpretasiIndikator1,
+          userId: widget.userId,
+          kegiatanId: widget.kegiatanId, // Tambahkan kegiatanId di sini
+        ),
+      ),
+    );
   }
 
   void _updateAllScores() {
@@ -856,11 +886,25 @@ Widget build(BuildContext context) {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+        FloatingActionButton(
         onPressed: () {
           _saveAllData();
         },
         child: Icon(Icons.save),
+      ),
+         SizedBox(width: 10),
+          FloatingActionButton(
+      onPressed: () {
+        // Tambahkan logika untuk ekspor di sini
+        _exportData();
+      },
+      child: Icon(Icons.next_week),
+      tooltip: 'Export',
+    ),
+        ]
       ),
     );
   }

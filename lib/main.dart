@@ -23,6 +23,7 @@ import 'export_alkes_screen.dart';
 import 'export_kendaraan_screen.dart';
 import 'export_pembiayaan_screen.dart';
 import 'export_sdm_screen.dart';
+import 'export_program_screen.dart';
 import 'penilaian_sdm_screen.dart'; // Add this import
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest.dart' as tz;
@@ -106,6 +107,15 @@ class MyApp extends StatelessWidget {
           interpretasiSebelum: "",
           interpretasiSesudah: "",
           interpretasiAkhir: "",
+          userId: ModalRoute.of(context)!.settings.arguments as int,
+        ),
+        '/export_program': (context) => ExportProgramScreen(
+          puskesmas: "",
+          totalIndikator1: 0,
+           totalIndikator2: 0,
+            totalIndikator3: 0,
+             totalIndikator4: 0,
+          interpretasiIndikator1:"",
           userId: ModalRoute.of(context)!.settings.arguments as int,
         ),
       },
