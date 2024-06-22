@@ -97,7 +97,7 @@ class _ExportAlkesScreenState extends State<ExportAlkesScreen> {
   Future<void> _fetchDetailedData() async {
     if (widget.kegiatanId != null) {
       final dbHelper = DatabaseHelper();
-      final data = await dbHelper.getEntriesByKegiatanId(widget.kegiatanId!);
+      final data = await dbHelper.getEntriesByKegiatanIdAndCategoryAndUser(widget.kegiatanId!, 12, widget.userId); // Menyertakan kondisi kategori dan userId
       setState(() {
         detailedData = data;
       });
@@ -327,46 +327,32 @@ class _ExportAlkesScreenState extends State<ExportAlkesScreen> {
                     Text('Interpretasi Indikator 1 Sebelum', style: TextStyle(fontSize: 16)),
                     Text(widget.interpretasiIndikator1Sebelum,
                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                  ],
-                ),
-                Column(
-                  children: [
-                    Text('Sesudah Indikator 1', style: TextStyle(fontSize: 18)),
+                         Text('Sesudah Indikator 1', style: TextStyle(fontSize: 18)),
                     Text(widget.sesudahIndikator1.toString(),
                         style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                     SizedBox(height: 5),
                     Text('Interpretasi Indikator 1 Sesudah', style: TextStyle(fontSize: 16)),
                     Text(widget.interpretasiIndikator1Sesudah,
                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                  ],
-                ),
-                Column(
-                  children: [
-                    Text('Sebelum Indikator 2', style: TextStyle(fontSize: 18)),
+                        Text('Sebelum Indikator 2', style: TextStyle(fontSize: 18)),
                     Text(widget.sebelumIndikator2.toString(),
                         style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                     SizedBox(height: 5),
                     Text('Interpretasi Indikator 2 Sebelum', style: TextStyle(fontSize: 16)),
                     Text(widget.interpretasiIndikator2Sesudah,
                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                  ],
-                ),Column(
-                  children: [
-                    Text('Sesudah Indikator 2', style: TextStyle(fontSize: 18)),
+                          Text('Sesudah Indikator 2', style: TextStyle(fontSize: 18)),
                     Text(widget.sesudahIndikator2.toString(),
                         style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                     SizedBox(height: 5),
                     Text('Interpretasi Indikator 2 Sesudah', style: TextStyle(fontSize: 16)),
                     Text(widget.interpretasiIndikator2Sesudah,
                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                  ],
-                ),
-                 Column(
-                  children: [
-                    SizedBox(height: 5),
+                         SizedBox(height: 5),
                     Text('Interpretasi Indikator Akhir', style: TextStyle(fontSize: 16)),
                     Text(widget.interpretasiAkhir,
                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  
                   ],
                 ),
                 

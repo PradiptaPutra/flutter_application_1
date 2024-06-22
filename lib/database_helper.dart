@@ -16,110 +16,115 @@ class DatabaseHelper {
   }
 
   Future<Database> initializeDatabase() async {
-    String path = join(await getDatabasesPath(), 'health_app.db');
-    print('Database initialized at path: $path');
-    return openDatabase(
-      path,
-      version: 12, // Incremented version number
-      onCreate: _createDb,
-      onUpgrade: _upgradeDb,
-    );
-  }
+  String path = join(await getDatabasesPath(), 'health_app.db');
+  print('Database initialized at path: $path');
+  return openDatabase(
+    path,
+    version: 13, // Meningkatkan nomor versi database
+    onCreate: _createDb,
+    onUpgrade: _upgradeDb,
+  );
+}
+
 
   Future _createDb(Database db, int version) async {
-    await db.execute('''
-      CREATE TABLE IF NOT EXISTS Pengguna (
-        user_id INTEGER PRIMARY KEY AUTOINCREMENT, 
-        username TEXT, 
-        password_hash TEXT, 
-        email TEXT, 
-        name TEXT,
-        position TEXT,
-        phone TEXT,
-        created_at TEXT
-      )
-    ''');
+  await db.execute('''
+    CREATE TABLE IF NOT EXISTS Pengguna (
+      user_id INTEGER PRIMARY KEY AUTOINCREMENT, 
+      username TEXT, 
+      password_hash TEXT, 
+      email TEXT, 
+      name TEXT,
+      position TEXT,
+      phone TEXT,
+      created_at TEXT
+    )
+  ''');
 
-    await db.execute('''
-      CREATE TABLE IF NOT EXISTS DataEntry (
-        entry_id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id INTEGER,
-        kegiatan_id INTEGER,
-        id_category INTEGER,
-        puskesmas TEXT,
-        indikator TEXT,
-        sub_indikator TEXT,
-        kriteria TEXT,
-        SPM TEXT,
-        SBL TEXT,
-        SDH TEXT,
-        sebelum TEXT,
-        sesudah TEXT,
-        sebelum2 TEXT,
-        sesudah2 TEXT,
-        indikator1 TEXT,
-        indikator2 TEXT,
-        indikator3 TEXT,
-        indikator4 TEXT,
-        keterangan TEXT,
-        FOREIGN KEY(user_id) REFERENCES Pengguna(user_id),
-        FOREIGN KEY(kegiatan_id) REFERENCES Kegiatan(kegiatan_id)
-      )
-    ''');
+  await db.execute('''
+    CREATE TABLE IF NOT EXISTS DataEntry (
+      entry_id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER,
+      kegiatan_id INTEGER,
+      id_category INTEGER,
+      puskesmas TEXT,
+      indikator TEXT,
+      sub_indikator TEXT,
+      kriteria TEXT,
+      SPM TEXT,
+      SBL TEXT,
+      SDH TEXT,
+      sebelum TEXT,
+      sesudah TEXT,
+      sebelum2 TEXT,
+      sesudah2 TEXT,
+      indikator1 TEXT,
+      indikator2 TEXT,
+      indikator3 TEXT,
+      indikator4 TEXT,
+      keterangan TEXT,
+      skor TEXT,          -- Kolom baru
+      jumlah INTEGER,     -- Kolom baru
+      FOREIGN KEY(user_id) REFERENCES Pengguna(user_id),
+      FOREIGN KEY(kegiatan_id) REFERENCES Kegiatan(kegiatan_id)
+    )
+  ''');
 
-    await db.execute('''
-      CREATE TABLE IF NOT EXISTS Kegiatan (
-        kegiatan_id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id INTEGER,
-        nama_puskesmas TEXT,
-        dropdown_option TEXT,
-        provinsi TEXT,
-        kabupaten_kota TEXT,
-        tanggal_kegiatan TEXT,
-        nama TEXT,
-        jabatan TEXT,
-        notelepon TEXT,
-        FOREIGN KEY(user_id) REFERENCES Pengguna(user_id)
-      )
-    ''');
-  }
+  await db.execute('''
+    CREATE TABLE IF NOT EXISTS Kegiatan (
+      kegiatan_id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER,
+      nama_puskesmas TEXT,
+      dropdown_option TEXT,
+      provinsi TEXT,
+      kabupaten_kota TEXT,
+      tanggal_kegiatan TEXT,
+      nama TEXT,
+      jabatan TEXT,
+      notelepon TEXT,
+      FOREIGN KEY(user_id) REFERENCES Pengguna(user_id)
+    )
+  ''');
+}
 
   Future _upgradeDb(Database db, int oldVersion, int newVersion) async {
-    if (oldVersion < 7) {
-      await db.execute('ALTER TABLE DataEntry ADD COLUMN kegiatan_id INTEGER REFERENCES Kegiatan(kegiatan_id)');
-    }
-    if (oldVersion < 8) {
-      await db.execute('''
-        CREATE TABLE IF NOT EXISTS tblbangunan (
-          id_tbl INTEGER PRIMARY KEY AUTOINCREMENT,
-          panduan_pertanyaan TEXT,
-          nama_indikator TEXT,
-          sub_indikator TEXT,
-          kriteria TEXT,
-          id_sebelum TEXT,
-          id_sesudah TEXT
-        )
-      ''');
-    }
-    if (oldVersion < 9) {
-      await db.execute('ALTER TABLE DataEntry ADD COLUMN id_category INTEGER');
-    }
-    if (oldVersion < 10) {
-      await db.execute('ALTER TABLE DataEntry ADD COLUMN sebelum2 TEXT');
-      await db.execute('ALTER TABLE DataEntry ADD COLUMN sesudah2 TEXT');
-    }
-    if (oldVersion < 11) {
-      await db.execute('ALTER TABLE DataEntry ADD COLUMN SPM TEXT');
-      await db.execute('ALTER TABLE DataEntry ADD COLUMN SBL TEXT');
-      await db.execute('ALTER TABLE DataEntry ADD COLUMN SDH TEXT');
-    }
-    if (oldVersion < 12) {
-      await db.execute('ALTER TABLE DataEntry ADD COLUMN indikator1 TEXT');
-      await db.execute('ALTER TABLE DataEntry ADD COLUMN indikator2 TEXT');
-      await db.execute('ALTER TABLE DataEntry ADD COLUMN indikator3 TEXT');
-      await db.execute('ALTER TABLE DataEntry ADD COLUMN indikator4 TEXT');
-    }
+  if (oldVersion < 7) {
+    await db.execute('ALTER TABLE DataEntry ADD COLUMN kegiatan_id INTEGER REFERENCES Kegiatan(kegiatan_id)');
   }
+  if (oldVersion < 8) {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS tblbangunan (
+        id_tbl INTEGER PRIMARY KEY AUTOINCREMENT,
+        panduan_pertanyaan TEXT,
+        nama_indikator TEXT,
+        sub_indikator TEXT,
+        kriteria TEXT,
+        id_sebelum TEXT,
+        id_sesudah TEXT
+      )
+    ''');
+  }
+  if (oldVersion < 9) {
+    await db.execute('ALTER TABLE DataEntry ADD COLUMN id_category INTEGER');
+  }
+  if (oldVersion < 10) {
+    await db.execute('ALTER TABLE DataEntry ADD COLUMN sebelum2 TEXT');
+    await db.execute('ALTER TABLE DataEntry ADD COLUMN sesudah2 TEXT');
+  }
+  if (oldVersion < 11) {
+    await db.execute('ALTER TABLE DataEntry ADD COLUMN SPM TEXT');
+    await db.execute('ALTER TABLE DataEntry ADD COLUMN SBL TEXT');
+    await db.execute('ALTER TABLE DataEntry ADD COLUMN SDH TEXT');
+  }
+  if (oldVersion < 12) {
+    await db.execute('ALTER TABLE DataEntry ADD COLUMN indikator1 TEXT');
+    await db.execute('ALTER TABLE DataEntry ADD COLUMN indikator2 TEXT');
+    await db.execute('ALTER TABLE DataEntry ADD COLUMN indikator3 TEXT');
+    await db.execute('ALTER TABLE DataEntry ADD COLUMN indikator4 TEXT');
+  }
+  // Tidak perlu ada perubahan untuk versi 13 karena tabel dibuat ulang dengan kolom baru
+}
+
 
   Future<void> insertPengguna(Map<String, dynamic> pengguna) async {
     final db = await database;
@@ -366,6 +371,15 @@ Future<List<Map<String, dynamic>>> getEntriesByKegiatanIdAndKriteria(int kegiata
       where: 'kegiatan_id = ? AND kriteria = ? AND indikator = ?',
       whereArgs: [kegiatanId, kriteria, indikator],
     );
+  }
+  Future<List<Map<String, dynamic>>> getEntriesByKegiatanIdAndCategoryAndUser(int kegiatanId, int categoryId, int userId) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'DataEntry',
+      where: 'kegiatan_id = ? AND id_category = ? AND user_id = ?',
+      whereArgs: [kegiatanId, categoryId, userId],
+    );
+    return maps;
   }
 
   Future<int> updateDataEntry3(Map<String, dynamic> entry) async {

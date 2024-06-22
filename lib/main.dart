@@ -93,7 +93,8 @@ class MyApp extends StatelessWidget {
           interpretasiIndikator2Sesudah: "",
           interpretasiAkhir: "",
           userId: ModalRoute.of(context)!.settings.arguments as int,
-        ), '/export_alkes': (context) => ExportSdmScreen(
+        ), '/export_sdm': (context) => ExportSdmScreen(
+          id_category: 0,
             puskesmas: "",
             totalSPM: 0,
             totalSBL: 0,

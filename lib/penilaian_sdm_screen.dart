@@ -170,6 +170,8 @@ class _PenilaianSdmScreenState extends State<PenilaianSdmScreen> {
       context,
       MaterialPageRoute(
         builder: (context) => ExportSdmScreen(
+          kegiatanId: widget.kegiatanId,
+          id_category: widget.id_category,
           puskesmas: puskesmas,
           totalSPM: totalSPM,
           totalSBL: totalSBL,

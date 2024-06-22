@@ -81,10 +81,10 @@ class _PenilaianIsiansdmScreenState extends State<PenilaianIsiansdmScreen> {
     }
 
     setState(() {
-      totalSkorSebelum = totalSebelum * 4.15;
+      totalSkorSebelum = totalSebelum * 12.5;
       interpretasiSebelum = _setInterpretasi(totalSkorSebelum);
 
-      totalSkorSesudah = totalSesudah * 4.15;
+      totalSkorSesudah = totalSesudah * 12.5;
       interpretasiSesudah = _setInterpretasi(totalSkorSesudah);
     });
   }
@@ -134,9 +134,23 @@ class _PenilaianIsiansdmScreenState extends State<PenilaianIsiansdmScreen> {
 
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Data berhasil disimpan')));
 
-   
-    
-  }
+    setState(() {
+    isDataSaved = true;  // Set the state to true after data is saved
+  });
+
+  // Refresh screen
+  Navigator.pushReplacement(
+    context,
+    MaterialPageRoute(
+      builder: (context) => PenilaianIsiansdmScreen(
+        kegiatanId: widget.kegiatanId,
+        id_category: widget.id_category,
+        userId: widget.userId,
+        entryId: widget.entryId,
+      ),
+    ),
+  );
+}
 
   Future<void> _exportData() async {
     // Dapatkan daftar kegiatan untuk user

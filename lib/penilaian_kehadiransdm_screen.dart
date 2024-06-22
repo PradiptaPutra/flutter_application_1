@@ -36,7 +36,11 @@ class _PenilaianKehadiransdmScreenState extends State<PenilaianKehadiransdmScree
     super.initState();
     _loadExcelData();
     if (widget.kegiatanId != null) {
-      _loadDataEntriesByKegiatan(widget.kegiatanId!);
+      _loadDataEntriesByKegiatan(
+        widget.kegiatanId!,
+        widget.id_category,
+        widget.userId,
+      );
     }
   }
 
@@ -53,8 +57,14 @@ class _PenilaianKehadiransdmScreenState extends State<PenilaianKehadiransdmScree
     });
   }
 
-  Future<void> _loadDataEntriesByKegiatan(int kegiatanId) async {
-    List<Map<String, dynamic>> entries = await _dbHelper.getEntriesByKegiatanId(kegiatanId);
+  Future<void> _loadDataEntriesByKegiatan( int kegiatanId,
+    int categoryId,
+    int userId,) async {
+    List<Map<String, dynamic>> entries = await _dbHelper.getEntriesByKegiatanIdAndCategoryAndUser(
+      kegiatanId,
+      categoryId,
+      userId,
+    );
     if (entries.isNotEmpty) {
       setState(() {
         existingEntries = entries;
@@ -150,7 +160,8 @@ class _PenilaianKehadiransdmScreenState extends State<PenilaianKehadiransdmScree
         'sub_indikator': data[i]['sub_indikator'],
         'sebelum': sebelumControllers[i].text,
         'sesudah': sesudahControllers[i].text,
-        'keterangan': keteranganControllers[i].text,
+        'skor': skorControllers[i].text,
+        'keterangan': keteranganControllers[i].text, 
       };
 
       // Check if the entry already exists
