@@ -19,6 +19,7 @@ class _PenilaianKendaraanScreenState extends State<PenilaianKendaraanScreen> {
   final List<TextEditingController> sebelumControllers = [];
   final List<TextEditingController> sesudahControllers = [];
   final List<TextEditingController> keteranganControllers = [];
+  final List<TextEditingController> jumlahKendaraanControllers = [];
   List<Map<String, dynamic>> data = [];
   List<Map<String, dynamic>> existingEntries = [];
   double totalSkorSebelum = 0;
@@ -49,6 +50,8 @@ class _PenilaianKendaraanScreenState extends State<PenilaianKendaraanScreen> {
         sebelumControllers.add(TextEditingController());
         sesudahControllers.add(TextEditingController());
         keteranganControllers.add(TextEditingController());
+        jumlahKendaraanControllers.add(TextEditingController());
+
       }
     });
   }
@@ -73,36 +76,42 @@ class _PenilaianKendaraanScreenState extends State<PenilaianKendaraanScreen> {
     }
   }
 
-  void _calculateTotalScore() {
-    double totalSebelum = 0;
-    double totalSesudah = 0;
+void _calculateTotalScore() {
+  double totalSebelum = 0;
+  double totalSesudah = 0;
+  int totalKendaraan = 0;
 
-    for (var i = 0; i < sebelumControllers.length; i++) {
-      totalSebelum += double.tryParse(sebelumControllers[i].text) ?? 0;
-      totalSesudah += double.tryParse(sesudahControllers[i].text) ?? 0;
-    }
+  for (var i = 0; i < sebelumControllers.length; i++) {
+    double sebelum = double.tryParse(sebelumControllers[i].text) ?? 0;
+    double sesudah = double.tryParse(sesudahControllers[i].text) ?? 0;
+    int jumlahKendaraan = int.tryParse(jumlahKendaraanControllers[i].text) ?? 0;
 
-    setState(() {
-      totalSkorSebelum = totalSebelum * 4.35 / 2;
-      interpretasiSebelum = _setInterpretasi(totalSkorSebelum);
-
-      totalSkorSesudah = totalSesudah * 4.35 / 2;
-      interpretasiSesudah = _setInterpretasi(totalSkorSesudah);
-
-      totalSkorAkhir = (totalSkorSebelum + totalSkorSesudah) / 2;
-      interpretasiAkhir = _setInterpretasi(totalSkorAkhir);
-    });
+    totalSebelum += sebelum * jumlahKendaraan;
+    totalSesudah += sesudah * jumlahKendaraan;
+    totalKendaraan += jumlahKendaraan;
   }
 
-  String _setInterpretasi(double skor) {
-    if (skor > 65) {
-      return "Tinggi/Baik";
-    } else if (skor >= 36 && skor <= 65) {
-      return "Sedang/Cukup";
-    } else {
-      return "Rendah/Kurang";
-    }
+  setState(() {
+    totalSkorSebelum = (totalSebelum * 100) / (totalKendaraan * 2);
+    interpretasiSebelum = _setInterpretasi(totalSkorSebelum);
+
+    totalSkorSesudah = (totalSesudah * 100) / (totalKendaraan * 2);
+    interpretasiSesudah = _setInterpretasi(totalSkorSesudah);
+
+    totalSkorAkhir = (totalSkorSebelum + totalSkorSesudah) / 2;
+    interpretasiAkhir = _setInterpretasi(totalSkorAkhir);
+  });
+}
+
+String _setInterpretasi(double skor) {
+  if (skor > 65) {
+    return "Tinggi/Baik";
+  } else if (skor >= 36 && skor <= 65) {
+    return "Sedang/Cukup";
+  } else {
+    return "Rendah/Kurang";
   }
+}
 
   Future<void> _saveDataEntry() async {
     // Dapatkan daftar kegiatan untuk user
@@ -124,6 +133,7 @@ class _PenilaianKendaraanScreenState extends State<PenilaianKendaraanScreen> {
         'id_category': widget.id_category,
         'puskesmas': puskesmas,
         'indikator': data[i]['nama_indikator'],
+        'jumlah':jumlahKendaraanControllers,
         'sebelum': sebelumControllers[i].text,
         'sesudah': sesudahControllers[i].text,
         'keterangan': keteranganControllers[i].text,
@@ -166,6 +176,8 @@ class _PenilaianKendaraanScreenState extends State<PenilaianKendaraanScreen> {
 
     // Ambil nilai nama_puskesmas dari kegiatan
     String puskesmas = kegiatan.isNotEmpty ? kegiatan['nama_puskesmas'] : '';
+    int totalKendaraan = jumlahKendaraanControllers.fold(0, (sum, controller) => sum + (int.tryParse(controller.text) ?? 0));
+
 
     Navigator.push(
       context,
@@ -179,6 +191,8 @@ class _PenilaianKendaraanScreenState extends State<PenilaianKendaraanScreen> {
           interpretasiAkhir: interpretasiAkhir,
           userId: widget.userId,
           kegiatanId: widget.kegiatanId, // Tambahkan kegiatanId di sini
+          totalKendaraan: totalKendaraan, // Add this line
+
         ),
       ),
     );
@@ -378,6 +392,16 @@ class _PenilaianKendaraanScreenState extends State<PenilaianKendaraanScreen> {
                                   ),
                                 ],
                               ),
+                              TextField(
+                                  controller: jumlahKendaraanControllers[index],
+                                  decoration: InputDecoration(
+                                    labelText: 'Jumlah Kendaraan',
+                                    border: OutlineInputBorder(),
+                                    contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                  ),
+                                  keyboardType: TextInputType.number,
+                                  onChanged: (value) => _calculateTotalScore(),
+                                ),
                               SizedBox(height: 10),
                               TextField(
                                 controller: keteranganControllers[index],

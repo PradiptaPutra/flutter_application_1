@@ -25,6 +25,8 @@ class ExportKendaraanScreen extends StatefulWidget {
   final String interpretasiAkhir;
   final int userId;
   final int? kegiatanId;
+  final int totalKendaraan; // Add this line
+
 
   ExportKendaraanScreen({
     required this.puskesmas,
@@ -35,6 +37,8 @@ class ExportKendaraanScreen extends StatefulWidget {
     required this.interpretasiAkhir,
     required this.userId,
     this.kegiatanId,
+    required this.totalKendaraan, // Add this line
+
   });
 
   @override
@@ -226,29 +230,31 @@ class _ExportKendaraanScreenState extends State<ExportKendaraanScreen> {
     );
   }
 
-  pw.Widget _buildDetailedTable() {
-    return pw.Table(
-      border: pw.TableBorder.all(),
-      children: [
-        pw.TableRow(
-          children: [
-            _buildTableCell('Indikator', isHeader: true),            
-            _buildTableCell('Sebelum', isHeader: true),
-            _buildTableCell('Sesudah', isHeader: true),
-            _buildTableCell('Keterangan', isHeader: true),
-          ],
-        ),
-        ...detailedData.map((entry) => pw.TableRow(
-          children: [
-            _buildTableCell(entry['indikator']?? ''),
-            _buildTableCell(entry['sebelum']?? ''),
-            _buildTableCell(entry['sesudah']?? ''),
-            _buildTableCell(entry['keterangan']?? ''),
-          ],
-        )),
-      ],
-    );
-  }
+pw.Widget _buildDetailedTable() {
+  return pw.Table(
+    border: pw.TableBorder.all(),
+    children: [
+      pw.TableRow(
+        children: [
+          _buildTableCell('Indikator', isHeader: true),
+          _buildTableCell('Jumlah Kendaraan', isHeader: true),
+          _buildTableCell('Sebelum', isHeader: true),
+          _buildTableCell('Sesudah', isHeader: true),
+          _buildTableCell('Keterangan', isHeader: true),
+        ],
+      ),
+      ...detailedData.map((entry) => pw.TableRow(
+        children: [
+          _buildTableCell(entry['indikator'] ?? ''),
+          _buildTableCell(entry['jumlah_kendaraan'] ?? ''),
+          _buildTableCell(entry['sebelum'] ?? ''),
+          _buildTableCell(entry['sesudah'] ?? ''),
+          _buildTableCell(entry['keterangan'] ?? ''),
+        ],
+      )),
+    ],
+  );
+}
 
   pw.Widget _buildTableCell(String text, {bool isHeader = false}) {
     return pw.Container(
