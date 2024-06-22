@@ -160,22 +160,21 @@ class _PenilaianAlkesScreenState extends State<PenilaianAlkesScreen> {
     }
 
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Data berhasil disimpan')));
-   setState(() {
+    setState(() {
       isDataSaved = true;  // Set the state to true after data is saved
     });
     Navigator.pushReplacement(
-    context,
-    MaterialPageRoute(
-      builder: (context) => PenilaianAlkesScreen(
-        kegiatanId: widget.kegiatanId,
-        id_category: widget.id_category,
-        userId: widget.userId,
-        entryId: widget.entryId,
+      context,
+      MaterialPageRoute(
+        builder: (context) => PenilaianAlkesScreen(
+          kegiatanId: widget.kegiatanId,
+          id_category: widget.id_category,
+          userId: widget.userId,
+          entryId: widget.entryId,
+        ),
       ),
-    ),
-  );
-}
-  
+    );
+  }
 
   Future<void> _exportData() async {
     // Dapatkan daftar kegiatan untuk user
@@ -341,9 +340,21 @@ class _PenilaianAlkesScreenState extends State<PenilaianAlkesScreen> {
                   ),
                 ],
                 Expanded(
-                  child: ListView.builder(
-                    itemCount: data.length,
-                    itemBuilder: (context, index) {
+                    child: ListView.builder(
+                      itemCount: data.length,
+                      itemBuilder: (context, index) {
+                        bool isNonEditable = [
+                          'Set Pemeriksaan Kesehatan Ibu',
+                          'Set Pemeriksaan Kesehatan Anak',
+                          'Set Pelayanan KB',
+                          'Set Promosi Kesehatan',
+                          'Set ASI',
+                          'Kit UKS'
+                        ].contains(data[index]["nama_indikator"]?.trim() ?? '');
+                          // Print debug information
+    print('Nama Indikator: ${data[index]["nama_indikator"]}');
+    print('Is Non Editable: $isNonEditable');
+
                       return Card(
                         margin: EdgeInsets.all(10),
                         shape: RoundedRectangleBorder(
@@ -449,7 +460,10 @@ class _PenilaianAlkesScreenState extends State<PenilaianAlkesScreen> {
                                         labelText: 'Indikator 2 Sebelum',
                                         border: OutlineInputBorder(),
                                         contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                        fillColor: isNonEditable ? Colors.grey[300] : Colors.white,
+                                        filled: true,
                                       ),
+                                      enabled: !isNonEditable,
                                     ),
                                   ),
                                   SizedBox(width: 10),
@@ -460,7 +474,10 @@ class _PenilaianAlkesScreenState extends State<PenilaianAlkesScreen> {
                                         labelText: 'Indikator 2 Sesudah',
                                         border: OutlineInputBorder(),
                                         contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                        fillColor: isNonEditable ? Colors.grey[300] : Colors.white,
+                                        filled: true,
                                       ),
+                                      enabled: !isNonEditable,
                                     ),
                                   ),
                                 ],
