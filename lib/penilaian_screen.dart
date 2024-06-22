@@ -100,44 +100,57 @@ class _PenilaianScreenState extends State<PenilaianScreen> {
   }
 
   Future<void> _saveDataEntry() async {
-    // Dapatkan daftar kegiatan untuk user
-    List<Map<String, dynamic>> kegiatanList = await _dbHelper.getKegiatanForUser(widget.userId);
+  // Dapatkan daftar kegiatan untuk user
+  List<Map<String, dynamic>> kegiatanList = await _dbHelper.getKegiatanForUser(widget.userId);
 
-    // Temukan kegiatan yang sesuai dengan kegiatanId yang diberikan
-    Map<String, dynamic> kegiatan = kegiatanList.firstWhere(
-      (kegiatan) => kegiatan['kegiatan_id'] == widget.kegiatanId,
-      orElse: () => <String, dynamic>{},
-    );
+  // Temukan kegiatan yang sesuai dengan kegiatanId yang diberikan
+  Map<String, dynamic> kegiatan = kegiatanList.firstWhere(
+    (kegiatan) => kegiatan['kegiatan_id'] == widget.kegiatanId,
+    orElse: () => <String, dynamic>{},
+  );
 
-    // Ambil nilai nama_puskesmas dari kegiatan
-    puskesmas = kegiatan.isNotEmpty ? kegiatan['nama_puskesmas'] : '';
+  // Ambil nilai nama_puskesmas dari kegiatan
+  puskesmas = kegiatan.isNotEmpty ? kegiatan['nama_puskesmas'] : '';
 
-    for (var i = 0; i < data.length; i++) {
-      Map<String, dynamic> entry = {
-        'user_id': widget.userId,
-        'kegiatan_id': widget.kegiatanId,
-        'id_category': widget.id_category,
-        'puskesmas': puskesmas,
-        'indikator': data[i]['nama_indikator'],
-        'sub_indikator': data[i]['sub_indikator'],
-        'sebelum': sebelumControllers[i].text,
-        'sesudah': sesudahControllers[i].text,
-        'keterangan': keteranganControllers[i].text, // Tambahkan keterangan
-      };
+  for (var i = 0; i < data.length; i++) {
+    Map<String, dynamic> entry = {
+      'user_id': widget.userId,
+      'kegiatan_id': widget.kegiatanId,
+      'id_category': widget.id_category,
+      'puskesmas': puskesmas,
+      'indikator': data[i]['nama_indikator'],
+      'sub_indikator': data[i]['sub_indikator'],
+      'sebelum': sebelumControllers[i].text,
+      'sesudah': sesudahControllers[i].text,
+      'keterangan': keteranganControllers[i].text,
+    };
 
-      if (data[i].containsKey('entry_id')) {
-        entry['entry_id'] = int.parse(data[i]['entry_id']);
-      }
-
-      await _dbHelper.saveDataEntry(entry);
+    if (data[i].containsKey('entry_id')) {
+      entry['entry_id'] = int.parse(data[i]['entry_id']);
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Data berhasil disimpan')));
-
-    setState(() {
-      isDataSaved = true;  // Set the state to true after data is saved
-    });
+    await _dbHelper.saveDataEntry(entry);
   }
+
+  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Data berhasil disimpan')));
+
+  setState(() {
+    isDataSaved = true;  // Set the state to true after data is saved
+  });
+
+  // Refresh screen
+  Navigator.pushReplacement(
+    context,
+    MaterialPageRoute(
+      builder: (context) => PenilaianScreen(
+        kegiatanId: widget.kegiatanId,
+        id_category: widget.id_category,
+        userId: widget.userId,
+        entryId: widget.entryId,
+      ),
+    ),
+  );
+}
 
   Future<void> _exportData() async {
     // Dapatkan daftar kegiatan untuk user

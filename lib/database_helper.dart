@@ -368,16 +368,16 @@ Future<List<Map<String, dynamic>>> getEntriesByKegiatanIdAndKriteria(int kegiata
     );
   }
 
-  // Future<int> updateDataEntry(Map<String, dynamic> entry) async {
-  //   final db = await database;
+  Future<int> updateDataEntry3(Map<String, dynamic> entry) async {
+    final db = await database;
 
-  //   return await db.update(
-  //     'dataentry',
-  //     entry,
-  //     where: 'entry_id = ?',
-  //     whereArgs: [entry['entry_id']],
-  //   );
-  // }
+    return await db.update(
+      'dataentry',
+      entry,
+      where: 'entry_id = ?',
+      whereArgs: [entry['entry_id']],
+    );
+  }
   Future<void> updateDataEntry(Map<String, dynamic> dataEntry) async {
     final db = await database;
     await db.update(

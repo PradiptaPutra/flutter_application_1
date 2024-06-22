@@ -146,7 +146,18 @@ class _PenilaianPembiayaanScreenState extends State<PenilaianPembiayaanScreen> {
     setState(() {
       isDataSaved = true;  // Set the state to true after data is saved
     });
-  }
+    Navigator.pushReplacement(
+    context,
+    MaterialPageRoute(
+      builder: (context) => PenilaianPembiayaanScreen(
+        kegiatanId: widget.kegiatanId,
+        id_category: widget.id_category,
+        userId: widget.userId,
+        entryId: widget.entryId,
+      ),
+    ),
+  );
+}
 
   Future<void> _exportData() async {
     // Dapatkan daftar kegiatan untuk user

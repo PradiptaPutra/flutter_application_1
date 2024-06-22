@@ -134,9 +134,8 @@ class _PenilaianIsiansdmScreenState extends State<PenilaianIsiansdmScreen> {
 
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Data berhasil disimpan')));
 
-    setState(() {
-      isDataSaved = true;  // Set the state to true after data is saved
-    });
+   
+    
   }
 
   Future<void> _exportData() async {

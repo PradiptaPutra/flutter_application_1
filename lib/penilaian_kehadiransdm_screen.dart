@@ -163,7 +163,7 @@ class _PenilaianKehadiransdmScreenState extends State<PenilaianKehadiransdmScree
       if (existingEntry.isNotEmpty) {
         // If entry exists, update it
         entry['entry_id'] = existingEntry[0]['entry_id'];
-        await _dbHelper.updateDataEntry(entry);
+        await _dbHelper.updateDataEntry3(entry);
       } else {
         // If entry does not exist, insert a new one
         await _dbHelper.saveDataEntry(entry);
@@ -175,6 +175,17 @@ class _PenilaianKehadiransdmScreenState extends State<PenilaianKehadiransdmScree
     setState(() {
       isDataSaved = true;  // Set the state to true after data is saved
     });
+     Navigator.pushReplacement(
+    context,
+    MaterialPageRoute(
+      builder: (context) => PenilaianKehadiransdmScreen(
+        kegiatanId: widget.kegiatanId,
+        id_category: widget.id_category,
+        userId: widget.userId,
+        entryId: widget.entryId,
+      ),
+    ),
+  );
 }
 
 
