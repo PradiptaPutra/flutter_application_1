@@ -110,6 +110,7 @@ class MyApp extends StatelessWidget {
           interpretasiSebelum: "",
           interpretasiSesudah: "",
           interpretasiAkhir: "",
+          totalKendaraan: 0,
           userId: ModalRoute.of(context)!.settings.arguments as int,
         )),
         '/export_program': (context) => FadeAnimation(child: ExportProgramScreen(

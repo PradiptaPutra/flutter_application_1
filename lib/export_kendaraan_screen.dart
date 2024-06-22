@@ -246,7 +246,7 @@ pw.Widget _buildDetailedTable() {
       ...detailedData.map((entry) => pw.TableRow(
         children: [
           _buildTableCell(entry['indikator'] ?? ''),
-          _buildTableCell(entry['jumlah_kendaraan'] ?? ''),
+          _buildTableCell(entry['jumlah']?.toString() ?? ''),
           _buildTableCell(entry['sebelum'] ?? ''),
           _buildTableCell(entry['sesudah'] ?? ''),
           _buildTableCell(entry['keterangan'] ?? ''),

@@ -66,6 +66,7 @@ class _PenilaianKendaraanScreenState extends State<PenilaianKendaraanScreen> {
             if (entry['indikator'] == data[i]['nama_indikator']) {
               sebelumControllers[i].text = entry['sebelum'] ?? '';
               sesudahControllers[i].text = entry['sesudah'] ?? '';
+              jumlahKendaraanControllers[i].text = entry['jumlah'].toString() ?? '';
               keteranganControllers[i].text = entry['keterangan'] ?? '';
               data[i]['entry_id'] = entry['entry_id'].toString();  // Ensure entry_id is stored as String
             }
@@ -133,7 +134,7 @@ String _setInterpretasi(double skor) {
         'id_category': widget.id_category,
         'puskesmas': puskesmas,
         'indikator': data[i]['nama_indikator'],
-        'jumlah':jumlahKendaraanControllers,
+        'jumlah':jumlahKendaraanControllers[i].text ,
         'sebelum': sebelumControllers[i].text,
         'sesudah': sesudahControllers[i].text,
         'keterangan': keteranganControllers[i].text,
