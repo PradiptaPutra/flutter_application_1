@@ -90,10 +90,10 @@ class _PenilaianPembiayaanScreenState extends State<PenilaianPembiayaanScreen> {
     }
 
     setState(() {
-      totalSkorSebelum = totalSebelum * 4.15;
+      totalSkorSebelum = totalSebelum * 5;
       interpretasiSebelum = _setInterpretasi(totalSkorSebelum);
 
-      totalSkorSesudah = totalSesudah * 4.15;
+      totalSkorSesudah = totalSesudah * 5;
       interpretasiSesudah = _setInterpretasi(totalSkorSesudah);
     });
   }
@@ -429,7 +429,7 @@ class _PenilaianPembiayaanScreenState extends State<PenilaianPembiayaanScreen> {
             backgroundColor: Colors.blue,
           ),
           SizedBox(width: 10),
-          if (isDataSaved)  // Show Export button only if data is saved
+          
             FloatingActionButton.extended(
               onPressed: _exportData,
               label: Text('Export'),

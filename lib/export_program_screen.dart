@@ -99,7 +99,7 @@ class _ExportProgramScreenState extends State<ExportProgramScreen> {
   Future<void> _fetchDetailedData() async {
     if (widget.kegiatanId != null) {
       final dbHelper = DatabaseHelper();
-      final data = await dbHelper.getEntriesByKegiatanId(widget.kegiatanId!);
+      final data = await dbHelper.getEntriesByKegiatanIdAndCategoryAndUser(widget.kegiatanId!, 3, widget.userId); // Menyertakan kondisi kategori dan userId
       setState(() {
         detailedData = data;
       });
