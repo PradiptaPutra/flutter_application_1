@@ -493,7 +493,6 @@ class _PenilaianAlkesScreenState extends State<PenilaianAlkesScreen> {
             backgroundColor: Colors.blue,
           ),
           SizedBox(width: 10),
-          if (isDataSaved) 
           FloatingActionButton.extended(
             onPressed: _exportData,
             label: Text('Export'),

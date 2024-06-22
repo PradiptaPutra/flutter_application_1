@@ -403,7 +403,6 @@ class _PenilaianIsiansdmScreenState extends State<PenilaianIsiansdmScreen> {
             backgroundColor: Colors.blue,
           ),
           SizedBox(width: 10),
-          if (isDataSaved)  // Show Export button only if data is saved
             FloatingActionButton.extended(
               onPressed: _exportData,
               label: Text('Export'),
