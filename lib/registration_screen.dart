@@ -43,6 +43,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> with SingleTick
   }
 
   void _register() async {
+    final username = _usernameController.text;
     final email = _emailController.text;
     final name = _nameController.text;
     final password = _passwordController.text;
@@ -63,10 +64,26 @@ class _RegistrationScreenState extends State<RegistrationScreen> with SingleTick
       return;
     }
 
+    if (await _dbHelper.isUsernameExist(username)) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Username already exists'),
+        backgroundColor: Colors.red,
+      ));
+      return;
+    }
+
+    if (await _dbHelper.isEmailExist(email)) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Email already exists'),
+        backgroundColor: Colors.red,
+      ));
+      return;
+    }
+
     final passwordHash = sha256.convert(utf8.encode(password)).toString();
 
     Map<String, dynamic> userData = {
-      'username': _usernameController.text,
+      'username': username,
       'password_hash': passwordHash,
       'email': email,
       'name': name,

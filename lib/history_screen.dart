@@ -51,7 +51,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
     if (confirm == true) {
       await _deleteKegiatan(kegiatanId);
-      Navigator.of(context).pop(); // Close the dialog
+      // No need to pop the screen after deletion
+      setState(() {
+        // Trigger a rebuild to refresh the data
+      });
     }
   }
 

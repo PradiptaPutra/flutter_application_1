@@ -14,19 +14,23 @@ class CategorySelectionScreen extends StatefulWidget {
 
 class _CategorySelectionScreenState extends State<CategorySelectionScreen> {
   bool _isDataKehadiranEnabled = false;
+  String _puskesmasName = "Loading...";
   final DatabaseHelper _dbHelper = DatabaseHelper();
 
   @override
   void initState() {
     super.initState();
     _checkDataKehadiran();
+    _fetchPuskesmasName();
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // Call _checkDataKehadiran when returning to this screen
-    _checkDataKehadiran();
+  Future<void> _fetchPuskesmasName() async {
+    if (widget.kegiatanId != null) {
+      final puskesmasName = await _dbHelper.getPuskesmasNameByKegiatanId(widget.kegiatanId!);
+      setState(() {
+        _puskesmasName = puskesmasName ?? 'Unknown Puskesmas';
+      });
+    }
   }
 
   Future<void> _checkDataKehadiran() async {
@@ -72,6 +76,18 @@ class _CategorySelectionScreenState extends State<CategorySelectionScreen> {
       ),
       body: ListView(
         children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  'Puskesmas: $_puskesmasName',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold ,),
+                ),
+              ],
+            ),
+          ),
           ExpansionTile(
             leading: Icon(Icons.local_hospital, color: Theme.of(context).primaryColor),
             title: Text('Fasilitas Pelayanan Kesehatan'),

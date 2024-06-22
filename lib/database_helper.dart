@@ -569,4 +569,28 @@ Future<void> deleteDataEntriesForKegiatan(int kegiatanId) async {
     whereArgs: [kegiatanId],
   );
 }
+  Future<bool> isUsernameExist(String username) async {
+    final db = await database;
+    var res = await db.query("Pengguna", where: "username = ?", whereArgs: [username]);
+    return res.isNotEmpty;
+  }
+
+  Future<bool> isEmailExist(String email) async {
+    final db = await database;
+    var res = await db.query("Pengguna", where: "email = ?", whereArgs: [email]);
+    return res.isNotEmpty;
+  }
+    Future<String?> getPuskesmasNameByKegiatanId(int kegiatanId) async {
+    final db = await database;
+    List<Map<String, dynamic>> result = await db.query(
+      'kegiatan',
+      columns: ['nama_puskesmas'],
+      where: 'kegiatan_id = ?',
+      whereArgs: [kegiatanId],
+    );
+    if (result.isNotEmpty) {
+      return result.first['nama_puskesmas'] as String?;
+    }
+    return null;
+  }
 }
