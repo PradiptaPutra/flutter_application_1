@@ -39,7 +39,7 @@ class ExportPembiayaanScreen extends StatefulWidget {
   _ExportPembiayaanScreenState createState() => _ExportPembiayaanScreenState();
 }
 
-class _ExportPembiayaanScreenState extends State<ExportPembiayaanScreen> {
+class _ExportPembiayaanScreenState extends State<ExportPembiayaanScreen> with SingleTickerProviderStateMixin {
   String catatan = '';
   String upayaKegiatan = '';
   String estimasiBiaya = '';
@@ -47,6 +47,8 @@ class _ExportPembiayaanScreenState extends State<ExportPembiayaanScreen> {
   String? emailPenerima;
   Uint8List? logoData;
   List<Map<String, dynamic>> detailedData = [];
+  late AnimationController _controller;
+  late Animation<double> _animation;
 
   @override
   void initState() {
@@ -55,6 +57,18 @@ class _ExportPembiayaanScreenState extends State<ExportPembiayaanScreen> {
     _fetchEmailPenerima();
     _loadLogo();
     _fetchDetailedData();
+    _controller = AnimationController(
+      duration: const Duration(seconds: 1),
+      vsync: this,
+    );
+    _animation = CurvedAnimation(parent: _controller, curve: Curves.easeInOut);
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   Future<void> _checkConnectivity() async {
@@ -94,7 +108,7 @@ class _ExportPembiayaanScreenState extends State<ExportPembiayaanScreen> {
     }
   }
 
-    Future<void> _openPdf(String filePath) async {
+  Future<void> _openPdf(String filePath) async {
     try {
       await OpenFile.open(filePath);
     } catch (e) {
@@ -121,7 +135,6 @@ class _ExportPembiayaanScreenState extends State<ExportPembiayaanScreen> {
       Fluttertoast.showToast(msg: 'Failed to send email. Please try again later.');
     }
   }
-
 
   Future<void> _savePdf() async {
     if (logoData == null) {
@@ -275,8 +288,6 @@ class _ExportPembiayaanScreenState extends State<ExportPembiayaanScreen> {
     );
   }
 
-  // ... (rest of the methods remain the same)
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -292,83 +303,90 @@ class _ExportPembiayaanScreenState extends State<ExportPembiayaanScreen> {
               backgroundImage: AssetImage('assets/images/bgsplash.png'),
             ),
             SizedBox(height: 10),
-            Text(
-              widget.puskesmas,
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                Column(
-                  children: [
-                    Text('Sebelum', style: TextStyle(fontSize: 18)),
-                    Text(widget.sebelum.toString(),
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                    SizedBox(height: 5),
-                    Text('Interpretasi', style: TextStyle(fontSize: 16)),
-                    Text(widget.interpretasiSebelum,
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                  ],
-                ),
-                Column(
-                  children: [
-                    Text('Sesudah', style: TextStyle(fontSize: 18)),
-                    Text(widget.sesudah.toString(),
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                    SizedBox(height: 5),
-                    Text('Interpretasi', style: TextStyle(fontSize: 16)),
-                    Text(widget.interpretasiSesudah,
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                  ],
-                ),
-              ],
-            ),
-            SizedBox(height: 20),
-            Column(
-              children: [
-                Card(
-                  child: ListTile(
-                    title: Text('Catatan:'),
-                    subtitle: TextFormField(
-                      onChanged: (value) {
-                        setState(() {
-                          catatan = value;
-                        });
-                      },
-                    ),
+            FadeTransition(
+              opacity: _animation,
+              child: Column(
+                children: [
+                  Text(
+                    widget.puskesmas,
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                   ),
-                ),
-                Card(
-                  child: ListTile(
-                    title: Text('Upaya / Kegiatan:'),
-                    subtitle: TextFormField(
-                      onChanged: (value) {
-                        setState(() {
-                          upayaKegiatan = value;
-                        });
-                      },
-                    ),
+                  SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      Column(
+                        children: [
+                          Text('Sebelum', style: TextStyle(fontSize: 18)),
+                          Text(widget.sebelum.toString(),
+                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                          SizedBox(height: 5),
+                          Text('Interpretasi', style: TextStyle(fontSize: 16)),
+                          Text(widget.interpretasiSebelum,
+                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                        ],
+                      ),
+                      Column(
+                        children: [
+                          Text('Sesudah', style: TextStyle(fontSize: 18)),
+                          Text(widget.sesudah.toString(),
+                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                          SizedBox(height: 5),
+                          Text('Interpretasi', style: TextStyle(fontSize: 16)),
+                          Text(widget.interpretasiSesudah,
+                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                        ],
+                      ),
+                    ],
                   ),
-                ),
-                Card(
-                  child: ListTile(
-                    title: Text('Estimasi Biaya:'),
-                    subtitle: TextFormField(
-                      onChanged: (value) {
-                        setState(() {
-                          estimasiBiaya = value;
-                        });
-                      },
-                    ),
+                  SizedBox(height: 20),
+                  Column(
+                    children: [
+                      Card(
+                        child: ListTile(
+                          title: Text('Catatan:'),
+                          subtitle: TextFormField(
+                            onChanged: (value) {
+                              setState(() {
+                                catatan = value;
+                              });
+                            },
+                          ),
+                        ),
+                      ),
+                      Card(
+                        child: ListTile(
+                          title: Text('Upaya / Kegiatan:'),
+                          subtitle: TextFormField(
+                            onChanged: (value) {
+                              setState(() {
+                                upayaKegiatan = value;
+                              });
+                            },
+                          ),
+                        ),
+                      ),
+                      Card(
+                        child: ListTile(
+                          title: Text('Estimasi Biaya:'),
+                          subtitle: TextFormField(
+                            onChanged: (value) {
+                              setState(() {
+                                estimasiBiaya = value;
+                              });
+                            },
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              ],
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _savePdf,
-              child: Text('Save PDF'),
+                  SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: _savePdf,
+                    child: Text('Save PDF'),
+                  ),
+                ],
+              ),
             ),
           ],
         ),

@@ -24,9 +24,10 @@ import 'export_kendaraan_screen.dart';
 import 'export_pembiayaan_screen.dart';
 import 'export_sdm_screen.dart';
 import 'export_program_screen.dart';
-import 'penilaian_sdm_screen.dart'; // Add this import
+import 'penilaian_sdm_screen.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest.dart' as tz;
+import 'fade_animation.dart'; // Import FadeAnimation
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -42,46 +43,46 @@ class MyApp extends StatelessWidget {
       title: 'Health Application',
       initialRoute: '/splash',
       routes: {
-        '/splash': (context) => SplashScreen(),
-        '/logreg': (context) => LogregScreen(),
-        '/login': (context) => LoginScreen(),
-        '/register': (context) => RegistrationScreen(),
-        '/profile': (context) => ProfileScreen(userId: ModalRoute.of(context)!.settings.arguments as int),
-        '/dashboard': (context) => DashboardScreen(userId: ModalRoute.of(context)!.settings.arguments as int),
-        '/data_entry': (context) => DataEntryForm(userId: ModalRoute.of(context)!.settings.arguments as int),
-        '/export': (context) => ExportScreen(
+        '/splash': (context) => FadeAnimation(child: SplashScreen()),
+        '/logreg': (context) => FadeAnimation(child: LogregScreen()),
+        '/login': (context) => FadeAnimation(child: LoginScreen()),
+        '/register': (context) => FadeAnimation(child: RegistrationScreen()),
+        '/profile': (context) => FadeAnimation(child: ProfileScreen(userId: ModalRoute.of(context)!.settings.arguments as int)),
+        '/dashboard': (context) => FadeAnimation(child: DashboardScreen(userId: ModalRoute.of(context)!.settings.arguments as int)),
+        '/data_entry': (context) => FadeAnimation(child: DataEntryForm(userId: ModalRoute.of(context)!.settings.arguments as int)),
+        '/export': (context) => FadeAnimation(child: ExportScreen(
           puskesmas: "",
           sebelum: 0,
           sesudah: 0,
           interpretasiSebelum: "",
           interpretasiSesudah: "",
           userId: ModalRoute.of(context)!.settings.arguments as int,
-        ),
-        '/export_isiansdm': (context) => ExportIsiansdmScreen(
+        )),
+        '/export_isiansdm': (context) => FadeAnimation(child: ExportIsiansdmScreen(
           puskesmas: "",
           sebelum: 0,
           sesudah: 0,
           interpretasiSebelum: "",
           interpretasiSesudah: "",
           userId: ModalRoute.of(context)!.settings.arguments as int,
-        ),
-        '/export_kehadiransdm': (context) => ExportKehadiransdmScreen(
+        )),
+        '/export_kehadiransdm': (context) => FadeAnimation(child: ExportKehadiransdmScreen(
           puskesmas: "",
           sebelum: 0,
           sesudah: 0,
           interpretasiSebelum: "",
           interpretasiSesudah: "",
           userId: ModalRoute.of(context)!.settings.arguments as int,
-        ),
-        '/export_pembiayaan': (context) => ExportPembiayaanScreen(
+        )),
+        '/export_pembiayaan': (context) => FadeAnimation(child: ExportPembiayaanScreen(
           puskesmas: "",
           sebelum: 0,
           sesudah: 0,
           interpretasiSebelum: "",
           interpretasiSesudah: "",
           userId: ModalRoute.of(context)!.settings.arguments as int,
-        ),
-        '/export_alkes': (context) => ExportAlkesScreen(
+        )),
+        '/export_alkes': (context) => FadeAnimation(child: ExportAlkesScreen(
           puskesmas: "",
           sebelumIndikator1: 0,
           sesudahIndikator1: 0,
@@ -93,15 +94,16 @@ class MyApp extends StatelessWidget {
           interpretasiIndikator2Sesudah: "",
           interpretasiAkhir: "",
           userId: ModalRoute.of(context)!.settings.arguments as int,
-        ), '/export_sdm': (context) => ExportSdmScreen(
+        )),
+        '/export_sdm': (context) => FadeAnimation(child: ExportSdmScreen(
           id_category: 0,
-            puskesmas: "",
-            totalSPM: 0,
-            totalSBL: 0,
-            totalSDH: 0,
-            userId: ModalRoute.of(context)!.settings.arguments as int,
-          ),
-        '/export_kendaraan': (context) => ExportKendaraanScreen(
+          puskesmas: "",
+          totalSPM: 0,
+          totalSBL: 0,
+          totalSDH: 0,
+          userId: ModalRoute.of(context)!.settings.arguments as int,
+        )),
+        '/export_kendaraan': (context) => FadeAnimation(child: ExportKendaraanScreen(
           puskesmas: "",
           sebelumIndikator: 0,
           sesudahIndikator: 0,
@@ -109,125 +111,121 @@ class MyApp extends StatelessWidget {
           interpretasiSesudah: "",
           interpretasiAkhir: "",
           userId: ModalRoute.of(context)!.settings.arguments as int,
-        ),
-        '/export_program': (context) => ExportProgramScreen(
+        )),
+        '/export_program': (context) => FadeAnimation(child: ExportProgramScreen(
           puskesmas: "",
           totalIndikator1: 0,
-           totalIndikator2: 0,
-            totalIndikator3: 0,
-             totalIndikator4: 0,
-             totalOverall: 0,
+          totalIndikator2: 0,
+          totalIndikator3: 0,
+          totalIndikator4: 0,
+          totalOverall: 0,
           interpretasiIndikator1:"",
           interpretasiIndikator2:"",
           interpretasiIndikator3:"",
           interpretasiIndikator4:"",
           interpretasiOverall:"",
           userId: ModalRoute.of(context)!.settings.arguments as int,
-        ),
+        )),
       },
       onGenerateRoute: (settings) {
         if (settings.name == '/category_selection') {
           final args = settings.arguments as Map<String, dynamic>;
           return MaterialPageRoute(
-            builder: (context) => CategorySelectionScreen(
+            builder: (context) => FadeAnimation(child: CategorySelectionScreen(
               userId: args['userId'],
               kegiatanId: args['kegiatanId'],
               entryIds: args['entryIds'],
-            ),
+            )),
           );
         } else if (settings.name == '/penilaian') {
           final args = settings.arguments as Map<String, dynamic>;
           return MaterialPageRoute(
-            builder: (context) => PenilaianScreen(
+            builder: (context) => FadeAnimation(child: PenilaianScreen(
               userId: args['userId'],
               kegiatanId: args['kegiatanId'],
               id_category: args['id_category'],
               entryId: args['entryId'],
-            ),
+            )),
           );
-          } else if (settings.name == '/penilaian_isiansdm') {
+        } else if (settings.name == '/penilaian_isiansdm') {
           final args = settings.arguments as Map<String, dynamic>;
           return MaterialPageRoute(
-            builder: (context) => PenilaianIsiansdmScreen(
+            builder: (context) => FadeAnimation(child: PenilaianIsiansdmScreen(
               userId: args['userId'],
               kegiatanId: args['kegiatanId'],
               id_category: args['id_category'],
               entryId: args['entryId'],
-            ),
+            )),
           );
-        
-        } 
-         else if (settings.name == '/penilaian_kehadiransdm') {
+        } else if (settings.name == '/penilaian_kehadiransdm') {
           final args = settings.arguments as Map<String, dynamic>;
           return MaterialPageRoute(
-            builder: (context) => PenilaianKehadiransdmScreen(
+            builder: (context) => FadeAnimation(child: PenilaianKehadiransdmScreen(
               userId: args['userId'],
               kegiatanId: args['kegiatanId'],
               id_category: args['id_category'],
               entryId: args['entryId'],
-            ),
+            )),
           );
-        
-        }else if (settings.name == '/penilaian_alkes') {
+        } else if (settings.name == '/penilaian_alkes') {
           final args = settings.arguments as Map<String, dynamic>;
           return MaterialPageRoute(
-            builder: (context) => PenilaianAlkesScreen(
+            builder: (context) => FadeAnimation(child: PenilaianAlkesScreen(
               userId: args['userId'],
               kegiatanId: args['kegiatanId'],
               id_category: args['id_category'],
               entryId: args['entryId'],
-            ),
+            )),
           );
         } else if (settings.name == '/penilaian_kendaraan') {
           final args = settings.arguments as Map<String, dynamic>;
           return MaterialPageRoute(
-            builder: (context) => PenilaianKendaraanScreen(
+            builder: (context) => FadeAnimation(child: PenilaianKendaraanScreen(
               userId: args['userId'],
               kegiatanId: args['kegiatanId'],
               id_category: args['id_category'],
               entryId: args['entryId'],
-            ),
+            )),
           );
-          } else if (settings.name == '/penilaian_program') {
+        } else if (settings.name == '/penilaian_program') {
           final args = settings.arguments as Map<String, dynamic>;
           return MaterialPageRoute(
-            builder: (context) => PenilaianProgramScreen(
+            builder: (context) => FadeAnimation(child: PenilaianProgramScreen(
               userId: args['userId'],
               kegiatanId: args['kegiatanId'],
               id_category: args['id_category'],
               entryId: args['entryId'],
               puskesmas: "",
-
-            ),
+            )),
           );
         } else if (settings.name == '/penilaian_pembiayaan') {
           final args = settings.arguments as Map<String, dynamic>;
           return MaterialPageRoute(
-            builder: (context) => PenilaianPembiayaanScreen(
+            builder: (context) => FadeAnimation(child: PenilaianPembiayaanScreen(
               userId: args['userId'],
               kegiatanId: args['kegiatanId'],
               id_category: args['id_category'],
               entryId: args['entryId'],
-            ),
+            )),
           );
         } else if (settings.name == '/calendar') {
-          return MaterialPageRoute(builder: (context) => CalendarScreen());
+          return MaterialPageRoute(builder: (context) => FadeAnimation(child: CalendarScreen()));
         } else if (settings.name == '/penilaian_sdm') {
           final args = settings.arguments as Map<String, dynamic>;
           return MaterialPageRoute(
-            builder: (context) => PenilaianSdmScreen(
+            builder: (context) => FadeAnimation(child: PenilaianSdmScreen(
               userId: args['userId'],
               kegiatanId: args['kegiatanId'],
               id_category: args['id_category'],
               entryId: args['entryId'],
               dropdownOption: 'Non Rawat Inap', // Pass the required parameter
-            ),
+            )),
           );
         }
         return null;
       },
       onUnknownRoute: (settings) {
-        return MaterialPageRoute(builder: (context) => LogregScreen());
+        return MaterialPageRoute(builder: (context) => FadeAnimation(child: LogregScreen()));
       },
     );
   }

@@ -310,6 +310,7 @@ class _ExportAlkesScreenState extends State<ExportAlkesScreen> {
               backgroundImage: AssetImage('assets/images/bgsplash.png'),
             ),
             SizedBox(height: 10),
+            
             Text(
               widget.puskesmas,
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
