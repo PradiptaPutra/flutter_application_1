@@ -29,6 +29,7 @@ class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
   double totalIndikator2 = 0.0;
   double totalIndikator3 = 0.0;
   double totalIndikator4 = 0.0;
+  double totalOverall = 0.0;
   String interpretasiIndikator1 = "";
   String interpretasiIndikator2 = "";
   String interpretasiIndikator3 = "";
@@ -299,7 +300,12 @@ Future<void> _exportData() async {
           totalIndikator2: totalIndikator2.toInt(),
           totalIndikator3: totalIndikator3.toInt(),
           totalIndikator4: totalIndikator4.toInt(),
+          totalOverall: totalOverall.toInt(),
           interpretasiIndikator1: interpretasiIndikator1,
+          interpretasiIndikator2: interpretasiIndikator2,
+          interpretasiIndikator3: interpretasiIndikator3,
+          interpretasiIndikator4: interpretasiIndikator4,
+          interpretasiOverall: interpretasiOverall,
           userId: widget.userId,
           kegiatanId: widget.kegiatanId, // Tambahkan kegiatanId di sini
         ),
@@ -313,6 +319,7 @@ Future<void> _exportData() async {
       totalIndikator2 = _calculateTotalSkorForIndikator(2);
       totalIndikator3 = _calculateTotalSkorForIndikator(3);
       totalIndikator4 = _calculateTotalSkorForIndikator(4);
+      totalOverall = totalIndikator1 * 0.2 + totalIndikator2 * 0.2 + totalIndikator3 * 0.3 + totalIndikator4 * 0.3;
       interpretasiIndikator1 = _setInterpretasi(totalIndikator1);
       interpretasiIndikator2 = _setInterpretasi(totalIndikator2);
       interpretasiIndikator3 = _setInterpretasi(totalIndikator3);

@@ -218,8 +218,8 @@ class _ExportScreenState extends State<ExportScreen> {
         pw.Text('Summary', style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold)),
         pw.Text('Sebelum: ${widget.sebelum}'),
         pw.Text('Sesudah: ${widget.sesudah}'),
-        pw.Text('Interpretasi Sebelum: ${widget.interpretasiSebelum}'),
-        pw.Text('Interpretasi Sesudah: ${widget.interpretasiSesudah}'),
+        pw.Text('Interpretasi Sebelum: ${widget.interpretasiSebelum ?? ''}'),
+        pw.Text('Interpretasi Sesudah: ${widget.interpretasiSesudah ?? ''}'),
       ],
     );
   }
@@ -239,11 +239,11 @@ class _ExportScreenState extends State<ExportScreen> {
         ),
         ...detailedData.map((entry) => pw.TableRow(
           children: [
-            _buildTableCell(entry['indikator']),
-            _buildTableCell(entry['sub_indikator']),
-            _buildTableCell(entry['sebelum']),
-            _buildTableCell(entry['sesudah']),
-            _buildTableCell(entry['keterangan']),
+            _buildTableCell(entry['indikator']?? ''),
+            _buildTableCell(entry['sub_indikator']?? ''),
+            _buildTableCell(entry['sebelum']?? ''),
+            _buildTableCell(entry['sesudah']?? ''),
+            _buildTableCell(entry['keterangan']?? ''),
           ],
         )),
       ],

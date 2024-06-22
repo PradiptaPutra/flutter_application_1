@@ -12,7 +12,7 @@ import 'package:mailer/smtp_server.dart';
 import 'package:sqflite/sqflite.dart';
 import 'database_helper.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:fluttertoast/fluttertoast.dart'; // Tambahkan import ini
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:path/path.dart' as path;
 
@@ -20,13 +20,16 @@ class ExportProgramScreen extends StatefulWidget {
   final String puskesmas;
   final int totalIndikator1;
   final int totalIndikator2;
-  final int totalIndikator3;
+  final int totalIndikator3; 
   final int totalIndikator4;
+  final int totalOverall;
   final String interpretasiIndikator1;
-
+  final String interpretasiIndikator2;
+  final String interpretasiIndikator3;
+  final String interpretasiIndikator4;
+  final String interpretasiOverall;
   final int userId;
-  final int? kegiatanId; // Tambahkan kegiatanId di sini
-  
+  final int? kegiatanId;
 
   ExportProgramScreen({
     required this.puskesmas,
@@ -34,9 +37,14 @@ class ExportProgramScreen extends StatefulWidget {
     required this.totalIndikator2,
     required this.totalIndikator3,
     required this.totalIndikator4,
-   required this.interpretasiIndikator1,
+    required this.totalOverall,
+    required this.interpretasiIndikator1,
+    required this.interpretasiIndikator2,
+    required this.interpretasiIndikator3,
+    required this.interpretasiIndikator4,
+    required this.interpretasiOverall,
     required this.userId,
-    this.kegiatanId, // Tambahkan kegiatanId di sini
+    this.kegiatanId,
   });
 
   @override
@@ -50,6 +58,7 @@ class _ExportProgramScreenState extends State<ExportProgramScreen> {
   bool isConnected = false;
   String? emailPenerima;
   Uint8List? logoData;
+  List<Map<String, dynamic>> detailedData = [];
 
   @override
   void initState() {
@@ -57,6 +66,7 @@ class _ExportProgramScreenState extends State<ExportProgramScreen> {
     _checkConnectivity();
     _fetchEmailPenerima();
     _loadLogo();
+    _fetchDetailedData();
   }
 
   Future<void> _checkConnectivity() async {
@@ -86,120 +96,22 @@ class _ExportProgramScreenState extends State<ExportProgramScreen> {
     });
   }
 
-  Future<void> _savePdf() async {
-  if (logoData == null) {
-    print('Logo not loaded');
-    return;
+  Future<void> _fetchDetailedData() async {
+    if (widget.kegiatanId != null) {
+      final dbHelper = DatabaseHelper();
+      final data = await dbHelper.getEntriesByKegiatanId(widget.kegiatanId!);
+      setState(() {
+        detailedData = data;
+      });
+    }
   }
 
-  final pdf = pw.Document();
-
-  pdf.addPage(
-    pw.Page(
-      build: (context) {
-        return pw.Column(
-          crossAxisAlignment: pw.CrossAxisAlignment.start,
-          children: [
-            pw.Row(
-              mainAxisAlignment: pw.MainAxisAlignment.center,
-              children: [
-                pw.Image(
-                  pw.MemoryImage(logoData!),
-                  width: 100,
-                  height: 100,
-                ),
-                pw.SizedBox(width: 20),
-                pw.Column(
-                  crossAxisAlignment: pw.CrossAxisAlignment.start,
-                  children: [
-                    pw.Text(
-                      'Puskesmas: ${widget.puskesmas}',
-                      style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold),
-                    ),
-                    pw.Text(
-                      'Jl. Puskesmas No.123, Bangun Jaya, Kec. Bangun',
-                      style: pw.TextStyle(fontSize: 12),
-                    ),
-                    pw.Text(
-                      'Telp: (021) 12345678 | Email: info@puskesmasbangunjaya.id',
-                      style: pw.TextStyle(fontSize: 12),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            pw.Divider(),
-            pw.Header(
-              level: 1,
-              text: 'Data Export',
-            ),
-            pw.Text('Puskesmas: ${widget.puskesmas}'),
-            // pw.Text('Sebelum: ${widget.sebelum}'),
-            // pw.Text('Sesudah: ${widget.sesudah}'),
-            // pw.Text('Interpretasi Sebelum: ${widget.interpretasiSebelum}'),
-            // pw.Text('Interpretasi Sesudah: ${widget.interpretasiSesudah}'),
-            pw.Text('Catatan: $catatan'),
-            pw.Text('Upaya / Kegiatan: $upayaKegiatan'),
-            pw.Text('Estimasi Biaya: $estimasiBiaya'),
-          ],
-        );
-      },
-    ),
-  );
-
-  try {
-    // Request storage permission
-    var status = await Permission.storage.request();
-    if (!status.isGranted) {
-      print('Permission not granted');
-      return;
-    }
-
-    // Get the Downloads directory
-    final downloadsDir = Directory('/storage/emulated/0/Download');
-    String fileName = 'IsianSDM_${widget.puskesmas}.pdf'; // Default file name format
-
-    // Update file name if id_category equals 11
-    if (widget.kegiatanId != null && widget.kegiatanId == 11) {
-      fileName = 'IsianSDM_${widget.puskesmas}.pdf';
-    }
-
-    final pdfPath = path.join(downloadsDir.path, fileName);
-    final pdfFile = File(pdfPath);
-
-    await pdfFile.writeAsBytes(await pdf.save());
-    print('PDF saved to $pdfPath');
-
-    Fluttertoast.showToast(msg: 'PDF saved to $pdfPath');
-
-    _openPdf(pdfPath);
-
-    if (isConnected && emailPenerima != null) {
-      await _sendEmail(pdfPath, emailPenerima!);
-      Fluttertoast.showToast(msg: 'Email successfully sent');
-    } else {
-      print('Device is offline or email recipient not found. Email will be sent when online.');
-    }
-  } catch (e) {
-    print('Error while saving PDF: $e');
-  }
-}
-
-  void _openPdf(String filePath) async {
+    Future<void> _openPdf(String filePath) async {
     try {
-      final result = await FilePicker.platform.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: ['pdf'],
-      );
-
-      if (result != null) {
-        final file = File(result.files.single.path!);
-        OpenFile.open(file.path);
-      } else {
-        print('User canceled the file picking');
-      }
+      await OpenFile.open(filePath);
     } catch (e) {
-      print('Error while picking file: $e');
+      print('Error while opening PDF: $e');
+      Fluttertoast.showToast(msg: 'Unable to open PDF. Please check if you have a PDF viewer installed.');
     }
   }
 
@@ -218,8 +130,176 @@ class _ExportProgramScreenState extends State<ExportProgramScreen> {
       print('Email sent: ${sendReport.toString()}');
     } catch (e) {
       print('Error while sending email: $e');
+      Fluttertoast.showToast(msg: 'Failed to send email. Please try again later.');
     }
   }
+
+
+  Future<void> _savePdf() async {
+    if (logoData == null) {
+      print('Logo not loaded');
+      return;
+    }
+
+    final pdf = pw.Document();
+
+    pdf.addPage(
+      pw.MultiPage(
+        build: (context) => [
+          _buildHeader(),
+          pw.SizedBox(height: 20),
+          _buildSummary(),
+          pw.SizedBox(height: 20),
+          _buildDetailedTable(),
+          pw.SizedBox(height: 20),
+          _buildAdditionalInfo(),
+        ],
+      ),
+    );
+
+    try {
+      var status = await Permission.storage.request();
+      if (!status.isGranted) {
+        print('Permission not granted');
+        return;
+      }
+
+      final downloadsDir = Directory('/storage/emulated/0/Download');
+      String fileName = 'Bangunan_${widget.puskesmas}.pdf';
+
+      if (widget.kegiatanId != null && widget.kegiatanId == 11) {
+        fileName = 'bangunan_${widget.puskesmas}.pdf';
+      }
+
+      final pdfPath = path.join(downloadsDir.path, fileName);
+      final pdfFile = File(pdfPath);
+
+      await pdfFile.writeAsBytes(await pdf.save());
+      print('PDF saved to $pdfPath');
+
+      Fluttertoast.showToast(msg: 'PDF saved to $pdfPath');
+
+      _openPdf(pdfPath);
+
+      if (isConnected && emailPenerima != null) {
+        await _sendEmail(pdfPath, emailPenerima!);
+        Fluttertoast.showToast(msg: 'Email successfully sent');
+      } else {
+        print('Device is offline or email recipient not found. Email will be sent when online.');
+      }
+    } catch (e) {
+      print('Error while saving PDF: $e');
+    }
+  }
+
+  pw.Widget _buildHeader() {
+    return pw.Row(
+      mainAxisAlignment: pw.MainAxisAlignment.center,
+      children: [
+        pw.Image(
+          pw.MemoryImage(logoData!),
+          width: 100,
+          height: 100,
+        ),
+        pw.SizedBox(width: 20),
+        pw.Column(
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          children: [
+            pw.Text(
+              'Puskesmas: ${widget.puskesmas}',
+              style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold),
+            ),
+            pw.Text(
+              'Jl. Puskesmas No.123, Bangun Jaya, Kec. Bangun',
+              style: pw.TextStyle(fontSize: 12),
+            ),
+            pw.Text(
+              'Telp: (021) 12345678 | Email: info@puskesmasbangunjaya.id',
+              style: pw.TextStyle(fontSize: 12),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  pw.Widget _buildSummary() {
+    return pw.Column(
+      crossAxisAlignment: pw.CrossAxisAlignment.start,
+      children: [
+        pw.Text('Summary', style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold)),
+        pw.Text('Total Indikator 1: ${widget.totalIndikator1}'),
+        pw.Text('Total Indikator 2: ${widget.totalIndikator2}'),
+        pw.Text('Total Indikator 3: ${widget.totalIndikator3}'),
+        pw.Text('Total Indikator 4: ${widget.totalIndikator4}'),
+        pw.Text('Total Keseluruhan: ${widget.totalOverall}'),
+        pw.Text('Interpretasi Indikator 1: ${widget.interpretasiIndikator1 ?? ''}'),
+        pw.Text('Interpretasi Indikator 2: ${widget.interpretasiIndikator2 ?? ''}'),
+        pw.Text('Interpretasi Indikator 3: ${widget.interpretasiIndikator3 ?? ''}'),
+        pw.Text('Interpretasi Indikator 4: ${widget.interpretasiIndikator4 ?? ''}'),
+        pw.Text('Interpretasi Keseluruhan: ${widget.interpretasiOverall ?? ''}'),
+      ],
+    );
+  }
+
+  pw.Widget _buildDetailedTable() {
+    return pw.Table(
+      border: pw.TableBorder.all(),
+      children: [
+        pw.TableRow(
+          children: [
+            _buildTableCell('Indikator', isHeader: true),
+            _buildTableCell('Sub Indikator', isHeader: true),
+            _buildTableCell('Kriteria', isHeader: true),
+            _buildTableCell('Indikator 1', isHeader: true),
+            _buildTableCell('Indikator 2', isHeader: true),
+            _buildTableCell('Indikator 3', isHeader: true),
+            _buildTableCell('Indikator 4', isHeader: true),
+            _buildTableCell('Keterangan', isHeader: true),
+          ],
+        ),
+        ...detailedData.map((entry) => pw.TableRow(
+          children: [
+            _buildTableCell(entry['indikator']?? ''),
+            _buildTableCell(entry['sub_indikator']?? ''),
+            _buildTableCell(entry['kriteria']?? ''),
+            _buildTableCell(entry['indikator1']?? ''),
+            _buildTableCell(entry['indikator2']?? ''),
+            _buildTableCell(entry['indikator3']?? ''),
+            _buildTableCell(entry['indikator4']?? ''),
+            _buildTableCell(entry['keterangan']?? ''),
+          ],
+        )),
+      ],
+    );
+  }
+
+  pw.Widget _buildTableCell(String text, {bool isHeader = false}) {
+    return pw.Container(
+      padding: pw.EdgeInsets.all(5),
+      child: pw.Text(
+        text,
+        style: pw.TextStyle(
+          fontSize: isHeader ? 12 : 10,
+          fontWeight: isHeader ? pw.FontWeight.bold : pw.FontWeight.normal,
+        ),
+      ),
+    );
+  }
+
+  pw.Widget _buildAdditionalInfo() {
+    return pw.Column(
+      crossAxisAlignment: pw.CrossAxisAlignment.start,
+      children: [
+        pw.Text('Additional Information', style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold)),
+        pw.Text('Catatan: $catatan'),
+        pw.Text('Upaya / Kegiatan: $upayaKegiatan'),
+        pw.Text('Estimasi Biaya: $estimasiBiaya'),
+      ],
+    );
+  }
+
+  // ... (rest of the methods remain the same)
 
   @override
   Widget build(BuildContext context) {
@@ -246,23 +326,56 @@ class _ExportProgramScreenState extends State<ExportProgramScreen> {
               children: [
                 Column(
                   children: [
-                    Text('Sebelum', style: TextStyle(fontSize: 18)),
+                    Text('Total Indikator 1', style: TextStyle(fontSize: 18)),
                     Text(widget.totalIndikator1.toString(),
                         style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                     SizedBox(height: 5),
-                    Text('Interpretasi', style: TextStyle(fontSize: 16)),
+                    Text('Interpretasi Indikator 1', style: TextStyle(fontSize: 16)),
                     Text(widget.interpretasiIndikator1,
                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                   ],
                 ),
                 Column(
                   children: [
-                    Text('Sesudah', style: TextStyle(fontSize: 18)),
-                    Text(widget.totalIndikator1.toString(),
+                    Text('Total Indikator 2', style: TextStyle(fontSize: 18)),
+                    Text(widget.totalIndikator2.toString(),
                         style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                     SizedBox(height: 5),
-                    Text('Interpretasi', style: TextStyle(fontSize: 16)),
-                    Text(widget.interpretasiIndikator1,
+                    Text('Interpretasi Indikator 2', style: TextStyle(fontSize: 16)),
+                    Text(widget.interpretasiIndikator2,
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  ],
+                ),
+                Column(
+                  children: [
+                    Text('Total Indikator 3', style: TextStyle(fontSize: 18)),
+                    Text(widget.totalIndikator3.toString(),
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    SizedBox(height: 5),
+                    Text('Interpretasi Indikator 3', style: TextStyle(fontSize: 16)),
+                    Text(widget.interpretasiIndikator3,
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  ],
+                ),
+                Column(
+                  children: [
+                    Text('Total Indikator 4', style: TextStyle(fontSize: 18)),
+                    Text(widget.totalIndikator4.toString(),
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    SizedBox(height: 5),
+                    Text('Interpretasi Indikator 4', style: TextStyle(fontSize: 16)),
+                    Text(widget.interpretasiIndikator4,
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  ],
+                ),
+                Column(
+                  children: [
+                    Text('Total Keseluruhan ', style: TextStyle(fontSize: 18)),
+                    Text(widget.totalOverall.toString(),
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    SizedBox(height: 5),
+                    Text('Interpretasi Keseluruhan', style: TextStyle(fontSize: 16)),
+                    Text(widget.interpretasiOverall,
                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                   ],
                 ),
