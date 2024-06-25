@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
 import 'database_helper.dart';
 import 'package:intl/intl.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
+
+
 
 class PuskesmasScreen extends StatefulWidget {
   final int userId;
@@ -67,7 +73,8 @@ class _PuskesmasScreenState extends State<PuskesmasScreen> {
     'Sumatera Utara': ['Binjai', 'Gunungsitoli', 'Medan', 'Padang Sidempuan', 'Pematang Siantar', 'Sibolga', 'Tanjungbalai', 'Tebing Tinggi'],
     'Yogyakarta': ['Yogyakarta'],
   };
-
+List<int>? _imageBytes;
+File? _selectedImage;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   bool _isNextButtonEnabled = false;
 
@@ -304,7 +311,42 @@ class _PuskesmasScreenState extends State<PuskesmasScreen> {
                 ],
               ),
             ),
-            SizedBox(height: 20), // Add spacing between fields and the "Next" button
+            // Input gambar untuk upload
+          ListTile(
+              leading: Icon(Icons.add_a_photo),
+              title: Row(
+                children: [
+                  Icon(Icons.image),
+                  SizedBox(width: 10),
+                  Text('Pilih Gambar'),
+                  PopupMenuButton<String>(
+                    onSelected: (value) {
+                      if (value == 'camera') {
+                        _getImage(ImageSource.camera);
+                      } else if (value == 'gallery') {
+                        _getImage(ImageSource.gallery);
+                      }
+                    },
+                    itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                      const PopupMenuItem<String>(
+                        value: 'camera',
+                        child: ListTile(
+                          leading: Icon(Icons.camera_alt),
+                          title: Text('Ambil Foto'),
+                        ),
+                      ),
+                      const PopupMenuItem<String>(
+                        value: 'gallery',
+                        child: ListTile(
+                          leading: Icon(Icons.image),
+                          title: Text('Pilih dari Galeri'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
             ListTile(
               title: ElevatedButton(
                 onPressed: _isNextButtonEnabled ? _insertKegiatan : null,
@@ -316,6 +358,22 @@ class _PuskesmasScreenState extends State<PuskesmasScreen> {
       ),
     );
   }
+
+     Future<void> _getImage(ImageSource source) async {
+    final pickedFile = await ImagePicker().pickImage(source: source);
+
+    if (pickedFile != null) {
+      setState(() {
+        _selectedImage = File(pickedFile.path);
+      });
+    }
+  }
+
+Future<bool> _requestPermission() async {
+  PermissionStatus status = await Permission.storage.request();
+  return status.isGranted;
+}
+
 
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? pickedDate = await showDatePicker(
@@ -332,20 +390,39 @@ class _PuskesmasScreenState extends State<PuskesmasScreen> {
     }
   }
 
- void _insertKegiatan() async {
+Future<void> _insertKegiatan() async {
+  // Meminta izin terlebih dahulu
+  bool permissionGranted = await _requestPermission();
+  if (!permissionGranted) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text('Permission untuk menyimpan gambar ditolak.'),
+    ));
+    return;
+  }
+
   String namaPuskesmas = namaPuskesmasController.text;
   String tanggalKegiatan =
       selectedDate != null ? DateFormat('dd-MM-yyyy').format(selectedDate!) : '';
-
+  
   // Mendapatkan data pengguna yang sedang login
   Map<String, dynamic>? userData = await DatabaseHelper().getUserData(widget.userId);
 
-  // Jika data pengguna ditemukan
   if (userData != null) {
-    // Mengisi kolom nama, jabatan, dan nomor telepon dari data pengguna
     String nama = userData['name'];
     String jabatan = userData['position'];
     String notelp = userData['phone'];
+
+    // Menyimpan gambar ke penyimpanan lokal
+    String namaFileFoto = '';
+    if (_selectedImage != null) {
+      final downloadsDir = Directory('/storage/emulated/0/Download/fotopuskesmas');
+      if (!await downloadsDir.exists()) {
+        await downloadsDir.create(recursive: true); // Membuat folder fotopuskesmas jika belum ada
+      }
+      namaFileFoto = 'foto_${namaPuskesmas}.jpg';
+      String filePath = '${downloadsDir.path}/$namaFileFoto';
+      await _selectedImage!.copy(filePath);
+    }
 
     // Membuat objek data kegiatan
     Map<String, dynamic> kegiatanData = {
@@ -355,9 +432,10 @@ class _PuskesmasScreenState extends State<PuskesmasScreen> {
       'provinsi': selectedProvinsi,
       'kabupaten_kota': selectedKabupaten,
       'tanggal_kegiatan': tanggalKegiatan,
-      'nama': nama, // Mengisi kolom nama dengan data pengguna
-      'jabatan': jabatan, // Mengisi kolom jabatan dengan data pengguna
-      'notelepon': notelp, // Mengisi kolom nomor telepon dengan data pengguna
+      'nama': nama,
+      'jabatan': jabatan,
+      'notelepon': notelp,
+      'foto': namaFileFoto, // Menyimpan nama file foto
     };
 
     // Memasukkan data kegiatan ke dalam database
@@ -369,6 +447,7 @@ class _PuskesmasScreenState extends State<PuskesmasScreen> {
       selectedDate = null;
       selectedProvinsi = null;
       selectedKabupaten = null;
+      _selectedImage = null;
       _validateInputs();
     });
 

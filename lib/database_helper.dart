@@ -20,7 +20,7 @@ class DatabaseHelper {
   print('Database initialized at path: $path');
   return openDatabase(
     path,
-    version: 13, // Meningkatkan nomor versi database
+    version: 14, // Meningkatkan nomor versi database
     onCreate: _createDb,
     onUpgrade: _upgradeDb,
   );
@@ -82,6 +82,7 @@ class DatabaseHelper {
       nama TEXT,
       jabatan TEXT,
       notelepon TEXT,
+      foto TEXT, -- New column for storing photos as binary data
       FOREIGN KEY(user_id) REFERENCES Pengguna(user_id)
     )
   ''');
@@ -207,6 +208,46 @@ class DatabaseHelper {
       return maps.first;
     }
     return null;
+  }
+  // Metode untuk mengambil tanggal kegiatan
+  Future<String> getTanggalKegiatan(int kegiatanId) async {
+    final db = await database;
+    var result = await db.query(
+      'kegiatan',
+      columns: ['tanggal_kegiatan'],
+      where: 'kegiatan_id = ?',
+      whereArgs: [kegiatanId],
+    );
+    if (result.isNotEmpty) {
+      return result.first['tanggal_kegiatan'] as String? ?? 'Tidak ada tanggal';
+    } else {
+      return 'Tidak ada tanggal';
+    }
+  }
+
+  // Metode untuk mengambil category_id yang sudah diselesaikan
+  Future<List<int>> getCompletedCategoriesForKegiatan(int kegiatanId, List<int> requiredCategories) async {
+    Database db = await database;
+
+    // Fetch completed categories for the given kegiatan_id
+    List<Map<String, dynamic>> dataEntries = await db.query(
+      'dataentry',
+      columns: ['id_category'],
+      where: 'kegiatan_id = ?',
+      whereArgs: [kegiatanId],
+    );
+
+    List<int> completedCategories = [];
+
+    // Check each required category
+    for (int category in requiredCategories) {
+      bool isCompleted = dataEntries.any((entry) => entry['id_category'] == category);
+      if (isCompleted) {
+        completedCategories.add(category);
+      }
+    }
+
+    return completedCategories;
   }
 
   Future<void> updateUserData(Map<String, dynamic> userData) async {
@@ -364,6 +405,32 @@ Future<List<Map<String, dynamic>>> getKegiatanForUserSorted(int userId, bool asc
     );
   }
 
+Future<void> updateKegiatanPhoto(int kegiatanId, Uint8List photoData) async {
+  final db = await database;
+  await db.update(
+    'Kegiatan',
+    {'foto': photoData},
+    where: 'kegiatan_id = ?',
+    whereArgs: [kegiatanId],
+  );
+}
+
+Future<Uint8List?> getKegiatanPhoto(int kegiatanId) async {
+  final db = await database;
+  List<Map<String, dynamic>> result = await db.query(
+    'Kegiatan',
+    columns: ['foto'],
+    where: 'kegiatan_id = ?',
+    whereArgs: [kegiatanId],
+    limit: 1,
+  );
+  if (result.isNotEmpty) {
+    // Convert BLOB data back to Uint8List
+    return result.first['foto'] as Uint8List?;
+  }
+  return null;
+}
+
 Future<List<Map<String, dynamic>>> getEntriesByKegiatanIdAndKriteria(int kegiatanId, String kriteria, String indikator) async {
     final db = await database;
     return await db.query(
@@ -493,7 +560,7 @@ Future<void> updateDataEntry2(Map<String, dynamic> dataEntry) async {
   Future<List<Map<String, dynamic>>> getDataEntriesForUserHome(int userId) async {
     final db = await database;
     final List<Map<String, dynamic>> maps = await db.rawQuery('''
-      SELECT DISTINCT kegiatan_id, nama_puskesmas, dropdown_option , provinsi ,kabupaten_kota
+      SELECT DISTINCT kegiatan_id, nama_puskesmas, dropdown_option , provinsi ,kabupaten_kota, foto
       FROM Kegiatan 
       WHERE user_id = ?
     ''', [userId]);
@@ -540,6 +607,7 @@ Future<void> updateDataEntry2(Map<String, dynamic> dataEntry) async {
       return 0.0;
     }
   }
+
 
   Future<int> getPuskesmasSurveyedCount(int userId) async {
     final db = await database;
