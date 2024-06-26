@@ -109,7 +109,7 @@ Widget build(BuildContext context) {
                     List<int> missingCategories = puskesmas['missing_categories'];
                     String fotoPath = puskesmas['foto'] != null && puskesmas['foto'].isNotEmpty
                         ? '/storage/emulated/0/Download/fotopuskesmas/${puskesmas['foto']}'
-                        : '/storage/emulated/0/Download/fotopuskesmas/${puskesmas['foto']}';
+                        : 'assets/images/logors.jpg';
                   // Debug print to see missingCategories map
                   
                   print('Missing Categories for Puskesmas ${puskesmas['nama_puskesmas']}: $missingCategories');
