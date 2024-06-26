@@ -21,7 +21,7 @@ class DatabaseHelper {
   print('Database initialized at path: $path');
   return openDatabase(
     path,
-    version: 14, // Meningkatkan nomor versi database
+    version: 15, // Meningkatkan nomor versi database
     onCreate: _createDb,
     onUpgrade: _upgradeDb,
   );
@@ -84,6 +84,7 @@ class DatabaseHelper {
       jabatan TEXT,
       notelepon TEXT,
       foto TEXT, -- New column for storing photos as binary data
+      lokasi TEXT,
       FOREIGN KEY(user_id) REFERENCES Pengguna(user_id)
     )
   ''');
@@ -225,6 +226,46 @@ class DatabaseHelper {
       return 'Tidak ada tanggal';
     }
   }
+
+   Future<String> getLokasiKegiatan(int kegiatanId) async {
+    final db = await database;
+    var result = await db.query(
+      'kegiatan',
+      columns: ['lokasi'],
+      where: 'kegiatan_id = ?',
+      whereArgs: [kegiatanId],
+    );
+    if (result.isNotEmpty) {
+      return result.first['lokasi'] as String? ?? 'Tidak ada tanggal';
+    } else {
+      return 'tidak ada lokasi';
+    }
+  }
+
+  // Metode untuk mengambil semua data pengguna
+ Future<List<Map<String, dynamic>>> getAllPengguna(int userId) async {
+  final db = await database;
+  final List<Map<String, dynamic>> result = await db.query(
+    'Pengguna',
+    where: 'user_id = ?',
+    whereArgs: [userId],
+  );
+  return result;
+}
+
+  // Metode untuk mengambil semua data pengguna
+ Future<List<Map<String, dynamic>>> getAllKegiatan(int userId,kegiatanId) async {
+  final db = await database;
+  final List<Map<String, dynamic>> result = await db.query(
+    'Kegiatan',
+    where: 'user_id = ? AND kegiatan_id = ?',
+    whereArgs: [userId,kegiatanId],
+  );
+  return result;
+}
+
+
+
 
   // Metode untuk mengambil category_id yang sudah diselesaikan
   Future<List<int>> getCompletedCategoriesForKegiatan(int kegiatanId, List<int> requiredCategories) async {

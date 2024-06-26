@@ -182,8 +182,12 @@ Future<void> _initializeBackgroundImage() async {
       final downloadsDir = Directory('/storage/emulated/0/Download');
       String fileName = 'KehadiranSdm_${widget.puskesmas}.pdf';
 
-      if (widget.kegiatanId != null && widget.kegiatanId == 11) {
-        fileName = 'KehadiranSdm_${widget.puskesmas}.pdf';
+      if (widget.kegiatanId != null) {
+        final dbHelper = DatabaseHelper();
+        final tanggalKegiatan = await dbHelper.getTanggalKegiatan(widget.kegiatanId!);
+        if (tanggalKegiatan != null) {
+          fileName = 'KehadiranSdm_${widget.puskesmas}_$tanggalKegiatan.pdf';
+        }
       }
 
       final pdfPath = path.join(downloadsDir.path, fileName);

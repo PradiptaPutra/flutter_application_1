@@ -20,6 +20,7 @@ class PuskesmasScreen extends StatefulWidget {
 class _PuskesmasScreenState extends State<PuskesmasScreen> {
   // Define controllers for text fields
   TextEditingController namaPuskesmasController = TextEditingController();
+  TextEditingController lokasiController = TextEditingController();
   DateTime? selectedDate;
 
   // Define dropdown values
@@ -83,12 +84,15 @@ File? _selectedImage;
     super.initState();
     // Add listeners to text fields and other inputs
     namaPuskesmasController.addListener(_validateInputs);
+    
   }
 
   void _validateInputs() {
     if (namaPuskesmasController.text.isNotEmpty &&
+        lokasiController.text.isNotEmpty &&
         selectedDate != null &&
         selectedProvinsi != null &&
+
         selectedKabupaten != null) {
       setState(() {
         _isNextButtonEnabled = true;
@@ -104,6 +108,7 @@ File? _selectedImage;
   void dispose() {
     // Dispose controllers when the screen is disposed
     namaPuskesmasController.dispose();
+    lokasiController.dispose();
     super.dispose();
   }
 
@@ -254,6 +259,14 @@ File? _selectedImage;
               ),
             ),
             ListTile(
+              title: TextField(
+                controller: lokasiController,
+                decoration: InputDecoration(
+                  labelText: 'Alamat lengkap..',
+                ),
+              ),
+            ),
+            ListTile(
               title: DropdownButton<String>(
                 hint: Text('Pilih Provinsi'),
                 value: selectedProvinsi,
@@ -401,6 +414,7 @@ Future<void> _insertKegiatan() async {
   }
 
   String namaPuskesmas = namaPuskesmasController.text;
+  String lokasiPuskesmas = lokasiController.text;
   String tanggalKegiatan =
       selectedDate != null ? DateFormat('dd-MM-yyyy').format(selectedDate!) : '';
   
@@ -436,6 +450,7 @@ Future<void> _insertKegiatan() async {
       'jabatan': jabatan,
       'notelepon': notelp,
       'foto': namaFileFoto, // Menyimpan nama file foto
+      'lokasi': lokasiPuskesmas,
     };
 
     // Memasukkan data kegiatan ke dalam database

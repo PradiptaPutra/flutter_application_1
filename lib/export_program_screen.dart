@@ -60,6 +60,9 @@ class _ExportProgramScreenState extends State<ExportProgramScreen> {
   Uint8List? logoData;
   List<Map<String, dynamic>> detailedData = [];
    File? backgroundImageFile;
+List<Map<String, dynamic>> penggunaList = [];
+   List<Map<String, dynamic>> kegiatanList = [];
+   String lokasiKegiatan = '';
 
   @override
   void initState() {
@@ -68,9 +71,38 @@ class _ExportProgramScreenState extends State<ExportProgramScreen> {
     _fetchEmailPenerima();
     _loadLogo();
     _fetchDetailedData();
-      _initializeBackgroundImage();
+     _initializeBackgroundImage();
+      _fetchLokasiKegiatan();
+    _fetchAllPengguna();
+    _fetchAllKegiatan();
   }
 
+Future<void> _fetchAllPengguna() async {
+  List<Map<String, dynamic>> pengguna = await DatabaseHelper().getAllPengguna(widget.userId);
+  setState(() {
+    penggunaList = pengguna;
+  });
+
+  // Print pengguna ke konsol debug
+  print('Pengguna: $pengguna');
+}
+Future<void> _fetchAllKegiatan() async {
+  List<Map<String, dynamic>> kegiatan = await DatabaseHelper().getAllKegiatan(widget.userId,widget.kegiatanId!); // Menyertakan kondisi kategori dan userId
+  setState(() {
+    kegiatanList = kegiatan;
+  });
+
+  // Print pengguna ke konsol debug
+  print('Kegiatan: $kegiatan');
+}
+
+
+  Future<void> _fetchLokasiKegiatan() async {
+    String lokasi = await DatabaseHelper().getLokasiKegiatan(widget.kegiatanId!);
+    setState(() {
+      lokasiKegiatan = lokasi;
+    });
+  }
   Future<void> _checkConnectivity() async {
     var connectivityResult = await (Connectivity().checkConnectivity());
     if (connectivityResult != ConnectivityResult.none) {
@@ -194,10 +226,14 @@ class _ExportProgramScreenState extends State<ExportProgramScreen> {
       }
 
       final downloadsDir = Directory('/storage/emulated/0/Download');
-      String fileName = 'Bangunan_${widget.puskesmas}.pdf';
+      String fileName = 'Program_${widget.puskesmas}.pdf';
 
-      if (widget.kegiatanId != null && widget.kegiatanId == 11) {
-        fileName = 'bangunan_${widget.puskesmas}.pdf';
+      if (widget.kegiatanId != null) {
+        final dbHelper = DatabaseHelper();
+        final tanggalKegiatan = await dbHelper.getTanggalKegiatan(widget.kegiatanId!);
+        if (tanggalKegiatan != null) {
+          fileName = 'Program_${widget.puskesmas}_$tanggalKegiatan.pdf';
+        }
       }
 
       final pdfPath = path.join(downloadsDir.path, fileName);
@@ -222,35 +258,54 @@ class _ExportProgramScreenState extends State<ExportProgramScreen> {
   }
 
   pw.Widget _buildHeader() {
-    return pw.Row(
-      mainAxisAlignment: pw.MainAxisAlignment.center,
-      children: [
-        pw.Image(
-          pw.MemoryImage(logoData!),
-          width: 100,
-          height: 100,
-        ),
-        pw.SizedBox(width: 20),
-        pw.Column(
-          crossAxisAlignment: pw.CrossAxisAlignment.start,
-          children: [
-            pw.Text(
-              'Puskesmas: ${widget.puskesmas}',
-              style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold),
-            ),
-            pw.Text(
-              'Jl. Puskesmas No.123, Bangun Jaya, Kec. Bangun',
-              style: pw.TextStyle(fontSize: 12),
-            ),
-            pw.Text(
-              'Telp: (021) 12345678 | Email: info@puskesmasbangunjaya.id',
-              style: pw.TextStyle(fontSize: 12),
-            ),
-          ],
-        ),
-      ],
-    );
+  if (penggunaList.isEmpty) {
+    // Handle case when penggunaList is empty
+    return pw.Text('Data Pengguna Kosong');
   }
+
+  Map<String, dynamic> pengguna = penggunaList.first;
+  Map<String, dynamic> kegiatan = kegiatanList.first;
+  
+
+  return pw.Row(
+  crossAxisAlignment: pw.CrossAxisAlignment.start,
+    children: [
+      pw.Image(
+        pw.MemoryImage(logoData!),
+        width: 250,
+        height: 150,
+      ),
+      pw.SizedBox(width: 20),
+      pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        children: [
+          pw.Text(
+            'Puskesmas: ${widget.puskesmas}',
+            style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold),
+          ),
+          pw.Text(
+            'Alamat Puskesmas: $lokasiKegiatan',
+            style: pw.TextStyle(fontSize: 12),
+          ),
+          pw.Text(
+            'Non/Rawat inap : ${kegiatan['dropdown_option'] ?? 'Belum Tersedia'}\nProvinsi : ${kegiatan['provinsi'] ?? 'Belum Tersedia'}\nKabupaten / Kota : ${kegiatan['kabupaten_kota'] ?? 'Belum Tersedia'}\nTanggal Survei : ${kegiatan['tanggal_kegiatan'] ?? 'Belum Tersedia'}',
+            style: pw.TextStyle(fontSize: 12),
+          ),
+           pw.Container(
+      margin: const pw.EdgeInsets.symmetric(vertical: 8.0), // Margin antara garis dengan teks
+      height: 2.0,
+      width: 350.0,
+      color: PdfColors.black, // Warna garis
+    ),
+          pw.Text(
+            'Nama Surveyor : ${pengguna['name'] ?? 'Belum Tersedia'}\nJabatan Pengguna : ${pengguna['position'] ?? 'Belum Tersedia'}\nNo Telepon Pengguna : ${pengguna['phone'] ?? 'Belum Tersedia'}\nEmail Pengguna : ${pengguna['email'] ?? 'Belum Tersedia'}',
+            style: pw.TextStyle(fontSize: 12),
+          ),
+        ],
+      ),
+    ],
+  );
+}
 
   pw.Widget _buildSummary() {
     return pw.Column(
