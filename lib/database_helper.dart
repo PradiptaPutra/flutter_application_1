@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/services.dart' show rootBundle;
@@ -566,7 +567,43 @@ Future<void> updateDataEntry2(Map<String, dynamic> dataEntry) async {
     ''', [userId]);
     return maps;
   }
+ Future<Uint8List?> getImageByKegiatanId(int kegiatanId) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'kegiatan',
+      columns: ['foto'],
+      where: 'kegiatan_id = ?',
+      whereArgs: [kegiatanId],
+    );
 
+    if (maps.isNotEmpty) {
+      String fotoName = maps.first['foto'] as String;
+      String fotoPath = '/storage/emulated/0/Download/fotopuskesmas/$fotoName';
+      File file = File(fotoPath);
+      return await file.readAsBytes();
+    }
+    return null;
+  }
+  Future<File?> getImageFileByKegiatanId(int kegiatanId) async {
+  final db = await database;
+  final List<Map<String, dynamic>> maps = await db.query(
+    'kegiatan', // Sesuaikan nama tabelnya
+    where: 'kegiatan_id = ?',
+    whereArgs: [kegiatanId],
+  );
+
+  if (maps.isNotEmpty) {
+    String? imageName = maps.first['foto'];
+    if (imageName != null) {
+      String imagePath = '/storage/emulated/0/Download/fotopuskesmas/$imageName';
+      File imageFile = File(imagePath);
+      if (await imageFile.exists()) {
+        return imageFile;
+      }
+    }
+  }
+  return null;
+}
   Future<bool> entryExists(int kegiatanId, String kriteria) async {
     final db = await database;
     List<Map<String, dynamic>> result = await db.query(

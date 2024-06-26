@@ -49,6 +49,7 @@ class _ExportPembiayaanScreenState extends State<ExportPembiayaanScreen> with Si
   List<Map<String, dynamic>> detailedData = [];
   late AnimationController _controller;
   late Animation<double> _animation;
+  File? backgroundImageFile;
 
   @override
   void initState() {
@@ -57,6 +58,7 @@ class _ExportPembiayaanScreenState extends State<ExportPembiayaanScreen> with Si
     _fetchEmailPenerima();
     _loadLogo();
     _fetchDetailedData();
+      _initializeBackgroundImage();
     _controller = AnimationController(
       duration: const Duration(seconds: 1),
       vsync: this,
@@ -83,7 +85,22 @@ class _ExportPembiayaanScreenState extends State<ExportPembiayaanScreen> with Si
       });
     }
   }
-
+Future<void> _initializeBackgroundImage() async {
+  final imageFile = await _loadBackgroundImage();
+  setState(() {
+    backgroundImageFile = imageFile;
+  });
+}
+ Future<File?> _loadBackgroundImage() async {
+  if (widget.kegiatanId != null) {
+    final dbHelper = DatabaseHelper();
+    final imageFile = await dbHelper.getImageFileByKegiatanId(widget.kegiatanId!);
+    if (imageFile != null) {
+      return imageFile;
+    }
+  }
+  return null;
+}
   Future<void> _fetchEmailPenerima() async {
     final email = await DatabaseHelper().getEmailByUserId(widget.userId);
     setState(() {
@@ -92,11 +109,21 @@ class _ExportPembiayaanScreenState extends State<ExportPembiayaanScreen> with Si
   }
 
   Future<void> _loadLogo() async {
-    final logo = await rootBundle.load('assets/images/logors.jpg');
-    setState(() {
-      logoData = logo.buffer.asUint8List();
-    });
+  if (widget.kegiatanId != null) {
+    final dbHelper = DatabaseHelper();
+    final imageData = await dbHelper.getImageByKegiatanId(widget.kegiatanId!);
+    if (imageData != null) {
+      setState(() {
+        logoData = imageData;
+      });
+      return;
+    }
   }
+  final logo = await rootBundle.load('assets/images/logors.jpg');
+  setState(() {
+    logoData = logo.buffer.asUint8List();
+  });
+}
 
   Future<void> _fetchDetailedData() async {
     if (widget.kegiatanId != null) {
@@ -295,13 +322,18 @@ class _ExportPembiayaanScreenState extends State<ExportPembiayaanScreen> with Si
         title: Text('Export'),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            CircleAvatar(
-              radius: 40,
-              backgroundImage: AssetImage('assets/images/bgsplash.png'),
-            ),
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        children: [
+          backgroundImageFile != null
+              ? CircleAvatar(
+                  radius: 40,
+                  backgroundImage: FileImage(backgroundImageFile!),
+                )
+              : CircleAvatar(
+                  radius: 40,
+                  backgroundImage: AssetImage('assets/images/bgsplash.png'),
+                ),
             SizedBox(height: 10),
             FadeTransition(
               opacity: _animation,

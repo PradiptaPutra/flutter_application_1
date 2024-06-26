@@ -47,6 +47,7 @@ class _ExportScreenState extends State<ExportScreen> {
   String? emailPenerima;
   Uint8List? logoData;
   List<Map<String, dynamic>> detailedData = [];
+  File? backgroundImageFile;
 
   @override
   void initState() {
@@ -55,6 +56,7 @@ class _ExportScreenState extends State<ExportScreen> {
     _fetchEmailPenerima();
     _loadLogo();
     _fetchDetailedData();
+     _initializeBackgroundImage();
   }
 
   Future<void> _checkConnectivity() async {
@@ -69,6 +71,22 @@ class _ExportScreenState extends State<ExportScreen> {
       });
     }
   }
+  Future<void> _initializeBackgroundImage() async {
+  final imageFile = await _loadBackgroundImage();
+  setState(() {
+    backgroundImageFile = imageFile;
+  });
+}
+ Future<File?> _loadBackgroundImage() async {
+  if (widget.kegiatanId != null) {
+    final dbHelper = DatabaseHelper();
+    final imageFile = await dbHelper.getImageFileByKegiatanId(widget.kegiatanId!);
+    if (imageFile != null) {
+      return imageFile;
+    }
+  }
+  return null;
+}
 
   Future<void> _fetchEmailPenerima() async {
     final email = await DatabaseHelper().getEmailByUserId(widget.userId);
@@ -77,24 +95,34 @@ class _ExportScreenState extends State<ExportScreen> {
     });
   }
 
-  Future<void> _loadLogo() async {
-    final logo = await rootBundle.load('assets/images/logors.jpg');
-    setState(() {
-      logoData = logo.buffer.asUint8List();
-    });
+ Future<void> _loadLogo() async {
+  if (widget.kegiatanId != null) {
+    final dbHelper = DatabaseHelper();
+    final imageData = await dbHelper.getImageByKegiatanId(widget.kegiatanId!);
+    if (imageData != null) {
+      setState(() {
+        logoData = imageData;
+      });
+      return;
+    }
   }
+  final logo = await rootBundle.load('assets/images/logors.jpg');
+  setState(() {
+    logoData = logo.buffer.asUint8List();
+  });
+}
 
   Future<void> _fetchDetailedData() async {
     if (widget.kegiatanId != null) {
       final dbHelper = DatabaseHelper();
-      final data = await dbHelper.getEntriesByKegiatanIdAndCategoryAndUser(widget.kegiatanId!, 11, widget.userId); // Menyertakan kondisi kategori dan userId
+      final data = await dbHelper.getEntriesByKegiatanIdAndCategoryAndUser(widget.kegiatanId!, 11, widget.userId);
       setState(() {
         detailedData = data;
       });
     }
   }
 
-    Future<void> _openPdf(String filePath) async {
+  Future<void> _openPdf(String filePath) async {
     try {
       await OpenFile.open(filePath);
     } catch (e) {
@@ -121,7 +149,6 @@ class _ExportScreenState extends State<ExportScreen> {
       Fluttertoast.showToast(msg: 'Failed to send email. Please try again later.');
     }
   }
-
 
   Future<void> _savePdf() async {
     if (logoData == null) {
@@ -239,11 +266,11 @@ class _ExportScreenState extends State<ExportScreen> {
         ),
         ...detailedData.map((entry) => pw.TableRow(
           children: [
-            _buildTableCell(entry['indikator']?? ''),
-            _buildTableCell(entry['sub_indikator']?? ''),
-            _buildTableCell(entry['sebelum']?? ''),
-            _buildTableCell(entry['sesudah']?? ''),
-            _buildTableCell(entry['keterangan']?? ''),
+            _buildTableCell(entry['indikator'] ?? ''),
+            _buildTableCell(entry['sub_indikator'] ?? ''),
+            _buildTableCell(entry['sebelum'] ?? ''),
+            _buildTableCell(entry['sesudah'] ?? ''),
+            _buildTableCell(entry['keterangan'] ?? ''),
           ],
         )),
       ],
@@ -275,22 +302,25 @@ class _ExportScreenState extends State<ExportScreen> {
     );
   }
 
-  // ... (rest of the methods remain the same)
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Export'),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            CircleAvatar(
-              radius: 40,
-              backgroundImage: AssetImage('assets/images/bgsplash.png'),
-            ),
+     body: SingleChildScrollView(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        children: [
+          backgroundImageFile != null
+              ? CircleAvatar(
+                  radius: 40,
+                  backgroundImage: FileImage(backgroundImageFile!),
+                )
+              : CircleAvatar(
+                  radius: 40,
+                  backgroundImage: AssetImage('assets/images/bgsplash.png'),
+                ),
             SizedBox(height: 10),
             Text(
               widget.puskesmas,
