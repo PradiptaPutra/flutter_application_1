@@ -5,6 +5,8 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:path/path.dart' as path;
+
 
 
 
@@ -92,7 +94,7 @@ File? _selectedImage;
         lokasiController.text.isNotEmpty &&
         selectedDate != null &&
         selectedProvinsi != null &&
-
+        _selectedImage != null &&
         selectedKabupaten != null) {
       setState(() {
         _isNextButtonEnabled = true;
@@ -326,40 +328,48 @@ File? _selectedImage;
             ),
             // Input gambar untuk upload
           ListTile(
-              leading: Icon(Icons.add_a_photo),
-              title: Row(
-                children: [
-                  Icon(Icons.image),
-                  SizedBox(width: 10),
-                  Text('Pilih Gambar'),
-                  PopupMenuButton<String>(
-                    onSelected: (value) {
-                      if (value == 'camera') {
-                        _getImage(ImageSource.camera);
-                      } else if (value == 'gallery') {
-                        _getImage(ImageSource.gallery);
-                      }
-                    },
-                    itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-                      const PopupMenuItem<String>(
-                        value: 'camera',
-                        child: ListTile(
-                          leading: Icon(Icons.camera_alt),
-                          title: Text('Ambil Foto'),
-                        ),
-                      ),
-                      const PopupMenuItem<String>(
-                        value: 'gallery',
-                        child: ListTile(
-                          leading: Icon(Icons.image),
-                          title: Text('Pilih dari Galeri'),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+  leading: Icon(Icons.add_a_photo),
+  title: Row(
+    children: [
+      Icon(Icons.image),
+      SizedBox(width: 10),
+      _selectedImage != null
+          ? Expanded(
+              child: Text(
+                path.basename(_selectedImage!.path),
+                overflow: TextOverflow.ellipsis,
               ),
+            )
+          : Text('Pilih Gambar'),
+      PopupMenuButton<String>(
+        onSelected: (value) {
+          if (value == 'camera') {
+            _getImage(ImageSource.camera);
+          } else if (value == 'gallery') {
+            _getImage(ImageSource.gallery);
+          }
+        },
+        itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+          const PopupMenuItem<String>(
+            value: 'camera',
+            child: ListTile(
+              leading: Icon(Icons.camera_alt),
+              title: Text('Ambil Foto'),
             ),
+          ),
+          const PopupMenuItem<String>(
+            value: 'gallery',
+            child: ListTile(
+              leading: Icon(Icons.image),
+              title: Text('Pilih dari Galeri'),
+            ),
+          ),
+        ],
+      ),
+    ],
+  ),
+),
+
             ListTile(
               title: ElevatedButton(
                 onPressed: _isNextButtonEnabled ? _insertKegiatan : null,
@@ -458,6 +468,7 @@ Future<void> _insertKegiatan() async {
 
     // Mengosongkan input setelah data disimpan
     namaPuskesmasController.clear();
+    lokasiController.clear();
     setState(() {
       selectedDate = null;
       selectedProvinsi = null;

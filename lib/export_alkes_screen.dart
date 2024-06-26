@@ -15,6 +15,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:path/path.dart' as path;
+import 'dart:typed_data';
 
 class ExportAlkesScreen extends StatefulWidget {
   final String puskesmas;
@@ -146,7 +147,12 @@ Future<void> _initializeBackgroundImage() async {
       setState(() {
         logoData = imageData;
       });
-      return;
+    } else {
+      final ByteData assetByteData = await rootBundle.load('assets/images/logors.jpg');
+      final Uint8List uint8list = assetByteData.buffer.asUint8List();
+      setState(() {
+        logoData = uint8list;
+      });
     }
   }
   final logo = await rootBundle.load('assets/images/logors.jpg');
