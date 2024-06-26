@@ -613,6 +613,17 @@ Future<void> updateDataEntry2(Map<String, dynamic> dataEntry) async {
     );
     return result.isNotEmpty;
   }
+   Future<List<Map<String, dynamic>>> getKegiatanForUserSortedAndFiltered(int userId, bool ascending, String query) async {
+    Database db = await database;
+    String orderBy = ascending ? 'ASC' : 'DESC';
+    List<Map<String, dynamic>> result = await db.query(
+      'kegiatan',
+      where: 'user_id = ? AND nama_puskesmas LIKE ?',
+      whereArgs: [userId, '%$query%'],
+      orderBy: 'tanggal_kegiatan $orderBy',
+    );
+    return result;
+  }
   Future<double> getProgressForKegiatan(int kegiatanId) async {
     final db = await database;
     final List<Map<String, dynamic>> entries = await db.rawQuery('''

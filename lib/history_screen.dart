@@ -13,10 +13,12 @@ class HistoryScreen extends StatefulWidget {
 
 class _HistoryScreenState extends State<HistoryScreen> {
   bool isAscending = true;
+  String searchQuery = "";
+  TextEditingController searchController = TextEditingController();
 
-  Future<List<Map<String, dynamic>>> _fetchKegiatan(bool ascending) async {
+  Future<List<Map<String, dynamic>>> _fetchKegiatan(bool ascending, String query) async {
     DatabaseHelper dbHelper = DatabaseHelper();
-    return await dbHelper.getKegiatanForUserSorted(widget.userId, ascending);
+    return await dbHelper.getKegiatanForUserSortedAndFiltered(widget.userId, ascending, query);
   }
 
   Future<void> _deleteKegiatan(int kegiatanId) async {
@@ -51,7 +53,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
     if (confirm == true) {
       await _deleteKegiatan(kegiatanId);
-      // No need to pop the screen after deletion
       setState(() {
         // Trigger a rebuild to refresh the data
       });
@@ -64,12 +65,49 @@ class _HistoryScreenState extends State<HistoryScreen> {
     });
   }
 
+  void _searchKegiatan(String query) {
+    setState(() {
+      searchQuery = query;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: Text("History Penilaian"),
+        title: Row(
+          children: [
+            Expanded(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(40),
+                  border: Border.all(color: const Color.fromARGB(137, 206, 203, 203)),
+                ),
+                child: TextField(
+                  controller: searchController,
+                  decoration: InputDecoration(
+                    hintText: 'Cari nama Puskesmas disini...',
+                    border: InputBorder.none,
+                    contentPadding: EdgeInsets.symmetric(horizontal: 8),
+                    hintStyle: TextStyle(color: const Color.fromARGB(179, 0, 0, 0)),
+                  ),
+                  style: TextStyle(color: const Color.fromARGB(255, 0, 0, 0)),
+                  onChanged: (query) {
+                    _searchKegiatan(query);
+                  },
+                ),
+              ),
+            ),
+            IconButton(
+              icon: Icon(Icons.search, color: Colors.white),
+              onPressed: () {
+                _searchKegiatan(searchController.text);
+              },
+            ),
+          ],
+        ),
         actions: [
           IconButton(
             icon: Icon(Icons.sort),
@@ -78,7 +116,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
         ],
       ),
       body: FutureBuilder<List<Map<String, dynamic>>>(
-        future: _fetchKegiatan(isAscending),
+        future: _fetchKegiatan(isAscending, searchQuery),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());

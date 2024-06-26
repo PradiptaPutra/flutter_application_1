@@ -73,7 +73,7 @@ Widget build(BuildContext context) {
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Text(
-              'Belum ada puskesmas yang diinput. Slide untuk melihat info.',
+              'Belum ada puskesmas yang diinput. Buat Survei baru!',
               style: TextStyle(fontSize: 16),
             ),
           ),
