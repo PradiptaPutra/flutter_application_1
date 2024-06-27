@@ -8,24 +8,39 @@ import 'package:path/path.dart';
 import 'package:excel/excel.dart';
 
 class DatabaseHelper {
+ static final DatabaseHelper instance = DatabaseHelper._internal();
+  factory DatabaseHelper() => instance;
+
+  DatabaseHelper._internal();
+
   static Database? _database;
 
   Future<Database> get database async {
     if (_database != null) return _database!;
-    _database = await initializeDatabase();
+
+    _database = await _initDatabase();
     return _database!;
   }
-
-  Future<Database> initializeDatabase() async {
-  String path = join(await getDatabasesPath(), 'health_app.db');
-  print('Database initialized at path: $path');
-  return openDatabase(
-    path,
+Future<Database> _initDatabase() async {
+    String path = join(await getDatabasesPath(), 'puskesmas_database.db');
+ print('Database initialized at path: $path');
+    return await openDatabase(
+      path,
     version: 15, // Meningkatkan nomor versi database
     onCreate: _createDb,
     onUpgrade: _upgradeDb,
-  );
-}
+    );
+  }
+//   Future<Database> initializeDatabase() async {
+//   String path = join(await getDatabasesPath(), 'health_app.db');
+//   print('Database initialized at path: $path');
+//   return openDatabase(
+//     path,
+//     version: 15, // Meningkatkan nomor versi database
+//     onCreate: _createDb,
+//     onUpgrade: _upgradeDb,
+//   );
+// }
 
 
   Future _createDb(Database db, int version) async {
@@ -306,6 +321,10 @@ class DatabaseHelper {
   Future<int> insertKegiatan(Map<String, dynamic> kegiatan) async {
     final db = await database;
     return await db.insert('Kegiatan', kegiatan, conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+   Future<int> insertPuskesmas(Map<String, dynamic> row) async {
+    Database db = await instance.database;
+    return await db.insert('Kegiatan', row);
   }
 
   Future<List<Map<String, dynamic>>> getKegiatanForUser(int userId) async {
@@ -619,7 +638,7 @@ Future<void> updateDataEntry2(Map<String, dynamic> dataEntry) async {
 
     if (maps.isNotEmpty) {
       String fotoName = maps.first['foto'] as String;
-      String fotoPath = '/storage/emulated/0/Download/fotopuskesmas/$fotoName';
+      String fotoPath = '/storage/emulated/0/Android/data/com.example.flutter_application_1/files/fotopuskesmas/$fotoName';
       File file = File(fotoPath);
       return await file.readAsBytes();
     }
