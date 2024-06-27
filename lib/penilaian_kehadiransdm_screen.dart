@@ -369,37 +369,7 @@ class _PenilaianKehadiransdmScreenState extends State<PenilaianKehadiransdmScree
                                       ],
                                     ),
                                   ),
-                                  Column(
-                                    children: [
-                                      Row(
-                                        children: [
-                                          IconButton(
-                                            icon: Icon(
-                                              Icons.visibility,
-                                              color: Colors.blue,
-                                            ),
-                                            onPressed: () async {
-                                              _showPopup(context,
-                                                  data[index]["kriteria"] ??
-                                                      '');
-                                            },
-                                          ),
-                                          IconButton(
-                                            icon: Icon(
-                                              Icons.help_outline,
-                                              color: Colors.orange,
-                                            ),
-                                            onPressed: () async {
-                                              _showPopup(context,
-                                                  data[index]["keterangan"] ??
-                                                      '');
-                                            },
-                                          ),
-                                        ],
-                                      ),
-                                      SizedBox(height: 4),
-                                    ],
-                                  ),
+                                  
                                 ],
                               ),
                               SizedBox(height: 10),

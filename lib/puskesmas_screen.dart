@@ -21,56 +21,86 @@ class _PuskesmasScreenState extends State<PuskesmasScreen> {
   DateTime? selectedDate;
 
   String dropdownValue = 'Rawat Inap';
-  String? selectedProvinsi;
+  String? selectedProvinsi = 'Jambi'; // Default to Jambi province
   String? selectedKabupaten;
-  
-  List<String> provinsiList = [
-    'Aceh', 'Bali', 'Banten', 'Bengkulu', 'Gorontalo', 'Jakarta', 
-    'Jambi', 'Jawa Barat', 'Jawa Tengah', 'Jawa Timur', 'Kalimantan Barat',
-    'Kalimantan Selatan', 'Kalimantan Tengah', 'Kalimantan Timur',
-    'Kalimantan Utara', 'Kepulauan Bangka Belitung', 'Kepulauan Riau', 
-    'Lampung', 'Maluku', 'Maluku Utara', 'Nusa Tenggara Barat', 
-    'Nusa Tenggara Timur', 'Papua', 'Papua Barat', 'Riau', 'Sulawesi Barat',
-    'Sulawesi Selatan', 'Sulawesi Tengah', 'Sulawesi Tenggara', 'Sulawesi Utara',
-    'Sumatera Barat', 'Sumatera Selatan', 'Sumatera Utara', 'Yogyakarta'
-  ];
+  String? selectedKelurahan;
+  String? selectedKecamatan;
+
+  List<String> provinsiList = ['Jambi'];
   Map<String, List<String>> kabupatenList = {
-    'Aceh': ['Banda Aceh', 'Langsa', 'Lhokseumawe', 'Meulaboh', 'Sabang', 'Subulussalam'],
-    'Bali': ['Denpasar'],
-    'Banten': ['Cilegon', 'Serang', 'Tangerang', 'Tangerang Selatan'],
-    'Bengkulu': ['Bengkulu'],
-    'Gorontalo': ['Gorontalo'],
-    'Jakarta': ['Jakarta Barat', 'Jakarta Pusat', 'Jakarta Selatan', 'Jakarta Timur', 'Jakarta Utara'],
-    'Jambi': ['Jambi'],
-    'Jawa Barat': ['Bandung', 'Bekasi', 'Bogor', 'Cimahi', 'Cirebon', 'Depok', 'Sukabumi', 'Tasikmalaya'],
-    'Jawa Tengah': ['Magelang', 'Pekalongan', 'Salatiga', 'Semarang', 'Surakarta', 'Tegal'],
-    'Jawa Timur': ['Batu', 'Blitar', 'Kediri', 'Madiun', 'Malang', 'Mojokerto', 'Pasuruan', 'Probolinggo', 'Surabaya'],
-    'Kalimantan Barat': ['Pontianak', 'Singkawang'],
-    'Kalimantan Selatan': ['Banjarbaru', 'Banjarmasin'],
-    'Kalimantan Tengah': ['Palangka Raya'],
-    'Kalimantan Timur': ['Balikpapan', 'Bontang', 'Samarinda'],
-    'Kalimantan Utara': ['Tarakan'],
-    'Kepulauan Bangka Belitung': ['Pangkal Pinang'],
-    'Kepulauan Riau': ['Batam', 'Tanjung Pinang'],
-    'Lampung': ['Bandar Lampung', 'Metro'],
-    'Maluku': ['Ambon', 'Tual'],
-    'Maluku Utara': ['Ternate', 'Tidore Kepulauan'],
-    'Nusa Tenggara Barat': ['Bima', 'Mataram'],
-    'Nusa Tenggara Timur': ['Kupang'],
-    'Papua': ['Jayapura'],
-    'Papua Barat': ['Manokwari'],
-    'Riau': ['Dumai', 'Pekanbaru'],
-    'Sulawesi Barat': ['Mamuju'],
-    'Sulawesi Selatan': ['Makassar', 'Palopo', 'Parepare'],
-    'Sulawesi Tengah': ['Palu'],
-    'Sulawesi Tenggara': ['Bau-Bau', 'Kendari'],
-    'Sulawesi Utara': ['Bitung', 'Kotamobagu', 'Manado', 'Tomohon'],
-    'Sumatera Barat': ['Bukittinggi', 'Padang', 'Padang Panjang', 'Pariaman', 'Payakumbuh', 'Sawahlunto', 'Solok'],
-    'Sumatera Selatan': ['Lubuklinggau', 'Pagar Alam', 'Palembang', 'Prabumulih'],
-    'Sumatera Utara': ['Binjai', 'Gunungsitoli', 'Medan', 'Padang Sidempuan', 'Pematang Siantar', 'Sibolga', 'Tanjungbalai', 'Tebing Tinggi'],
-    'Yogyakarta': ['Yogyakarta'],
+    'Jambi': ['Kota Jambi', 'Kabupaten Bungo', 'Kabupaten Kerinci', 'Kabupaten Muaro Jambi', 'Kabupaten Sarolangun', 'Kabupaten Tanjung Jabung Barat', 'Kabupaten Tanjung Jabung Timur', 'Kabupaten Tebo']
   };
-  
+ Map<String, List<String>> kelurahanList = {
+  'Kota Jambi': [
+    'Talang Banjar',
+    'Beringin',
+    'Kasang'],
+  'Kabupaten Bungo': [
+    'Bathin II Babeko',
+    'Muko-Muko Bathin VII',
+    'Penyengat I'],
+  'Kabupaten Kerinci': [
+    'Dusun Baru',
+    'Mentawak',
+    'Talang Kuta'],
+  'Kabupaten Muaro Jambi': [
+    'Pelayangan',
+    'Pasar Muara Bungo',
+    'Teluk Binjai'],
+  'Kabupaten Sarolangun': [
+    'Danau Lamo',
+    'Renah Kemumu',
+    'Sungai Gula'],
+  'Kabupaten Tanjung Jabung Barat': [
+    'Batu Hampar',
+    'Mendalo Darat',
+    'Renah Pembarap'],
+  'Kabupaten Tanjung Jabung Timur': [
+    'Babeko',
+    'Batang Asai',
+    'Penyengat Rendah'],
+  'Kabupaten Tebo': [
+    'Air Hitam',
+    'Lubuk Raman',
+    'Sungai Penuh']
+};
+
+Map<String, List<String>> kecamatanList = {
+  'Kota Jambi': [
+    'Alam Barajo',
+    'Jelutung',
+    'Kota Baru'],
+  'Kabupaten Bungo': [
+    'Bathin II Babeko',
+    'Muko-Muko Bathin VII',
+    'Pasar Muara Bungo'],
+  'Kabupaten Kerinci': [
+    'Air Hangat Timur',
+    'Kayu Aro',
+    'Keliling Danau'],
+  'Kabupaten Muaro Jambi': [
+    'Jambi Selatan',
+    'Jambi Timur',
+    'Jambi Utara'],
+  'Kabupaten Sarolangun': [
+    'Mandiangin',
+    'Pauh',
+    'Sarolangun'],
+  'Kabupaten Tanjung Jabung Barat': [
+    'Dendang',
+    'Muara Papalik',
+    'Nasal'],
+  'Kabupaten Tanjung Jabung Timur': [
+    'Dalam',
+    'Rantau Rasau',
+    'Tungkal Ulu'],
+  'Kabupaten Tebo': [
+    'Rimbo Bujang',
+    'Tebo Tengah',
+    'Tebo Ulu']
+};
+
+
   File? _selectedImage;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   bool _isNextButtonEnabled = false;
@@ -87,7 +117,9 @@ class _PuskesmasScreenState extends State<PuskesmasScreen> {
         selectedDate != null &&
         selectedProvinsi != null &&
         _selectedImage != null &&
-        selectedKabupaten != null) {
+        selectedKabupaten != null &&
+        selectedKelurahan != null &&
+        selectedKecamatan != null) {
       setState(() {
         _isNextButtonEnabled = true;
       });
@@ -250,6 +282,8 @@ class _PuskesmasScreenState extends State<PuskesmasScreen> {
                   setState(() {
                     selectedProvinsi = newValue;
                     selectedKabupaten = null; // Reset selected kabupaten when province changes
+                    selectedKelurahan = null; // Reset selected kelurahan when province changes
+                    selectedKecamatan = null; // Reset selected kecamatan when province changes
                   });
                   _validateInputs();
                 },
@@ -270,6 +304,8 @@ class _PuskesmasScreenState extends State<PuskesmasScreen> {
                   onChanged: (String? newValue) {
                     setState(() {
                       selectedKabupaten = newValue;
+                      selectedKelurahan = null; // Reset selected kelurahan when kabupaten changes
+                      selectedKecamatan = null; // Reset selected kecamatan when kabupaten changes
                     });
                     _validateInputs();
                   },
@@ -281,6 +317,46 @@ class _PuskesmasScreenState extends State<PuskesmasScreen> {
                   }).toList(),
                 ),
               ),
+              if (selectedKabupaten != null) ...[
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: DropdownButtonFormField<String>(
+                    value: selectedKelurahan,
+                    hint: Text('Pilih Kelurahan'),
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        selectedKelurahan = newValue;
+                      });
+                      _validateInputs();
+                    },
+                    items: kelurahanList[selectedKabupaten!]!.map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: DropdownButtonFormField<String>(
+                    value: selectedKecamatan,
+                    hint: Text('Pilih Kecamatan'),
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        selectedKecamatan = newValue;
+                      });
+                      _validateInputs();
+                    },
+                    items: kecamatanList[selectedKabupaten!]!.map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ],
             ],
             Padding(
               padding: const EdgeInsets.all(16.0),
@@ -292,7 +368,7 @@ class _PuskesmasScreenState extends State<PuskesmasScreen> {
                     dropdownValue = newValue!;
                   });
                 },
-                items: <String>['Rawat Inap', 'Rawat Jalan']
+                items: <String>['Rawat Inap', 'Non Rawat Inap']
                     .map<DropdownMenuItem<String>>((String value) {
                   return DropdownMenuItem<String>(
                     value: value,
@@ -306,19 +382,33 @@ class _PuskesmasScreenState extends State<PuskesmasScreen> {
               child: ListTile(
                 title: Text(
                   selectedDate == null
-                      ? 'Tanggal Pendirian'
+                      ? 'Tanggal Kegiatan'
                       : DateFormat('dd-MM-yyyy').format(selectedDate!),
                 ),
                 trailing: Icon(Icons.calendar_today),
                 onTap: () => _selectDate(context),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: ElevatedButton(
-                onPressed: _pickImage,
-                child: Text('Pilih Gambar'),
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton.icon(
+                  onPressed: () => _pickImage(ImageSource.gallery),
+                  icon: Icon(Icons.photo_library),
+                  label: Text('Ambil dari Galeri'),
+                ),
+              ],
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                
+                ElevatedButton.icon(
+                  onPressed: () => _pickImage(ImageSource.camera),
+                  icon: Icon(Icons.camera_alt),
+                  label: Text('Ambil Foto'),
+                ),
+              ],
             ),
             if (_selectedImage != null)
               Padding(
@@ -341,7 +431,7 @@ class _PuskesmasScreenState extends State<PuskesmasScreen> {
     );
   }
 
-
+  
 
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -357,12 +447,13 @@ class _PuskesmasScreenState extends State<PuskesmasScreen> {
       });
   }
 
-  void _pickImage() async {
+  void _pickImage(ImageSource source) async {
     final ImagePicker _picker = ImagePicker();
-    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+    final XFile? image = await _picker.pickImage(source: source);
     if (image != null) {
       setState(() {
         _selectedImage = File(image.path);
+        _validateInputs();
       });
     }
   }
@@ -374,6 +465,8 @@ class _PuskesmasScreenState extends State<PuskesmasScreen> {
     final String jenisLayanan = dropdownValue;
     final String provinsi = selectedProvinsi ?? '';
     final String kabupaten = selectedKabupaten ?? '';
+    final String kelurahan = selectedKelurahan ?? '';
+    final String kecamatan = selectedKecamatan ?? '';
 
     // Ensure _selectedImage is not null before accessing its path
     final String imagePath = _selectedImage != null ? _selectedImage!.path : '';
@@ -396,27 +489,14 @@ class _PuskesmasScreenState extends State<PuskesmasScreen> {
           }
           namaFileFoto = 'foto_${namaPuskesmas.replaceAll(' ', '_').toLowerCase()}.jpg';
           String filePath = path.join(downloadsDir.path, 'fotopuskesmas', namaFileFoto);
-         try {
-  if (_selectedImage != null) {
-    final downloadsDir = await getExternalStorageDirectory();
-    if (downloadsDir != null) {
-      final fotopuskesmasDir = Directory('${downloadsDir.path}/fotopuskesmas');
-      if (!await fotopuskesmasDir.exists()) {
-        await fotopuskesmasDir.create(recursive: true);
-      }
-      String namaFileFoto = 'foto_${namaPuskesmas}.jpg';
-      String filePath = '${fotopuskesmasDir.path}/$namaFileFoto';
-      await _selectedImage!.copy(filePath);
-      print('Berhasil menyimpan foto ke: $filePath');
-    } else {
-      print('Gagal mendapatkan direktori eksternal');
-    }
-  }
-} catch (e) {
-  print('Gagal menyimpan foto: $e');
-}
+          try {
+            await _selectedImage!.copy(filePath);
+            print('Berhasil menyimpan foto ke: $filePath');
+          } catch (e) {
+            print('Gagal menyimpan foto: $e');
+          }
         } else {
-          print("Error: Tidak dapat mengakses direktori penyimpanan.");
+          print('Gagal mendapatkan direktori eksternal');
         }
       }
 
@@ -431,7 +511,22 @@ class _PuskesmasScreenState extends State<PuskesmasScreen> {
         'notelepon': notelp,
         'provinsi': provinsi,
         'kabupaten_kota': kabupaten,
+        'kelurahan': kelurahan,
+        'kecamatan': kecamatan,
         'foto': namaFileFoto,
+      });
+
+      // Mengosongkan input setelah data disimpan
+      namaPuskesmasController.clear();
+      lokasiController.clear();
+      setState(() {
+        selectedDate = null;
+        selectedProvinsi = 'Jambi'; // Reset to default Jambi province
+        selectedKabupaten = null;
+        selectedKelurahan = null;
+        selectedKecamatan = null;
+        _selectedImage = null;
+        _validateInputs();
       });
 
       if (result > 0) {

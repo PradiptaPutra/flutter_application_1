@@ -36,6 +36,21 @@ class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
   String interpretasiIndikator4 = "";
   String interpretasiOverall = "";
   bool showInterpretations = false;
+  bool _shouldDisableIndikator2(String subIndikator) {
+  List<String> subIndikatorList = [
+    '2.1 Puskesmas pembantu',
+    '2.2 Puskesmas keliling',
+    '2.3 Posyandu',
+    '3.1 Rawat Jalan',
+    '3.2 Pelayanan gawat darurat',
+    '3.3 Rawat inap',
+    '4.1 Manajemen puskesmas',
+    '4.2 Pelayanan Kefarmasian',
+    '4.3 Pelayanan Laboratorium',
+  ];
+  return subIndikatorList.contains(subIndikator);
+}
+
 
   final List<Map<String, dynamic>> data = [
     {
@@ -106,6 +121,7 @@ class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
       ],
       'selected_kriteria': '',
       'input_data': {},
+      'panduan_pertanyaan': '1. Bagaimana situasi program pengendalian dan pencegahan penyakit sebelum dan sesudah bencana? \n2. Jelaskan mengenai cakupan kelengkapan, ketepatan dan respon alert SKDR? *tuliskan di keterangan \nLihat             keberadaan penanggung          jawab, berhubungan       dengan surveilans faktor risiko di bidang   lain   (kesehatan lingkungan)?   Ada   atau tidaknya          pemegang program?,   apa   rencana untuk masa pemulihan? *perhatikan kepada program-program yang menjadi capaian nasional, berikut juga ciri khas daerah. Penekanan lebih pada penyakit menular, tetapi juga bagii penyakit tidak menular lainnya. Yang tidak tercakup dalam list ini, tuliskan di keterangan'
     },
     {
       'nama_indikator': '1. Program Upaya Kesehatan Masyarakat Esensial',
@@ -130,6 +146,7 @@ class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
       ],
       'selected_kriteria': '',
       'input_data': {},
+      'panduan_pertanyaan': '1. Bagaimana situasi program pengendalian dan pencegahan penyakit sebelum dan sesudah bencana? \n2. Jelaskan mengenai cakupan kelengkapan, ketepatan dan respon alert SKDR? *tuliskan di keterangan \nLihat             keberadaan penanggung          jawab, berhubungan       dengan surveilans faktor risiko di bidang   lain   (kesehatan lingkungan)?   Ada   atau tidaknya          pemegang program?,   apa   rencana untuk masa pemulihan? *perhatikan kepada program-program yang menjadi capaian nasional, berikut juga ciri khas daerah. Penekanan lebih pada penyakit menular, tetapi juga bagii penyakit tidak menular lainnya. Yang tidak tercakup dalam list ini, tuliskan di keterangan'
     },
     {
       'nama_indikator': '1. Program Upaya Kesehatan Masyarakat Esensial',
@@ -143,6 +160,7 @@ class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
       ],
       'selected_kriteria': '',
       'input_data': {},
+      'panduan_pertanyaan': '1. Bagaimana situasi program pengendalian dan pencegahan penyakit sebelum dan sesudah bencana? \n2. Jelaskan mengenai cakupan kelengkapan, ketepatan dan respon alert SKDR? *tuliskan di keterangan \nLihat             keberadaan penanggung          jawab, berhubungan       dengan surveilans faktor risiko di bidang   lain   (kesehatan lingkungan)?   Ada   atau tidaknya          pemegang program?,   apa   rencana untuk masa pemulihan? *perhatikan kepada program-program yang menjadi capaian nasional, berikut juga ciri khas daerah. Penekanan lebih pada penyakit menular, tetapi juga bagii penyakit tidak menular lainnya. Yang tidak tercakup dalam list ini, tuliskan di keterangan'
     },
     {
       'nama_indikator': '1. Program Upaya Kesehatan Masyarakat Esensial',
@@ -152,6 +170,7 @@ class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
       ],
       'selected_kriteria': '',
       'input_data': {},
+      'panduan_pertanyaan': '1. Bagaimana situasi program pengendalian dan pencegahan penyakit sebelum dan sesudah bencana? \n2. Jelaskan mengenai cakupan kelengkapan, ketepatan dan respon alert SKDR? *tuliskan di keterangan \nLihat             keberadaan penanggung          jawab, berhubungan       dengan surveilans faktor risiko di bidang   lain   (kesehatan lingkungan)?   Ada   atau tidaknya          pemegang program?,   apa   rencana untuk masa pemulihan? *perhatikan kepada program-program yang menjadi capaian nasional, berikut juga ciri khas daerah. Penekanan lebih pada penyakit menular, tetapi juga bagii penyakit tidak menular lainnya. Yang tidak tercakup dalam list ini, tuliskan di keterangan'
     },
      {
       'nama_indikator': '2. Program Jejaring',
@@ -161,6 +180,7 @@ class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
       ],
       'selected_kriteria': '',
       'input_data': {},
+      'panduan_pertanyaan': '*tuliskan di keterangan *Berapa jumlah puskesmas pembantu yang dimiliki puskesmas? Termasuk rumah bidan, dan poskesdes polindes.'
     },
      {
       'nama_indikator': '2. Program Jejaring',
@@ -246,38 +266,55 @@ class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
   }
 
   Future<void> _loadDataFromDB() async {
-    for (int i = 0; i < data.length; i++) {
-      for (String kriteria in data[i]['kriteria']) {
-        List<Map<String, dynamic>> savedData = await _dbHelper.getEntriesByKegiatanIdAndKriteria(
-          widget.kegiatanId!,
-          kriteria,
-          data[i]['nama_indikator'],
-        );
+  for (int i = 0; i < data.length; i++) {
+    for (String kriteria in data[i]['kriteria']) {
+      List<Map<String, dynamic>> savedData = await _dbHelper.getEntriesByKegiatanIdAndKriteria(
+        widget.kegiatanId!,
+        kriteria,
+        data[i]['nama_indikator'],
+      );
 
-        if (savedData.isNotEmpty) {
-          for (var entry in savedData) {
-            setState(() {
+      if (savedData.isNotEmpty) {
+        for (var entry in savedData) {
+          setState(() {
+            if (_shouldDisableIndikator2(data[i]['sub_indikator'])) {
+              data[i]['input_data'][kriteria] = {
+                'indikator1': entry['indikator1']?.toString() ?? '',
+                'indikator3': entry['indikator3']?.toString() ?? '',
+                'indikator4': entry['indikator4']?.toString() ?? '',
+              };
+            } else {
               data[i]['input_data'][kriteria] = {
                 'indikator1': entry['indikator1']?.toString() ?? '',
                 'indikator2': entry['indikator2']?.toString() ?? '',
                 'indikator3': entry['indikator3']?.toString() ?? '',
                 'indikator4': entry['indikator4']?.toString() ?? '',
               };
-            });
-          }
-        } else {
-          setState(() {
+            }
+          });
+        }
+      } else {
+        setState(() {
+          if (_shouldDisableIndikator2(data[i]['sub_indikator'])) {
+            data[i]['input_data'][kriteria] = {
+              'indikator1': '',
+              'indikator3': '',
+              'indikator4': '',
+            };
+          } else {
             data[i]['input_data'][kriteria] = {
               'indikator1': '',
               'indikator2': '',
               'indikator3': '',
               'indikator4': '',
             };
-          });
-        }
+          }
+        });
       }
     }
   }
+}
+
 Future<void> _exportData() async {
     // Dapatkan daftar kegiatan untuk user
     List<Map<String, dynamic>> kegiatanList = await _dbHelper.getKegiatanForUser(widget.userId);
@@ -674,15 +711,7 @@ Widget build(BuildContext context) {
                               children: [
                                 Row(
                                   children: [
-                                    IconButton(
-                                      icon: Icon(
-                                        Icons.visibility,
-                                        color: Colors.blue,
-                                      ),
-                                      onPressed: () {
-                                        // Aksi saat tombol visibility ditekan
-                                      },
-                                    ),
+                                   
                                     IconButton(
                                       icon: Icon(
                                         Icons.help_outline,
@@ -807,21 +836,23 @@ Widget build(BuildContext context) {
                         Row(
                           children: [
                             Expanded(
-                              child: TextField(
-                                controller: indikator2Controller,
-                                decoration: InputDecoration(
-                                  labelText: 'Indikator 2',
-                                  border: OutlineInputBorder(),
-                                  contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                                ),
-                                onChanged: (value) {
-                                  setState(() {
-                                    data[index]['input_data'][selectedKriteria]['indikator2'] = value;
-                                  });
-                                  _saveData(index);
-                                },
-                              ),
-                            ),
+  child: TextField(
+    controller: indikator2Controller,
+    decoration: InputDecoration(
+      labelText: 'Indikator 2',
+      border: OutlineInputBorder(),
+      contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+    ),
+    onChanged: (value) {
+      setState(() {
+        data[index]['input_data'][selectedKriteria]['indikator2'] = value;
+      });
+      _saveData(index);
+    },
+    enabled: !_shouldDisableIndikator2(data[index]['sub_indikator']), // Menonaktifkan input indikator 2 sesuai sub indikator
+  ),
+),
+
                             IconButton(
                               icon: Icon(Icons.help_outline),
                               onPressed: () {

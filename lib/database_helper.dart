@@ -95,6 +95,8 @@ Future<Database> _initDatabase() async {
       dropdown_option TEXT,
       provinsi TEXT,
       kabupaten_kota TEXT,
+      kelurahan TEXT,
+      kecamatan TEXT,
       tanggal_kegiatan TEXT,
       nama TEXT,
       jabatan TEXT,

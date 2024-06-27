@@ -49,6 +49,8 @@ dependencies:
   shared_preferences: ^2.0.6
   sqflite: ^2.0.0+4
   image_picker: ^0.8.4+2
+  google_maps_flutter: ^2.0.6 # Check for the latest version
+  camera: ^0.9.4+11  # Versi bisa disesuaikan dengan versi terbaru yang tersedia
 
   
 

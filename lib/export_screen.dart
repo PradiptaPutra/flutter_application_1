@@ -216,15 +216,19 @@ Future<void> _fetchAllKegiatan() async {
 
       final pdfPath = '${downloadsDir!.path}/fotopuskesmas/$fileName';
       final pdfFile = File(pdfPath);
-
-      if (!pdfFile.parent.existsSync()) {
-        pdfFile.parent.createSync(recursive: true);
-      }
-
-      await pdfFile.writeAsBytes(await pdf.save());
+ await pdfFile.writeAsBytes(await pdf.save());
       print('PDF saved to $pdfPath');
 
-      OpenFile.open(pdfPath);
+      Fluttertoast.showToast(msg: 'PDF saved to $pdfPath');
+
+      _openPdf(pdfPath);
+
+      if (isConnected && emailPenerima != null) {
+        await _sendEmail(pdfPath, emailPenerima!);
+        Fluttertoast.showToast(msg: 'Email successfully sent');
+      } else {
+        print('Device is offline or email recipient not found. Email will be sent when online.');
+      }
     } catch (e) {
       print('Error while saving PDF: $e');
     }
@@ -261,7 +265,7 @@ Future<void> _fetchAllKegiatan() async {
             style: pw.TextStyle(fontSize: 12),
           ),
           pw.Text(
-            'Non/Rawat inap : ${kegiatan['dropdown_option'] ?? 'Belum Tersedia'}\nProvinsi : ${kegiatan['provinsi'] ?? 'Belum Tersedia'}\nKabupaten / Kota : ${kegiatan['kabupaten_kota'] ?? 'Belum Tersedia'}\nTanggal Survei : ${kegiatan['tanggal_kegiatan'] ?? 'Belum Tersedia'}',
+            'Non/Rawat inap : ${kegiatan['dropdown_option'] ?? 'Belum Tersedia'}\nProvinsi : ${kegiatan['provinsi'] ?? 'Belum Tersedia'}\nKabupaten / Kota : ${kegiatan['kabupaten_kota'] ?? 'Belum Tersedia'}\nKecamatan : ${kegiatan['kecamatan'] ?? 'Belum Tersedia'}\nKelurahan : ${kegiatan['kelurahan'] ?? 'Belum Tersedia'}\nTanggal Survei : ${kegiatan['tanggal_kegiatan'] ?? 'Belum Tersedia'}',
             style: pw.TextStyle(fontSize: 12),
           ),
            pw.Container(
