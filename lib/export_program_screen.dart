@@ -219,13 +219,9 @@ Future<void> _fetchAllKegiatan() async {
     );
 
     try {
-      var status = await Permission.storage.request();
-      if (!status.isGranted) {
-        print('Permission not granted');
-        return;
-      }
+      
 
-      final downloadsDir = Directory('/storage/emulated/0/Download');
+      final downloadsDir = await getExternalStorageDirectory();
       String fileName = 'Program_${widget.puskesmas}.pdf';
 
       if (widget.kegiatanId != null) {
@@ -236,7 +232,7 @@ Future<void> _fetchAllKegiatan() async {
         }
       }
 
-      final pdfPath = path.join(downloadsDir.path, fileName);
+       final pdfPath = '${downloadsDir!.path}/fotopuskesmas/$fileName';
       final pdfFile = File(pdfPath);
 
       await pdfFile.writeAsBytes(await pdf.save());

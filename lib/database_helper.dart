@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
@@ -655,7 +656,7 @@ Future<void> updateDataEntry2(Map<String, dynamic> dataEntry) async {
   if (maps.isNotEmpty) {
     String? imageName = maps.first['foto'];
     if (imageName != null) {
-      String imagePath = '/storage/emulated/0/Download/fotopuskesmas/$imageName';
+      String imagePath = '/storage/emulated/0/Android/data/com.example.flutter_application_1/files/fotopuskesmas/$imageName';
       File imageFile = File(imagePath);
       if (await imageFile.exists()) {
         return imageFile;

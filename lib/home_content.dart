@@ -108,7 +108,7 @@ Widget build(BuildContext context) {
                     String tanggalKegiatan = puskesmas['tanggal_kegiatan'];
                     List<int> missingCategories = puskesmas['missing_categories'];
                     String fotoPath = puskesmas['foto'] != null && puskesmas['foto'].isNotEmpty
-                        ? '/storage/emulated/0/Download/fotopuskesmas/${puskesmas['foto']}'
+                        ? '/storage/emulated/0/Android/data/com.example.flutter_application_1/files/fotopuskesmas/${puskesmas['foto']}'
                         : 'assets/images/logors.jpg';
                   // Debug print to see missingCategories map
                   
