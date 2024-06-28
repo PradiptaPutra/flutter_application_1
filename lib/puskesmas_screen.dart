@@ -479,7 +479,7 @@ Map<String, List<String>> kecamatanList = {
       String jabatan = userData['position'];
       String notelp = userData['phone'];
 
-      // Menyimpan gambar ke penyimpanan lokal
+       // Menyimpan gambar ke penyimpanan lokal
       String namaFileFoto = '';
       if (_selectedImage != null) {
         final downloadsDir = await getExternalStorageDirectory();
@@ -489,16 +489,31 @@ Map<String, List<String>> kecamatanList = {
           }
           namaFileFoto = 'foto_${namaPuskesmas.replaceAll(' ', '_').toLowerCase()}.jpg';
           String filePath = path.join(downloadsDir.path, 'fotopuskesmas', namaFileFoto);
-          try {
-            await _selectedImage!.copy(filePath);
-            print('Berhasil menyimpan foto ke: $filePath');
-          } catch (e) {
-            print('Gagal menyimpan foto: $e');
-          }
+         try {
+  if (_selectedImage != null) {
+    final downloadsDir = await getExternalStorageDirectory();
+    if (downloadsDir != null) {
+      final fotopuskesmasDir = Directory('${downloadsDir.path}/fotopuskesmas');
+      if (!await fotopuskesmasDir.exists()) {
+        await fotopuskesmasDir.create(recursive: true);
+      }
+      String namaFileFoto = 'foto_${namaPuskesmas}.jpg';
+      String filePath = '${fotopuskesmasDir.path}/$namaFileFoto';
+      await _selectedImage!.copy(filePath);
+      print('Berhasil menyimpan foto ke: $filePath');
+    } else {
+      print('Gagal mendapatkan direktori eksternal');
+    }
+  }
+} catch (e) {
+  print('Gagal menyimpan foto: $e');
+}
         } else {
-          print('Gagal mendapatkan direktori eksternal');
+          print("Error: Tidak dapat mengakses direktori penyimpanan.");
         }
       }
+
+
 
       final int result = await DatabaseHelper.instance.insertPuskesmas({
         'user_id': widget.userId,
