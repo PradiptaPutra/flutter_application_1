@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'database_helper.dart';
 import 'export_screen.dart';
 
@@ -372,6 +373,10 @@ class _PenilaianScreenState extends State<PenilaianScreen> {
                                             EdgeInsets.symmetric(
                                                 horizontal: 10, vertical: 5),
                                       ),
+keyboardType: TextInputType.number,
+                                      inputFormatters: <TextInputFormatter>[
+                                        FilteringTextInputFormatter.digitsOnly
+                                      ],
                                       onChanged: (value) =>
                                           _calculateTotalScore(),
                                     ),
@@ -387,6 +392,10 @@ class _PenilaianScreenState extends State<PenilaianScreen> {
                                             EdgeInsets.symmetric(
                                                 horizontal: 10, vertical: 5),
                                       ),
+keyboardType: TextInputType.number,
+                                      inputFormatters: <TextInputFormatter>[
+                                        FilteringTextInputFormatter.digitsOnly
+                                      ],
                                       onChanged: (value) =>
                                           _calculateTotalScore(),
                                     ),

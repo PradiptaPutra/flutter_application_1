@@ -201,7 +201,7 @@ class _PuskesmasScreenState extends State<PuskesmasScreen> {
               child: TextField(
                 controller: lokasiController,
                 decoration: InputDecoration(
-                  labelText: 'Lokasi',
+                  labelText: 'Alamat Lengkap',
                 ),
               ),
             ),

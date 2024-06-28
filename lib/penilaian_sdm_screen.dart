@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'database_helper.dart';
 import 'export_sdm_screen.dart';
 
@@ -330,6 +331,10 @@ class _PenilaianSdmScreenState extends State<PenilaianSdmScreen> {
                                         border: OutlineInputBorder(),
                                         contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                                       ),
+                                      keyboardType: TextInputType.number,
+                                      inputFormatters: <TextInputFormatter>[
+                                        FilteringTextInputFormatter.digitsOnly
+                                      ],
                                       onChanged: (value) => _calculateTotalScores(),
                                     ),
                                   ),
@@ -346,6 +351,10 @@ class _PenilaianSdmScreenState extends State<PenilaianSdmScreen> {
                                         border: OutlineInputBorder(),
                                         contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                                       ),
+                                      keyboardType: TextInputType.number,
+                                      inputFormatters: <TextInputFormatter>[
+                                        FilteringTextInputFormatter.digitsOnly
+                                      ],
                                       onChanged: (value) => _calculateTotalScores(),
                                     ),
                                   ),

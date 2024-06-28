@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'database_helper.dart'; // Pastikan ini sesuai dengan path file DatabaseHelper
 import 'export_program_screen.dart';
@@ -816,6 +817,10 @@ Widget build(BuildContext context) {
                                   border: OutlineInputBorder(),
                                   contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                                 ),
+                                keyboardType: TextInputType.number,
+                                      inputFormatters: <TextInputFormatter>[
+                                        FilteringTextInputFormatter.digitsOnly
+                                      ],
                                 onChanged: (value) {
                                   setState(() {
                                     data[index]['input_data'][selectedKriteria]['indikator1'] = value;
@@ -843,6 +848,10 @@ Widget build(BuildContext context) {
       border: OutlineInputBorder(),
       contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
     ),
+    keyboardType: TextInputType.number,
+                                      inputFormatters: <TextInputFormatter>[
+                                        FilteringTextInputFormatter.digitsOnly
+                                      ],
     onChanged: (value) {
       setState(() {
         data[index]['input_data'][selectedKriteria]['indikator2'] = value;
@@ -872,6 +881,10 @@ Widget build(BuildContext context) {
                                   border: OutlineInputBorder(),
                                   contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                                 ),
+                                keyboardType: TextInputType.number,
+                                      inputFormatters: <TextInputFormatter>[
+                                        FilteringTextInputFormatter.digitsOnly
+                                      ],
                                 onChanged: (value) {
                                   setState(() {
                                     data[index]['input_data'][selectedKriteria]['indikator3'] = value;
@@ -899,6 +912,10 @@ Widget build(BuildContext context) {
                                   border: OutlineInputBorder(),
                                   contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                                 ),
+                                keyboardType: TextInputType.number,
+                                      inputFormatters: <TextInputFormatter>[
+                                        FilteringTextInputFormatter.digitsOnly
+                                      ],
                                 onChanged: (value) {
                                   setState(() {
                                     data[index]['input_data'][selectedKriteria]['indikator4'] = value;

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'database_helper.dart';
 import 'export_pembiayaan_screen.dart';
 
@@ -379,6 +380,10 @@ class _PenilaianPembiayaanScreenState extends State<PenilaianPembiayaanScreen> {
                                             EdgeInsets.symmetric(
                                                 horizontal: 10, vertical: 5),
                                       ),
+keyboardType: TextInputType.number,
+                                      inputFormatters: <TextInputFormatter>[
+                                        FilteringTextInputFormatter.digitsOnly
+                                      ],
                                       onChanged: (value) =>
                                           _calculateTotalScore(),
                                     ),
@@ -394,6 +399,10 @@ class _PenilaianPembiayaanScreenState extends State<PenilaianPembiayaanScreen> {
                                             EdgeInsets.symmetric(
                                                 horizontal: 10, vertical: 5),
                                       ),
+keyboardType: TextInputType.number,
+                                      inputFormatters: <TextInputFormatter>[
+                                        FilteringTextInputFormatter.digitsOnly
+                                      ],
                                       onChanged: (value) =>
                                           _calculateTotalScore(),
                                     ),

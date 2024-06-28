@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'database_helper.dart';
 import 'export_kendaraan_screen.dart';
 
@@ -376,6 +377,10 @@ String _setInterpretasi(double skor) {
                                         border: OutlineInputBorder(),
                                         contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                                       ),
+                                      keyboardType: TextInputType.number,
+                                      inputFormatters: <TextInputFormatter>[
+                                        FilteringTextInputFormatter.digitsOnly
+                                      ],
                                       onChanged: (value) => _calculateTotalScore(),
                                     ),
                                   ),
@@ -388,6 +393,10 @@ String _setInterpretasi(double skor) {
                                         border: OutlineInputBorder(),
                                         contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                                       ),
+                                      keyboardType: TextInputType.number,
+                                      inputFormatters: <TextInputFormatter>[
+                                        FilteringTextInputFormatter.digitsOnly
+                                      ],
                                       onChanged: (value) => _calculateTotalScore(),
                                     ),
                                   ),
@@ -401,6 +410,9 @@ String _setInterpretasi(double skor) {
                                     contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                                   ),
                                   keyboardType: TextInputType.number,
+                                      inputFormatters: <TextInputFormatter>[
+                                        FilteringTextInputFormatter.digitsOnly
+                                      ],
                                   onChanged: (value) => _calculateTotalScore(),
                                 ),
                               SizedBox(height: 10),

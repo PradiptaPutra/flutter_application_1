@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'database_helper.dart';
 import 'export_alkes_screen.dart';
 
@@ -433,6 +434,10 @@ class _PenilaianAlkesScreenState extends State<PenilaianAlkesScreen> {
                                         border: OutlineInputBorder(),
                                         contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                                       ),
+                                      keyboardType: TextInputType.number,
+                                      inputFormatters: <TextInputFormatter>[
+                                        FilteringTextInputFormatter.digitsOnly
+                                      ],
                                       onChanged: (value) => _calculateTotalScore(),
                                     ),
                                   ),
@@ -445,6 +450,10 @@ class _PenilaianAlkesScreenState extends State<PenilaianAlkesScreen> {
                                         border: OutlineInputBorder(),
                                         contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                                       ),
+                                      keyboardType: TextInputType.number,
+                                      inputFormatters: <TextInputFormatter>[
+                                        FilteringTextInputFormatter.digitsOnly
+                                      ],
                                       onChanged: (value) => _calculateTotalScore(),
                                     ),
                                   ),
@@ -463,6 +472,10 @@ class _PenilaianAlkesScreenState extends State<PenilaianAlkesScreen> {
                                         fillColor: isNonEditable ? Colors.grey[300] : Colors.white,
                                         filled: true,
                                       ),
+                                      keyboardType: TextInputType.number,
+                                      inputFormatters: <TextInputFormatter>[
+                                        FilteringTextInputFormatter.digitsOnly
+                                      ],
                                       enabled: !isNonEditable,
                                     ),
                                   ),
@@ -477,6 +490,10 @@ class _PenilaianAlkesScreenState extends State<PenilaianAlkesScreen> {
                                         fillColor: isNonEditable ? Colors.grey[300] : Colors.white,
                                         filled: true,
                                       ),
+                                      keyboardType: TextInputType.number,
+                                      inputFormatters: <TextInputFormatter>[
+                                        FilteringTextInputFormatter.digitsOnly
+                                      ],
                                       enabled: !isNonEditable,
                                     ),
                                   ),
