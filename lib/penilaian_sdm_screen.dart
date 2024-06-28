@@ -149,7 +149,21 @@ class _PenilaianSdmScreenState extends State<PenilaianSdmScreen> {
         entry['entry_id'] = int.parse(data[i]['entry_id']);
       }
 
-      await _dbHelper.saveDataEntry(entry);
+      // Check if the entry already exists
+      List<Map<String, dynamic>> existingEntry = await _dbHelper.getEntriesByKegiatanIdAndIndikator(
+        widget.kegiatanId!,
+        widget.id_category,
+        data[i]['nama_indikator'],
+      );
+
+      if (existingEntry.isNotEmpty) {
+        // If entry exists, update it
+        entry['entry_id'] = existingEntry[0]['entry_id'];
+        await _dbHelper.updateDataEntry3(entry);
+      } else {
+        // If entry does not exist, insert a new one
+        await _dbHelper.saveDataEntry(entry);
+      }
     }
 
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Data berhasil disimpan')));
