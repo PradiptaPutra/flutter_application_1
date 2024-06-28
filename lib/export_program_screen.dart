@@ -426,44 +426,28 @@ Future<void> _fetchAllKegiatan() async {
                     Text('Interpretasi Indikator 1', style: TextStyle(fontSize: 16)),
                     Text(widget.interpretasiIndikator1,
                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                  ],
-                ),
-                Column(
-                  children: [
-                    Text('Total Indikator 2', style: TextStyle(fontSize: 18)),
+                        Text('Total Indikator 2', style: TextStyle(fontSize: 18)),
                     Text(widget.totalIndikator2.toString(),
                         style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                     SizedBox(height: 5),
                     Text('Interpretasi Indikator 2', style: TextStyle(fontSize: 16)),
                     Text(widget.interpretasiIndikator2,
                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                  ],
-                ),
-                Column(
-                  children: [
-                    Text('Total Indikator 3', style: TextStyle(fontSize: 18)),
+                        Text('Total Indikator 3', style: TextStyle(fontSize: 18)),
                     Text(widget.totalIndikator3.toString(),
                         style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                     SizedBox(height: 5),
                     Text('Interpretasi Indikator 3', style: TextStyle(fontSize: 16)),
                     Text(widget.interpretasiIndikator3,
                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                  ],
-                ),
-                Column(
-                  children: [
-                    Text('Total Indikator 4', style: TextStyle(fontSize: 18)),
+                         Text('Total Indikator 4', style: TextStyle(fontSize: 18)),
                     Text(widget.totalIndikator4.toString(),
                         style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                     SizedBox(height: 5),
                     Text('Interpretasi Indikator 4', style: TextStyle(fontSize: 16)),
                     Text(widget.interpretasiIndikator4,
                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                  ],
-                ),
-                Column(
-                  children: [
-                    Text('Total Keseluruhan ', style: TextStyle(fontSize: 18)),
+                        Text('Total Keseluruhan ', style: TextStyle(fontSize: 18)),
                     Text(widget.totalOverall.toString(),
                         style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                     SizedBox(height: 5),
@@ -472,6 +456,7 @@ Future<void> _fetchAllKegiatan() async {
                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                   ],
                 ),
+                
               ],
             ),
             SizedBox(height: 20),

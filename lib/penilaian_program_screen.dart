@@ -37,6 +37,7 @@ class _PenilaianProgramScreenState extends State<PenilaianProgramScreen> {
   String interpretasiIndikator4 = "";
   String interpretasiOverall = "";
   bool showInterpretations = false;
+  bool isDataSaved = false;  // New boolean state to track if data is saved
   bool _shouldDisableIndikator2(String subIndikator) {
   List<String> subIndikatorList = [
     '2.1 Puskesmas pembantu',
@@ -444,7 +445,24 @@ Future<void> _exportData() async {
       await _saveData(i);
     }
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Data has been saved successfully')));
-  }
+  setState(() {
+    isDataSaved = true;  // Set the state to true after data is saved
+  });
+
+  // Refresh screen
+  Navigator.pushReplacement(
+    context,
+    MaterialPageRoute(
+      builder: (context) => PenilaianProgramScreen(
+        kegiatanId: widget.kegiatanId,
+        id_category: widget.id_category,
+        userId: widget.userId,
+        entryId: widget.entryId,
+        puskesmas: puskesmas,
+      ),
+    ),
+  );
+}
 
   void _showPanduanPertanyaan(String panduanPertanyaan) {
     showDialog(
