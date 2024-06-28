@@ -234,7 +234,7 @@ Future<void> _fetchAllKegiatan() async {
     Fluttertoast.showToast(msg: 'PDF saved to $pdfPath');
 
     // Delay for 5 seconds before opening the PDF
-    await Future.delayed(Duration(seconds: 5));
+    await Future.delayed(Duration(seconds: 2));
     _openPdf(pdfPath);
 
     if (isConnected && emailPenerima != null) {

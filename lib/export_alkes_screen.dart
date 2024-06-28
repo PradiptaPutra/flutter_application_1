@@ -250,7 +250,7 @@ Future<void> _initializeBackgroundImage() async {
 
       Fluttertoast.showToast(msg: 'PDF saved to $pdfPath');
 
-      await Future.delayed(Duration(seconds: 5));
+      await Future.delayed(Duration(seconds: 2));
     _openPdf(pdfPath);
 
       if (isConnected && emailPenerima != null) {

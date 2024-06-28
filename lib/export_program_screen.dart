@@ -246,7 +246,7 @@ Future<void> _fetchAllKegiatan() async {
 
       Fluttertoast.showToast(msg: 'PDF saved to $pdfPath');
 
-      await Future.delayed(Duration(seconds: 5));
+      await Future.delayed(Duration(seconds: 2));
 _openPdf(pdfPath);
       if (isConnected && emailPenerima != null) {
         await _sendEmail(pdfPath, emailPenerima!);

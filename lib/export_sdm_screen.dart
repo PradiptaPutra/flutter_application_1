@@ -243,7 +243,7 @@ Future<void> _fetchAllKegiatan() async {
       print('PDF saved to $pdfPath');
 
       Fluttertoast.showToast(msg: 'PDF saved to $pdfPath');
-await Future.delayed(Duration(seconds: 5));
+await Future.delayed(Duration(seconds: 2));
     _openPdf(pdfPath);
       
 
