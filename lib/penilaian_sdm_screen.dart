@@ -157,20 +157,7 @@ class _PenilaianSdmScreenState extends State<PenilaianSdmScreen> {
     isDataSaved = true;  // Set the state to true after data is saved
   });
     
-  // Refresh screen
-  Navigator.pushReplacement(
-    context,
-    MaterialPageRoute(
-      builder: (context) => PenilaianSdmScreen(
-        kegiatanId: widget.kegiatanId,
-        id_category: widget.id_category,
-        userId: widget.userId,
-        entryId: widget.entryId,
-        dropdownOption: widget.dropdownOption,
-      ),
-    ),
-  );
-}
+  }
 
   Future<void> _exportData() async {
     List<Map<String, dynamic>> kegiatanList = await _dbHelper.getKegiatanForUser(widget.userId);

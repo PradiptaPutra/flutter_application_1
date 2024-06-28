@@ -225,17 +225,18 @@ Future<void> _fetchAllKegiatan() async {
     final pdfPath = '$directoryPath/$fileName';
     final pdfFile = File(pdfPath);
 
-    // Delete the file if it already exists
-    if (await pdfFile.exists()) {
-      await pdfFile.delete();
-    }
+     // Check if the file exists, and delete if it does
+        if (await pdfFile.exists()) {
+            await pdfFile.delete();
+            print('Old PDF file deleted.');
+        }
 
     await pdfFile.writeAsBytes(await pdf.save());
     print('PDF saved to $pdfPath');
 
     Fluttertoast.showToast(msg: 'PDF saved to $pdfPath');
 
-    _openPdf(pdfPath);
+    
 
     if (isConnected && emailPenerima != null) {
       await _sendEmail(pdfPath, emailPenerima!);
@@ -243,11 +244,15 @@ Future<void> _fetchAllKegiatan() async {
     } else {
       print('Device is offline or email recipient not found. Email will be sent when online.');
     }
+
+    _openPdf(pdfPath);
   } catch (e) {
     print('Error while saving PDF: $e');
     Fluttertoast.showToast(msg: 'Failed to save PDF. Please try again.');
   }
+  
 }
+
 
 
   pw.Widget _buildHeader() {
