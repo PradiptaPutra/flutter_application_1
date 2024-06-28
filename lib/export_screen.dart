@@ -216,27 +216,26 @@ Future<void> _fetchAllKegiatan() async {
       await directory.create(recursive: true);
     }
 
-    String fileName = 'Bangunan_${widget.puskesmas}.pdf';
-
-    if (widget.kegiatanId != null) {
-      fileName = 'Bangunan_${widget.puskesmas}_${widget.kegiatanId}.pdf';
-    }
+    // Menggunakan timestamp sebagai bagian dari nama file untuk membuatnya unik
+    String fileName = 'Bangunan_${widget.puskesmas}_${DateTime.now().millisecondsSinceEpoch}.pdf';
 
     final pdfPath = '$directoryPath/$fileName';
     final pdfFile = File(pdfPath);
 
-     // Check if the file exists, and delete if it does
-        if (await pdfFile.exists()) {
-            await pdfFile.delete();
-            print('Old PDF file deleted.');
-        }
+    // Check if the file exists, and delete if it does
+    if (await pdfFile.exists()) {
+      await pdfFile.delete();
+      print('Old PDF file deleted.');
+    }
 
     await pdfFile.writeAsBytes(await pdf.save());
     print('PDF saved to $pdfPath');
 
     Fluttertoast.showToast(msg: 'PDF saved to $pdfPath');
 
-    
+    // Delay for 5 seconds before opening the PDF
+    await Future.delayed(Duration(seconds: 5));
+    _openPdf(pdfPath);
 
     if (isConnected && emailPenerima != null) {
       await _sendEmail(pdfPath, emailPenerima!);
@@ -245,13 +244,12 @@ Future<void> _fetchAllKegiatan() async {
       print('Device is offline or email recipient not found. Email will be sent when online.');
     }
 
-    _openPdf(pdfPath);
   } catch (e) {
     print('Error while saving PDF: $e');
     Fluttertoast.showToast(msg: 'Failed to save PDF. Please try again.');
   }
-  
 }
+
 
 
 

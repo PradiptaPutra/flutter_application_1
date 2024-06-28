@@ -217,15 +217,8 @@ Future<void> _initializeBackgroundImage() async {
       if (!await directory.exists()) {
         await directory.create(recursive: true);
       }
-      String fileName = 'IsianSDM_${widget.puskesmas}.pdf';
+      String fileName = 'IsianSDM_${widget.puskesmas}_${DateTime.now().millisecondsSinceEpoch}.pdf';
 
-     if (widget.kegiatanId != null) {
-        final dbHelper = DatabaseHelper();
-        final tanggalKegiatan = await dbHelper.getTanggalKegiatan(widget.kegiatanId!);
-        if (tanggalKegiatan != null) {
-          fileName = 'IsianSDM_${widget.puskesmas}_$tanggalKegiatan.pdf';
-        }
-      }
 
        final pdfPath = '$directoryPath/$fileName';
     final pdfFile = File(pdfPath);
@@ -241,7 +234,8 @@ Future<void> _initializeBackgroundImage() async {
 
       Fluttertoast.showToast(msg: 'PDF saved to $pdfPath');
 
-      
+      await Future.delayed(Duration(seconds: 5));
+    _openPdf(pdfPath);
 
       if (isConnected && emailPenerima != null) {
         await _sendEmail(pdfPath, emailPenerima!);
@@ -250,7 +244,7 @@ Future<void> _initializeBackgroundImage() async {
         print('Device is offline or email recipient not found. Email will be sent when online.');
       }
 
-      _openPdf(pdfPath);
+      
     } catch (e) {
       print('Error while saving PDF: $e');
     }

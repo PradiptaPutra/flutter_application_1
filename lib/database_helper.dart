@@ -517,7 +517,7 @@ Future<List<Map<String, dynamic>>> getEntriesByKegiatanIdAndKriteria(int kegiata
     final db = await database;
 
     return await db.update(
-      'dataentry',
+      'DataEntry',
       entry,
       where: 'entry_id = ?',
       whereArgs: [entry['entry_id']],
