@@ -180,7 +180,7 @@ Future<void> _initializeBackgroundImage() async {
     final smtpServer = gmail('mtsalikhlasberbahh@gmail.com', 'oxtm hpkh ciiq ppan');
 
     final message = Message()
-      ..from = Address('mtsalikhlasberbahh@gmail.com', 'Your Name')
+      ..from = Address('jitupasna@gmail.com', 'JITUPASNA admin ')
       ..recipients.add(recipient)
       ..subject = 'Lampiran PDF'
       ..text = 'Silakan temukan lampiran PDF.'
