@@ -354,7 +354,7 @@ Future<void> _initializeBackgroundImage() async {
             _buildTableCell(entry['sub_indikator']?? ''),
             _buildTableCell(entry['sebelum']?? ''),
             _buildTableCell(entry['sebelum2']?? ''),
-            _buildTableCell(entry['sesudah1']?? ''),
+            _buildTableCell(entry['sesudah']?? ''),
             _buildTableCell(entry['sesudah2']?? ''),
             _buildTableCell(entry['keterangan']?? ''),
           ],
