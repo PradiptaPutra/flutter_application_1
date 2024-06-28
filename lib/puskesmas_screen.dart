@@ -433,7 +433,7 @@ class _PuskesmasScreenState extends State<PuskesmasScreen> {
                 if (!await fotopuskesmasDir.exists()) {
                   await fotopuskesmasDir.create(recursive: true);
                 }
-                String namaFileFoto = 'foto_${namaPuskesmas}.jpg';
+                String namaFileFoto = 'foto_${namaPuskesmas.replaceAll(' ', '_').toLowerCase()}.jpg';
                 String filePath = '${fotopuskesmasDir.path}/$namaFileFoto';
                 await _selectedImage!.copy(filePath);
                 print('Berhasil menyimpan foto ke: $filePath');
