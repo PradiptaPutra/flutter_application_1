@@ -18,88 +18,18 @@ class PuskesmasScreen extends StatefulWidget {
 class _PuskesmasScreenState extends State<PuskesmasScreen> {
   TextEditingController namaPuskesmasController = TextEditingController();
   TextEditingController lokasiController = TextEditingController();
+  TextEditingController kelurahanController = TextEditingController();
+  TextEditingController kecamatanController = TextEditingController();
   DateTime? selectedDate;
 
   String dropdownValue = 'Rawat Inap';
   String? selectedProvinsi = 'Jambi'; // Default to Jambi province
   String? selectedKabupaten;
-  String? selectedKelurahan;
-  String? selectedKecamatan;
 
   List<String> provinsiList = ['Jambi'];
   Map<String, List<String>> kabupatenList = {
     'Jambi': ['Kota Jambi', 'Kabupaten Bungo', 'Kabupaten Kerinci', 'Kabupaten Muaro Jambi', 'Kabupaten Sarolangun', 'Kabupaten Tanjung Jabung Barat', 'Kabupaten Tanjung Jabung Timur', 'Kabupaten Tebo']
   };
- Map<String, List<String>> kelurahanList = {
-  'Kota Jambi': [
-    'Talang Banjar',
-    'Beringin',
-    'Kasang'],
-  'Kabupaten Bungo': [
-    'Bathin II Babeko',
-    'Muko-Muko Bathin VII',
-    'Penyengat I'],
-  'Kabupaten Kerinci': [
-    'Dusun Baru',
-    'Mentawak',
-    'Talang Kuta'],
-  'Kabupaten Muaro Jambi': [
-    'Pelayangan',
-    'Pasar Muara Bungo',
-    'Teluk Binjai'],
-  'Kabupaten Sarolangun': [
-    'Danau Lamo',
-    'Renah Kemumu',
-    'Sungai Gula'],
-  'Kabupaten Tanjung Jabung Barat': [
-    'Batu Hampar',
-    'Mendalo Darat',
-    'Renah Pembarap'],
-  'Kabupaten Tanjung Jabung Timur': [
-    'Babeko',
-    'Batang Asai',
-    'Penyengat Rendah'],
-  'Kabupaten Tebo': [
-    'Air Hitam',
-    'Lubuk Raman',
-    'Sungai Penuh']
-};
-
-Map<String, List<String>> kecamatanList = {
-  'Kota Jambi': [
-    'Alam Barajo',
-    'Jelutung',
-    'Kota Baru'],
-  'Kabupaten Bungo': [
-    'Bathin II Babeko',
-    'Muko-Muko Bathin VII',
-    'Pasar Muara Bungo'],
-  'Kabupaten Kerinci': [
-    'Air Hangat Timur',
-    'Kayu Aro',
-    'Keliling Danau'],
-  'Kabupaten Muaro Jambi': [
-    'Jambi Selatan',
-    'Jambi Timur',
-    'Jambi Utara'],
-  'Kabupaten Sarolangun': [
-    'Mandiangin',
-    'Pauh',
-    'Sarolangun'],
-  'Kabupaten Tanjung Jabung Barat': [
-    'Dendang',
-    'Muara Papalik',
-    'Nasal'],
-  'Kabupaten Tanjung Jabung Timur': [
-    'Dalam',
-    'Rantau Rasau',
-    'Tungkal Ulu'],
-  'Kabupaten Tebo': [
-    'Rimbo Bujang',
-    'Tebo Tengah',
-    'Tebo Ulu']
-};
-
 
   File? _selectedImage;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
@@ -114,12 +44,12 @@ Map<String, List<String>> kecamatanList = {
   void _validateInputs() {
     if (namaPuskesmasController.text.isNotEmpty &&
         lokasiController.text.isNotEmpty &&
+        kelurahanController.text.isNotEmpty &&
+        kecamatanController.text.isNotEmpty &&
         selectedDate != null &&
         selectedProvinsi != null &&
         _selectedImage != null &&
-        selectedKabupaten != null &&
-        selectedKelurahan != null &&
-        selectedKecamatan != null) {
+        selectedKabupaten != null) {
       setState(() {
         _isNextButtonEnabled = true;
       });
@@ -134,6 +64,8 @@ Map<String, List<String>> kecamatanList = {
   void dispose() {
     namaPuskesmasController.dispose();
     lokasiController.dispose();
+    kelurahanController.dispose();
+    kecamatanController.dispose();
     super.dispose();
   }
 
@@ -282,8 +214,6 @@ Map<String, List<String>> kecamatanList = {
                   setState(() {
                     selectedProvinsi = newValue;
                     selectedKabupaten = null; // Reset selected kabupaten when province changes
-                    selectedKelurahan = null; // Reset selected kelurahan when province changes
-                    selectedKecamatan = null; // Reset selected kecamatan when province changes
                   });
                   _validateInputs();
                 },
@@ -304,8 +234,6 @@ Map<String, List<String>> kecamatanList = {
                   onChanged: (String? newValue) {
                     setState(() {
                       selectedKabupaten = newValue;
-                      selectedKelurahan = null; // Reset selected kelurahan when kabupaten changes
-                      selectedKecamatan = null; // Reset selected kecamatan when kabupaten changes
                     });
                     _validateInputs();
                   },
@@ -317,46 +245,30 @@ Map<String, List<String>> kecamatanList = {
                   }).toList(),
                 ),
               ),
-              if (selectedKabupaten != null) ...[
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: DropdownButtonFormField<String>(
-                    value: selectedKelurahan,
-                    hint: Text('Pilih Kelurahan'),
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        selectedKelurahan = newValue;
-                      });
-                      _validateInputs();
-                    },
-                    items: kelurahanList[selectedKabupaten!]!.map<DropdownMenuItem<String>>((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
-                      );
-                    }).toList(),
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: TextField(
+                  controller: kelurahanController,
+                  decoration: InputDecoration(
+                    labelText: 'Kelurahan',
                   ),
+                  onChanged: (value) {
+                    _validateInputs();
+                  },
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: DropdownButtonFormField<String>(
-                    value: selectedKecamatan,
-                    hint: Text('Pilih Kecamatan'),
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        selectedKecamatan = newValue;
-                      });
-                      _validateInputs();
-                    },
-                    items: kecamatanList[selectedKabupaten!]!.map<DropdownMenuItem<String>>((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
-                      );
-                    }).toList(),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: TextField(
+                  controller: kecamatanController,
+                  decoration: InputDecoration(
+                    labelText: 'Kecamatan',
                   ),
+                  onChanged: (value) {
+                    _validateInputs();
+                  },
                 ),
-              ],
+              ),
             ],
             Padding(
               padding: const EdgeInsets.all(16.0),
@@ -402,7 +314,6 @@ Map<String, List<String>> kecamatanList = {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                
                 ElevatedButton.icon(
                   onPressed: () => _pickImage(ImageSource.camera),
                   icon: Icon(Icons.camera_alt),
@@ -431,8 +342,6 @@ Map<String, List<String>> kecamatanList = {
     );
   }
 
-  
-
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -459,14 +368,35 @@ Map<String, List<String>> kecamatanList = {
   }
 
   Future<void> _nextStep() async {
+    // Tampilkan dialog loading
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return Dialog(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(width: 20),
+                Text("Loading..."),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+
     final String namaPuskesmas = namaPuskesmasController.text;
     final String lokasi = lokasiController.text;
+    final String kelurahan = kelurahanController.text;
+    final String kecamatan = kecamatanController.text;
     final String tanggalPendirian = selectedDate != null ? DateFormat('yyyy-MM-dd').format(selectedDate!) : '';
     final String jenisLayanan = dropdownValue;
     final String provinsi = selectedProvinsi ?? '';
     final String kabupaten = selectedKabupaten ?? '';
-    final String kelurahan = selectedKelurahan ?? '';
-    final String kecamatan = selectedKecamatan ?? '';
 
     // Ensure _selectedImage is not null before accessing its path
     final String imagePath = _selectedImage != null ? _selectedImage!.path : '';
@@ -479,41 +409,45 @@ Map<String, List<String>> kecamatanList = {
       String jabatan = userData['position'];
       String notelp = userData['phone'];
 
-       // Menyimpan gambar ke penyimpanan lokal
+      // Menyimpan gambar ke penyimpanan lokal
       String namaFileFoto = '';
       if (_selectedImage != null) {
         final downloadsDir = await getExternalStorageDirectory();
+        final directoryPath = '${downloadsDir!.path}/pdfpuskesmas';
+
+        // Create the directory if it doesn't exist
+        final directory = Directory(directoryPath);
+        if (!await directory.exists()) {
+          await directory.create(recursive: true);
+        }
         if (downloadsDir != null) {
           if (!await downloadsDir.exists()) {
             await downloadsDir.create(recursive: true); // Membuat folder fotopuskesmas jika belum ada
           }
           namaFileFoto = 'foto_${namaPuskesmas.replaceAll(' ', '_').toLowerCase()}.jpg';
           String filePath = path.join(downloadsDir.path, 'fotopuskesmas', namaFileFoto);
-         try {
-  if (_selectedImage != null) {
-    final downloadsDir = await getExternalStorageDirectory();
-    if (downloadsDir != null) {
-      final fotopuskesmasDir = Directory('${downloadsDir.path}/fotopuskesmas');
-      if (!await fotopuskesmasDir.exists()) {
-        await fotopuskesmasDir.create(recursive: true);
-      }
-      String namaFileFoto = 'foto_${namaPuskesmas}.jpg';
-      String filePath = '${fotopuskesmasDir.path}/$namaFileFoto';
-      await _selectedImage!.copy(filePath);
-      print('Berhasil menyimpan foto ke: $filePath');
-    } else {
-      print('Gagal mendapatkan direktori eksternal');
-    }
-  }
-} catch (e) {
-  print('Gagal menyimpan foto: $e');
-}
+          try {
+            if (_selectedImage != null) {
+              if (downloadsDir != null) {
+                final fotopuskesmasDir = Directory('${downloadsDir.path}/fotopuskesmas');
+                if (!await fotopuskesmasDir.exists()) {
+                  await fotopuskesmasDir.create(recursive: true);
+                }
+                String namaFileFoto = 'foto_${namaPuskesmas}.jpg';
+                String filePath = '${fotopuskesmasDir.path}/$namaFileFoto';
+                await _selectedImage!.copy(filePath);
+                print('Berhasil menyimpan foto ke: $filePath');
+              } else {
+                print('Gagal mendapatkan direktori eksternal');
+              }
+            }
+          } catch (e) {
+            print('Gagal menyimpan foto: $e');
+          }
         } else {
           print("Error: Tidak dapat mengakses direktori penyimpanan.");
         }
       }
-
-
 
       final int result = await DatabaseHelper.instance.insertPuskesmas({
         'user_id': widget.userId,
@@ -534,15 +468,18 @@ Map<String, List<String>> kecamatanList = {
       // Mengosongkan input setelah data disimpan
       namaPuskesmasController.clear();
       lokasiController.clear();
+      kelurahanController.clear();
+      kecamatanController.clear();
       setState(() {
         selectedDate = null;
         selectedProvinsi = 'Jambi'; // Reset to default Jambi province
         selectedKabupaten = null;
-        selectedKelurahan = null;
-        selectedKecamatan = null;
         _selectedImage = null;
         _validateInputs();
       });
+
+      // Tutup dialog loading
+      Navigator.pop(context);
 
       if (result > 0) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Data berhasil disimpan')));

@@ -177,62 +177,78 @@ Future<void> _fetchAllKegiatan() async {
     try {
       final sendReport = await send(message, smtpServer);
       print('Email sent: ${sendReport.toString()}');
+      Fluttertoast.showToast(msg: 'Email successfully sent');
     } catch (e) {
       print('Error while sending email: $e');
-      Fluttertoast.showToast(msg: 'Failed to send email. Please try again later.');
+      Fluttertoast.showToast(msg: 'Failed to send email. Error: $e');
     }
   }
 
  Future<void> _savePdf() async {
-    if (logoData == null) {
-      print('Logo not loaded');
-      return;
-    }
-
-    final pdf = pw.Document();
-
-    pdf.addPage(
-      pw.MultiPage(
-        build: (context) => [
-          _buildHeader(),
-          pw.SizedBox(height: 20),
-          _buildSummary(),
-          pw.SizedBox(height: 20),
-          _buildDetailedTable(),
-          pw.SizedBox(height: 20),
-          _buildAdditionalInfo(),
-        ],
-      ),
-    );
-
-    try {
-      final downloadsDir = await getExternalStorageDirectory();
-      String fileName = 'Bangunan_${widget.puskesmas}.pdf';
-
-      if (widget.kegiatanId != null) {
-        // Ganti dengan logika Anda untuk menyesuaikan nama file jika diperlukan
-        fileName = 'Bangunan_${widget.puskesmas}_${widget.kegiatanId}.pdf';
-      }
-
-      final pdfPath = '${downloadsDir!.path}/fotopuskesmas/$fileName';
-      final pdfFile = File(pdfPath);
- await pdfFile.writeAsBytes(await pdf.save());
-      print('PDF saved to $pdfPath');
-
-      Fluttertoast.showToast(msg: 'PDF saved to $pdfPath');
-
-      _openPdf(pdfPath);
-
-      if (isConnected && emailPenerima != null) {
-        await _sendEmail(pdfPath, emailPenerima!);
-        Fluttertoast.showToast(msg: 'Email successfully sent');
-      } else {
-        print('Device is offline or email recipient not found. Email will be sent when online.');
-      }
-    } catch (e) {
-      print('Error while saving PDF: $e');
-    }
+  if (logoData == null) {
+    print('Logo not loaded');
+    return;
   }
+
+  final pdf = pw.Document();
+
+  pdf.addPage(
+    pw.MultiPage(
+      build: (context) => [
+        _buildHeader(),
+        pw.SizedBox(height: 20),
+        _buildSummary(),
+        pw.SizedBox(height: 20),
+        _buildDetailedTable(),
+        pw.SizedBox(height: 20),
+        _buildAdditionalInfo(),
+      ],
+    ),
+  );
+
+  try {
+    final downloadsDir = await getExternalStorageDirectory();
+    final directoryPath = '${downloadsDir!.path}/pdfpuskesmas';
+
+    // Create the directory if it doesn't exist
+    final directory = Directory(directoryPath);
+    if (!await directory.exists()) {
+      await directory.create(recursive: true);
+    }
+
+    String fileName = 'Bangunan_${widget.puskesmas}.pdf';
+
+    if (widget.kegiatanId != null) {
+      fileName = 'Bangunan_${widget.puskesmas}_${widget.kegiatanId}.pdf';
+    }
+
+    final pdfPath = '$directoryPath/$fileName';
+    final pdfFile = File(pdfPath);
+
+    // Delete the file if it already exists
+    if (await pdfFile.exists()) {
+      await pdfFile.delete();
+    }
+
+    await pdfFile.writeAsBytes(await pdf.save());
+    print('PDF saved to $pdfPath');
+
+    Fluttertoast.showToast(msg: 'PDF saved to $pdfPath');
+
+    _openPdf(pdfPath);
+
+    if (isConnected && emailPenerima != null) {
+      await _sendEmail(pdfPath, emailPenerima!);
+      Fluttertoast.showToast(msg: 'Email successfully sent');
+    } else {
+      print('Device is offline or email recipient not found. Email will be sent when online.');
+    }
+  } catch (e) {
+    print('Error while saving PDF: $e');
+    Fluttertoast.showToast(msg: 'Failed to save PDF. Please try again.');
+  }
+}
+
 
   pw.Widget _buildHeader() {
   if (penggunaList.isEmpty) {

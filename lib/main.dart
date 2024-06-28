@@ -28,12 +28,24 @@ import 'penilaian_sdm_screen.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'fade_animation.dart'; // Import FadeAnimation
+import 'package:permission_handler/permission_handler.dart'; // Import permission_handler
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   tz.initializeTimeZones();
 
+  await _requestPermissions(); // Request permissions
+
   runApp(MyApp());
+}
+
+Future<void> _requestPermissions() async {
+  await [
+    Permission.storage,
+    Permission.camera,
+    Permission.microphone,
+    Permission.location,
+  ].request();
 }
 
 class MyApp extends StatelessWidget {

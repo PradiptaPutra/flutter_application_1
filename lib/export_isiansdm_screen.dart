@@ -176,9 +176,10 @@ Future<void> _initializeBackgroundImage() async {
     try {
       final sendReport = await send(message, smtpServer);
       print('Email sent: ${sendReport.toString()}');
+      Fluttertoast.showToast(msg: 'Email successfully sent');
     } catch (e) {
       print('Error while sending email: $e');
-      Fluttertoast.showToast(msg: 'Failed to send email. Please try again later.');
+      Fluttertoast.showToast(msg: 'Failed to send email. Error: $e');
     }
   }
 
@@ -209,6 +210,13 @@ Future<void> _initializeBackgroundImage() async {
       
 
       final downloadsDir = await getExternalStorageDirectory();
+      final directoryPath = '${downloadsDir!.path}/pdfpuskesmas';
+
+      // Create the directory if it doesn't exist
+      final directory = Directory(directoryPath);
+      if (!await directory.exists()) {
+        await directory.create(recursive: true);
+      }
       String fileName = 'IsianSDM_${widget.puskesmas}.pdf';
 
      if (widget.kegiatanId != null) {
@@ -219,7 +227,7 @@ Future<void> _initializeBackgroundImage() async {
         }
       }
 
-       final pdfPath = '${downloadsDir!.path}/fotopuskesmas/$fileName';
+       final pdfPath = '${downloadsDir!.path}/pdfpuskesmas/$fileName';
       final pdfFile = File(pdfPath);
 
       await pdfFile.writeAsBytes(await pdf.save());
