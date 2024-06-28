@@ -7,7 +7,7 @@ class LogregScreen extends StatelessWidget {
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Colors.white, Colors.grey.shade200], // Warna latar belakang yang lebih lembut
+            colors: [Colors.white, const Color.fromARGB(255, 255, 255, 255)], // Warna latar belakang yang lebih lembut
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -21,7 +21,7 @@ class LogregScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
                   Image.asset(
-                    'assets/images/logokemenkes.png',
+                    'assets/images/logoanapanca.png',
                     width: 250, // lebar gambar
                     height: 250, // tinggi gambar
                     fit: BoxFit.contain, // memastikan keseluruhan gambar terlihat

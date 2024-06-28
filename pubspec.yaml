@@ -53,6 +53,7 @@ dependencies:
   camera: ^0.9.4+11  # Versi bisa disesuaikan dengan versi terbaru yang tersedia
   timezone: ^0.9.3
   flutter_timezone: ^1.0.0
+  
 
   
 
@@ -64,6 +65,12 @@ dev_dependencies:
   flutter_bloc: any 
   shared_preferences: ^2.0.6
   flutter_blurhash: ^0.6.0
+  flutter_launcher_icons: ^0.9.2
+
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/logoanapanca.png"
   
 
   # The "flutter_lints" package below contains a set of recommended lints to
@@ -99,12 +106,12 @@ flutter:
     - assets/form_penilaian_kehadiransdm.xlsx
     - assets/form_penilaian_program.xlsx
     - assets/images/bgsplash.png
-    - assets/images/logokemenkes.png
     - assets/images/logopuskesmas.png
     - assets/images/logors.jpg
     - assets/images/logodinkes.jpg
     - assets/images/puskesmasheader.jpeg
     - assets/images/profile_placeholder.png
+    - assets/images/logoanapanca.png
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
