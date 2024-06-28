@@ -45,6 +45,7 @@ Future<void> _requestPermissions() async {
     Permission.camera,
     Permission.microphone,
     Permission.location,
+    Permission.notification,
   ].request();
 }
 
