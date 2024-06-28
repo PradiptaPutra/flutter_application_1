@@ -180,7 +180,7 @@ Future<void> _fetchAllKegiatan() async {
     final smtpServer = gmail('mtsalikhlasberbahh@gmail.com', 'oxtm hpkh ciiq ppan');
 
     final message = Message()
-      ..from = Address('jitupasna@gmail.com', 'JITUPASNA admin ')
+      ..from = Address('anapanca@gmail.com', 'ANAPANCA admin ')
       ..recipients.add(recipient)
       ..subject = 'Lampiran PDF'
       ..text = 'Silakan temukan lampiran PDF.'
