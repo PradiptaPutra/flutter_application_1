@@ -413,7 +413,7 @@ class _PuskesmasScreenState extends State<PuskesmasScreen> {
       String namaFileFoto = '';
       if (_selectedImage != null) {
         final downloadsDir = await getExternalStorageDirectory();
-        final directoryPath = '${downloadsDir!.path}/pdfpuskesmas';
+        final directoryPath = '${downloadsDir!.path}/fotopuskesmas';
 
         // Create the directory if it doesn't exist
         final directory = Directory(directoryPath);
