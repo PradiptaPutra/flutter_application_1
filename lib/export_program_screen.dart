@@ -63,6 +63,10 @@ class _ExportProgramScreenState extends State<ExportProgramScreen> {
 List<Map<String, dynamic>> penggunaList = [];
    List<Map<String, dynamic>> kegiatanList = [];
    String lokasiKegiatan = '';
+       bool _isEmailFieldVisible = false;
+  TextEditingController _emailController = TextEditingController();
+  bool _isLoading = false;
+  String _statusMessage = '';
 
   @override
   void initState() {
@@ -176,7 +180,12 @@ Future<void> _fetchAllKegiatan() async {
     }
   }
 
-  Future<void> _sendEmail(String pdfPath, String recipient) async {
+ Future<void> _sendEmail(String pdfPath, String recipient) async {
+    setState(() {
+      _isLoading = true;
+      _statusMessage = 'Sending email...';
+    });
+
     final smtpServer = gmail('mtsalikhlasberbahh@gmail.com', 'oxtm hpkh ciiq ppan');
 
     final message = Message()
@@ -189,75 +198,100 @@ Future<void> _fetchAllKegiatan() async {
     try {
       final sendReport = await send(message, smtpServer);
       print('Email sent: ${sendReport.toString()}');
+      setState(() {
+        _statusMessage = 'Email successfully sent';
+      });
       Fluttertoast.showToast(msg: 'Email successfully sent');
     } catch (e) {
       print('Error while sending email: $e');
+      setState(() {
+        _statusMessage = 'Failed to send email. Error: $e';
+      });
       Fluttertoast.showToast(msg: 'Failed to send email. Error: $e');
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
 
-  Future<void> _savePdf() async {
-    if (logoData == null) {
-      print('Logo not loaded');
-      return;
-    }
+  Future<String> _generatePdf() async {
+  if (logoData == null) {
+    print('Logo not loaded');
+    return '';
+  }
 
-    final pdf = pw.Document();
+  final pdf = pw.Document();
 
-    pdf.addPage(
-      pw.MultiPage(
-        build: (context) => [
-          _buildHeader(),
-          pw.SizedBox(height: 20),
-          _buildSummary(),
-          pw.SizedBox(height: 20),
-          _buildDetailedTable(),
-          pw.SizedBox(height: 20),
-          _buildAdditionalInfo(),
-        ],
-      ),
-    );
+  pdf.addPage(
+    pw.MultiPage(
+      build: (context) => [
+        _buildHeader(),
+        pw.SizedBox(height: 20),
+        _buildSummary(),
+        pw.SizedBox(height: 20),
+        _buildDetailedTable(),
+        pw.SizedBox(height: 20),
+        _buildAdditionalInfo(),
+      ],
+    ),
+  );
 
-    try {
-      
+  try {
+    // Request storage permissions
+    if (await Permission.storage.request().isGranted) {
+      final directoryPath = '/storage/emulated/0/Download';
 
-      final downloadsDir = await getExternalStorageDirectory();
-      final directoryPath = '${downloadsDir!.path}/pdfpuskesmas';
-
-      // Create the directory if it doesn't exist
       final directory = Directory(directoryPath);
       if (!await directory.exists()) {
         await directory.create(recursive: true);
       }
-      String fileName = 'Program_${widget.puskesmas}_${DateTime.now().millisecondsSinceEpoch}.pdf';
 
-       final pdfPath = '$directoryPath/$fileName';
-    final pdfFile = File(pdfPath);
+      String fileName = 'KehadiranSDM_${widget.puskesmas}_${DateTime.now().millisecondsSinceEpoch}.pdf';
 
-       // Check if the file exists, and delete if it does
-        if (await pdfFile.exists()) {
-            await pdfFile.delete();
-            print('Old PDF file deleted.');
-        }
+      final pdfPath = '$directoryPath/$fileName';
+      final pdfFile = File(pdfPath);
+
+      if (await pdfFile.exists()) {
+        await pdfFile.delete();
+        print('Old PDF file deleted.');
+      }
 
       await pdfFile.writeAsBytes(await pdf.save());
       print('PDF saved to $pdfPath');
 
+      return pdfPath;
+    } else {
+      print('Permission denied');
+      Fluttertoast.showToast(msg: 'Permission denied to access storage.');
+      return '';
+    }
+  } catch (e) {
+    print('Error while generating PDF: $e');
+    Fluttertoast.showToast(msg: 'Failed to generate PDF. Please try again.');
+    return '';
+  }
+}
+
+  Future<void> _savePdf() async {
+    final pdfPath = await _generatePdf();
+    if (pdfPath.isNotEmpty) {
       Fluttertoast.showToast(msg: 'PDF saved to $pdfPath');
-
       await Future.delayed(Duration(seconds: 2));
-_openPdf(pdfPath);
-      if (isConnected && emailPenerima != null) {
-        await _sendEmail(pdfPath, emailPenerima!);
-        Fluttertoast.showToast(msg: 'Email successfully sent');
-      } else {
-        print('Device is offline or email recipient not found. Email will be sent when online.');
-      }
+      _openPdf(pdfPath);
+    }
+  }
 
-      
-    } catch (e) {
-      print('Error while saving PDF: $e');
+  Future<void> _sendPdfByEmail() async {
+    if (_emailController.text.isEmpty) {
+      Fluttertoast.showToast(msg: 'Please enter a recipient email address');
+      return;
+    }
+
+    final pdfPath = await _generatePdf();
+    if (pdfPath.isNotEmpty) {
+      await _sendEmail(pdfPath, _emailController.text);
     }
   }
 
@@ -505,6 +539,41 @@ _openPdf(pdfPath);
               onPressed: _savePdf,
               child: Text('Save PDF'),
             ),
+          ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  _isEmailFieldVisible = !_isEmailFieldVisible;
+                });
+              },
+              child: Text('Send to Email'),
+            ),
+            if (_isEmailFieldVisible)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: TextFormField(
+                  controller: _emailController,
+                  decoration: InputDecoration(
+                    labelText: 'Enter recipient email',
+                    border: OutlineInputBorder(),
+                  ),
+                  keyboardType: TextInputType.emailAddress,
+                ),
+              ),
+            if (_isEmailFieldVisible)
+              ElevatedButton(
+                onPressed: _sendPdfByEmail,
+                child: Text('Send'),
+              ),
+            if (_isLoading)
+              CircularProgressIndicator(),
+            if (_statusMessage.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: Text(
+                  _statusMessage,
+                  style: TextStyle(color: _statusMessage.contains('Failed') ? Colors.red : Colors.green),
+                ),
+              ),
           ],
         ),
       ),
