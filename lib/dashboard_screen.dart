@@ -45,6 +45,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     setState(() {
       _selectedIndex = index;
     });
+    _loadUserData();
   }
 
   @override
@@ -180,6 +181,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       onTap: () {
         _onItemTapped(index);
       },
+      
       child: Column(
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,

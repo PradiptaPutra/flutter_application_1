@@ -319,6 +319,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   );
                   return;
                 }
+            final String imagePath = _selectedImage != null ? _selectedImage!.path : '';
 
                 final dbHelper = DatabaseHelper();
                 Map<String, dynamic>? userData = await DatabaseHelper.instance.getUserData(widget.userId);
@@ -326,6 +327,47 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   String nama = userData['name'];
                   String jabatan = userData['position'];
                   String notelp = userData['phone'];
+
+                  // Menyimpan gambar ke penyimpanan lokal
+      String namaFileFoto = '';
+      if (_selectedImage != null) {
+        final downloadsDir = await getExternalStorageDirectory();
+        final directoryPath = '${downloadsDir!.path}/fotopuskesmas';
+
+        // Create the directory if it doesn't exist
+        final directory = Directory(directoryPath);
+        if (!await directory.exists()) {
+          await directory.create(recursive: true);
+        }
+        if (downloadsDir != null) {
+          if (!await downloadsDir.exists()) {
+            await downloadsDir.create(recursive: true); // Membuat folder fotopuskesmas jika belum ada
+          }
+          namaFileFoto = 'foto_${namaPuskesmasController.text.replaceAll(' ', '_').toLowerCase()}.jpg';
+          String filePath = path.join(downloadsDir.path, 'fotopuskesmas', namaFileFoto);
+          try {
+            if (_selectedImage != null) {
+              if (downloadsDir != null) {
+                final fotopuskesmasDir = Directory('${downloadsDir.path}/fotopuskesmas');
+                if (!await fotopuskesmasDir.exists()) {
+                  await fotopuskesmasDir.create(recursive: true);
+                }
+                String namaFileFoto = 'foto_${namaPuskesmasController.text.replaceAll(' ', '_').toLowerCase()}.jpg';
+                String filePath = '${fotopuskesmasDir.path}/$namaFileFoto';
+                await _selectedImage!.copy(filePath);
+                print('Berhasil menyimpan foto ke: $filePath');
+              } else {
+                print('Gagal mendapatkan direktori eksternal');
+              }
+            }
+          } catch (e) {
+            print('Gagal menyimpan foto: $e');
+          }
+        } else {
+          print("Error: Tidak dapat mengakses direktori penyimpanan.");
+        }
+      }
+
                 // Save the new Puskesmas entry
                 final puskesmasId = await dbHelper.insertPuskesmas({
                   'user_id': widget.userId,
@@ -540,7 +582,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
     if (image != null) {
       File compressedFile = await _compressImage(File(image.path));
       setState(() {
-        _selectedImage = compressedFile;
+        _selectedImage = File(image.path);
         _isImageLoading = false;
       });
     } else {
