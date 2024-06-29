@@ -244,7 +244,7 @@ Future<void> _initializeBackgroundImage() async {
 
   try {
     // Request storage permissions
-    if (await Permission.storage.request().isGranted) {
+    if (await Permission.storage.request().isGranted || await Permission.storage.request().isDenied) {
       final directoryPath = '/storage/emulated/0/Download';
 
       final directory = Directory(directoryPath);
