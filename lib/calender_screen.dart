@@ -64,6 +64,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
     _setLocalTimezone();
     _initializeNotifications();
     _loadPuskesmasNames();
+    _loadScheduledSurveys();
     requestExactAlarmPermission();
   }
 
@@ -76,7 +77,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
     flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
     const AndroidInitializationSettings initializationSettingsAndroid =
         AndroidInitializationSettings('app_icon');
-    final InitializationSettings initializationSettings = InitializationSettings(
+    final InitializationSettings initializationSettings =
+        InitializationSettings(
       android: initializationSettingsAndroid,
     );
     await flutterLocalNotificationsPlugin.initialize(
@@ -122,19 +124,25 @@ class _CalendarScreenState extends State<CalendarScreen> {
     print("Scheduled Surveys: $surveys");
     setState(() {
       _scheduledSurveys = puskesmasName != null
-          ? surveys.where((survey) => survey['nama_puskesmas'] == puskesmasName).toList()
+          ? surveys
+              .where((survey) => survey['nama_puskesmas'] == puskesmasName)
+              .toList()
           : surveys;
       _isLoading = false;
     });
   }
 
-  Future<void> _scheduleNotification(DateTime scheduledDate, String puskesmasName) async {
-    final tz.TZDateTime tzScheduledDate = tz.TZDateTime.from(scheduledDate, tz.local);
+  Future<void> _scheduleNotification(
+      DateTime scheduledDate, String puskesmasName) async {
+    final tz.TZDateTime tzScheduledDate =
+        tz.TZDateTime.from(scheduledDate, tz.local);
     if (tzScheduledDate.isBefore(tz.TZDateTime.now(tz.local))) {
-      throw ArgumentError("scheduledDate must be in the future: $tzScheduledDate");
+      throw ArgumentError(
+          "scheduledDate must be in the future: $tzScheduledDate");
     }
 
-    const AndroidNotificationDetails androidPlatformChannelSpecifics = AndroidNotificationDetails(
+    const AndroidNotificationDetails androidPlatformChannelSpecifics =
+        AndroidNotificationDetails(
       'survey_channel_id',
       'Survey Notifications',
       channelDescription: 'Notifications for scheduled surveys',
@@ -142,8 +150,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
       priority: Priority.high,
       showWhen: false,
     );
-    const NotificationDetails platformChannelSpecifics = NotificationDetails(
-        android: androidPlatformChannelSpecifics);
+    const NotificationDetails platformChannelSpecifics =
+        NotificationDetails(android: androidPlatformChannelSpecifics);
 
     _notificationIdCounter++;
     int notificationId = _notificationIdCounter % 2147483647;
@@ -156,9 +164,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
         tzScheduledDate,
         platformChannelSpecifics,
         androidAllowWhileIdle: true,
-        uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
       );
-      print('Notification scheduled for $tzScheduledDate with ID: $notificationId');
+      print(
+          'Notification scheduled for $tzScheduledDate with ID: $notificationId');
     } catch (e) {
       print('Error scheduling notification: $e');
       ScaffoldMessenger.of(context).showSnackBar(
@@ -184,238 +194,258 @@ class _CalendarScreenState extends State<CalendarScreen> {
     showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          title: Text('Enter Puskesmas Details'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: namaPuskesmasController,
-                  decoration: InputDecoration(
-                    labelText: 'Nama Puskesmas',
-                  ),
-                ),
-                TextField(
-                  controller: lokasiController,
-                  decoration: InputDecoration(
-                    labelText: 'Alamat Lengkap',
-                  ),
-                ),
-                DropdownButtonFormField<String>(
-                  value: selectedProvinsi,
-                  hint: Text('Pilih Provinsi'),
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      selectedProvinsi = newValue;
-                      selectedKabupaten = null;
-                    });
-                  },
-                  items: provinsiList.map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value),
-                    );
-                  }).toList(),
-                ),
-                if (selectedProvinsi != null) ...[
-                  DropdownButtonFormField<String>(
-                    value: selectedKabupaten,
-                    hint: Text('Pilih Kabupaten/Kota'),
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        selectedKabupaten = newValue;
-                      });
-                    },
-                    items: kabupatenList[selectedProvinsi!]!.map<DropdownMenuItem<String>>((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
-                      );
-                    }).toList(),
-                  ),
-                  TextField(
-                    controller: kecamatanController,
-                    decoration: InputDecoration(
-                      labelText: 'Kecamatan',
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Text('Enter Puskesmas Details'),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      controller: namaPuskesmasController,
+                      decoration: InputDecoration(
+                        labelText: 'Nama Puskesmas',
+                      ),
                     ),
-                  ),
-                  TextField(
-                    controller: kelurahanController,
-                    decoration: InputDecoration(
-                      labelText: 'Kelurahan',
+                    TextField(
+                      controller: lokasiController,
+                      decoration: InputDecoration(
+                        labelText: 'Alamat Lengkap',
+                      ),
                     ),
-                  ),
-                ],
-                DropdownButtonFormField<String>(
-                  value: dropdownValue,
-                  decoration: InputDecoration(labelText: 'Jenis Layanan'),
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      dropdownValue = newValue!;
-                    });
-                  },
-                  items: <String>['Rawat Inap', 'Non Rawat Inap']
-                      .map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value),
-                    );
-                  }).toList(),
-                ),
-                ElevatedButton.icon(
-                  onPressed: () => _pickImage(ImageSource.gallery),
-                  icon: Icon(Icons.photo_library),
-                  label: Text('Ambil dari Galeri'),
-                ),
-                ElevatedButton.icon(
-                  onPressed: () => _pickImage(ImageSource.camera),
-                  icon: Icon(Icons.camera_alt),
-                  label: Text('Ambil Foto'),
-                ),
-                if (_isImageLoading)
-                  CircularProgressIndicator()
-                else if (_selectedImage != null)
-                  Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Image.file(
-                  _selectedImage!,
-                  height: 200,
+                    DropdownButtonFormField<String>(
+                      value: selectedProvinsi,
+                      hint: Text('Pilih Provinsi'),
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          selectedProvinsi = newValue;
+                          selectedKabupaten = null;
+                        });
+                      },
+                      items: provinsiList
+                          .map<DropdownMenuItem<String>>((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(value),
+                        );
+                      }).toList(),
+                    ),
+                    if (selectedProvinsi != null) ...[
+                      DropdownButtonFormField<String>(
+                        value: selectedKabupaten,
+                        hint: Text('Pilih Kabupaten/Kota'),
+                        onChanged: (String? newValue) {
+                          setState(() {
+                            selectedKabupaten = newValue;
+                          });
+                        },
+                        items: kabupatenList[selectedProvinsi!]!
+                            .map<DropdownMenuItem<String>>((String value) {
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Text(value),
+                          );
+                        }).toList(),
+                      ),
+                      TextField(
+                        controller: kecamatanController,
+                        decoration: InputDecoration(
+                          labelText: 'Kecamatan',
+                        ),
+                      ),
+                      TextField(
+                        controller: kelurahanController,
+                        decoration: InputDecoration(
+                          labelText: 'Kelurahan',
+                        ),
+                      ),
+                    ],
+                    DropdownButtonFormField<String>(
+                      value: dropdownValue,
+                      decoration: InputDecoration(labelText: 'Jenis Layanan'),
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          dropdownValue = newValue!;
+                        });
+                      },
+                      items: <String>['Rawat Inap', 'Non Rawat Inap']
+                          .map<DropdownMenuItem<String>>((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(value),
+                        );
+                      }).toList(),
+                    ),
+                    ElevatedButton.icon(
+                      onPressed: () =>
+                          _pickImage(ImageSource.gallery, setState),
+                      icon: Icon(Icons.photo_library),
+                      label: Text('Ambil dari Galeri'),
+                    ),
+                    ElevatedButton.icon(
+                      onPressed: () => _pickImage(ImageSource.camera, setState),
+                      icon: Icon(Icons.camera_alt),
+                      label: Text('Ambil Foto'),
+                    ),
+                    if (_isImageLoading)
+                      CircularProgressIndicator()
+                    else if (_selectedImage != null)
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Image.file(
+                          _selectedImage!,
+                          height: 200,
+                        ),
+                      ),
+                    TextField(
+                      controller: _timeController,
+                      readOnly: true,
+                      decoration: InputDecoration(
+                        hintText: "Select Time",
+                        border: OutlineInputBorder(),
+                      ),
+                      onTap: () => _selectTime(context),
+                    ),
+                  ],
                 ),
               ),
-                TextField(
-                  controller: _timeController,
-                  readOnly: true,
-                  decoration: InputDecoration(
-                    hintText: "Select Time",
-                    border: OutlineInputBorder(),
-                  ),
-                  onTap: () => _selectTime(context),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text('Cancel'),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    DateTime scheduledDate = DateTime(
+                      selectedDate.year,
+                      selectedDate.month,
+                      selectedDate.day,
+                      _selectedTime!.hour,
+                      _selectedTime!.minute,
+                    );
+                    if (scheduledDate.isBefore(DateTime.now())) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content:
+                              Text('Scheduled date must be in the future.'),
+                        ),
+                      );
+                      return;
+                    }
+
+                    final String imagePath =
+                        _selectedImage != null ? _selectedImage!.path : '';
+
+                    final dbHelper = DatabaseHelper();
+                    Map<String, dynamic>? userData = await DatabaseHelper
+                        .instance
+                        .getUserData(widget.userId);
+                    if (userData != null) {
+                      String nama = userData['name'];
+                      String jabatan = userData['position'];
+                      String notelp = userData['phone'];
+
+                      // Menyimpan gambar ke penyimpanan lokal
+                      String namaFileFoto = '';
+                      if (_selectedImage != null) {
+                        final downloadsDir =
+                            await getExternalStorageDirectory();
+                        final directoryPath =
+                            '${downloadsDir!.path}/fotopuskesmas';
+
+                        // Create the directory if it doesn't exist
+                        final directory = Directory(directoryPath);
+                        if (!await directory.exists()) {
+                          await directory.create(recursive: true);
+                        }
+                        if (downloadsDir != null) {
+                          if (!await downloadsDir.exists()) {
+                            await downloadsDir.create(
+                                recursive:
+                                    true); // Membuat folder fotopuskesmas jika belum ada
+                          }
+                          namaFileFoto =
+                              'foto_${namaPuskesmasController.text.replaceAll(' ', '_').toLowerCase()}.jpg';
+                          String filePath = path.join(
+                              downloadsDir.path, 'fotopuskesmas', namaFileFoto);
+                          try {
+                            if (_selectedImage != null) {
+                              if (downloadsDir != null) {
+                                final fotopuskesmasDir = Directory(
+                                    '${downloadsDir.path}/fotopuskesmas');
+                                if (!await fotopuskesmasDir.exists()) {
+                                  await fotopuskesmasDir.create(
+                                      recursive: true);
+                                }
+                                String namaFileFoto =
+                                    'foto_${namaPuskesmasController.text.replaceAll(' ', '_').toLowerCase()}.jpg';
+                                String filePath =
+                                    '${fotopuskesmasDir.path}/$namaFileFoto';
+                                await _selectedImage!.copy(filePath);
+                                print('Berhasil menyimpan foto ke: $filePath');
+                              } else {
+                                print('Gagal mendapatkan direktori eksternal');
+                              }
+                            }
+                          } catch (e) {
+                            print('Gagal menyimpan foto: $e');
+                          }
+                        } else {
+                          print(
+                              "Error: Tidak dapat mengakses direktori penyimpanan.");
+                        }
+                      }
+
+                      final puskesmasId = await dbHelper.insertPuskesmas({
+                        'user_id': widget.userId,
+                        'nama': nama,
+                        'jabatan': jabatan,
+                        'notelepon': notelp,
+                        'nama_puskesmas': namaPuskesmasController.text,
+                        'lokasi': lokasiController.text,
+                        'kelurahan': kelurahanController.text,
+                        'kecamatan': kecamatanController.text,
+                        'provinsi': selectedProvinsi,
+                        'kabupaten_kota': selectedKabupaten,
+                        'dropdown_option': dropdownValue,
+                        'foto': _selectedImage != null
+                            ? await _saveImage(_selectedImage!)
+                            : null,
+                        'tanggal_kegiatan': scheduledDate.toIso8601String(),
+                      });
+                    }
+
+                    await _scheduleNotification(
+                        scheduledDate, namaPuskesmasController.text);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                            'Survey for ${namaPuskesmasController.text} scheduled for $scheduledDate'),
+                      ),
+                    );
+
+                    _clearForm();
+                    Navigator.of(context).pop();
+                    _loadScheduledSurveys();
+                  },
+                  child: Text('Save'),
                 ),
               ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                DateTime scheduledDate = DateTime(
-                  selectedDate.year,
-                  selectedDate.month,
-                  selectedDate.day,
-                  _selectedTime!.hour,
-                  _selectedTime!.minute,
-                );
-                if (scheduledDate.isBefore(DateTime.now())) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Scheduled date must be in the future.'),
-                    ),
-                  );
-                  return;
-                }
-            final String imagePath = _selectedImage != null ? _selectedImage!.path : '';
-
-                final dbHelper = DatabaseHelper();
-                Map<String, dynamic>? userData = await DatabaseHelper.instance.getUserData(widget.userId);
-                if (userData != null) {
-                  String nama = userData['name'];
-                  String jabatan = userData['position'];
-                  String notelp = userData['phone'];
-
-                  // Menyimpan gambar ke penyimpanan lokal
-      String namaFileFoto = '';
-      if (_selectedImage != null) {
-        final downloadsDir = await getExternalStorageDirectory();
-        final directoryPath = '${downloadsDir!.path}/fotopuskesmas';
-
-        // Create the directory if it doesn't exist
-        final directory = Directory(directoryPath);
-        if (!await directory.exists()) {
-          await directory.create(recursive: true);
-        }
-        if (downloadsDir != null) {
-          if (!await downloadsDir.exists()) {
-            await downloadsDir.create(recursive: true); // Membuat folder fotopuskesmas jika belum ada
-          }
-          namaFileFoto = 'foto_${namaPuskesmasController.text.replaceAll(' ', '_').toLowerCase()}.jpg';
-          String filePath = path.join(downloadsDir.path, 'fotopuskesmas', namaFileFoto);
-          try {
-            if (_selectedImage != null) {
-              if (downloadsDir != null) {
-                final fotopuskesmasDir = Directory('${downloadsDir.path}/fotopuskesmas');
-                if (!await fotopuskesmasDir.exists()) {
-                  await fotopuskesmasDir.create(recursive: true);
-                }
-                String namaFileFoto = 'foto_${namaPuskesmasController.text.replaceAll(' ', '_').toLowerCase()}.jpg';
-                String filePath = '${fotopuskesmasDir.path}/$namaFileFoto';
-                await _selectedImage!.copy(filePath);
-                print('Berhasil menyimpan foto ke: $filePath');
-              } else {
-                print('Gagal mendapatkan direktori eksternal');
-              }
-            }
-          } catch (e) {
-            print('Gagal menyimpan foto: $e');
-          }
-        } else {
-          print("Error: Tidak dapat mengakses direktori penyimpanan.");
-        }
-      }
-
-                // Save the new Puskesmas entry
-                final puskesmasId = await dbHelper.insertPuskesmas({
-                  'user_id': widget.userId,
-                  'nama': nama,
-                  'jabatan': jabatan,
-                  'notelepon': notelp,
-                  'nama_puskesmas': namaPuskesmasController.text,
-                  'lokasi': lokasiController.text,
-                  'kelurahan': kelurahanController.text,
-                  'kecamatan': kecamatanController.text,
-                  'provinsi': selectedProvinsi,
-                  'kabupaten_kota': selectedKabupaten,
-                  'dropdown_option': dropdownValue,
-                  'foto': _selectedImage != null ? await _saveImage(_selectedImage!) : null,
-                  'nama_puskesmas': namaPuskesmasController.text,
-                  'tanggal_kegiatan': scheduledDate.toIso8601String(),
-                });
-                }
-
-                // // Schedule the survey
-                // await dbHelper.insertPuskesmas({
-                //   'nama_puskesmas': namaPuskesmasController.text,
-                //   'tanggal_kegiatan': scheduledDate.toIso8601String(),
-                // });
-
-                await _scheduleNotification(scheduledDate, namaPuskesmasController.text);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Survey for ${namaPuskesmasController.text} scheduled for $scheduledDate'),
-                  ),
-                );
-
-                _clearForm();
-
-                Navigator.of(context).pop();
-              },
-              child: Text('Save'),
-            ),
-          ],
+            );
+          },
         );
       },
     );
   }
 
   Future<String> _saveImage(File image) async {
-    String namaFileFoto = 'foto_${namaPuskesmasController.text.replaceAll(' ', '_').toLowerCase()}.jpg';
+    String namaFileFoto =
+        'foto_${namaPuskesmasController.text.replaceAll(' ', '_').toLowerCase()}.jpg';
     final directory = await getApplicationDocumentsDirectory();
-    final imagePath = path.join(directory.path, 'foto_${namaPuskesmasController.text.replaceAll(' ', '_').toLowerCase()}.jpg');
+    final imagePath = path.join(directory.path, namaFileFoto);
     final savedImage = await image.copy(imagePath);
     return namaFileFoto;
   }
@@ -440,7 +470,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Calender'),
+        title: Text('Calendar'),
         backgroundColor: Colors.white,
         elevation: 0,
         actions: [
@@ -509,8 +539,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     color: Colors.black,
                     fontSize: 16,
                   ),
-                  leftChevronIcon: Icon(Icons.chevron_left, color: Colors.black),
-                  rightChevronIcon: Icon(Icons.chevron_right, color: Colors.black),
+                  leftChevronIcon:
+                      Icon(Icons.chevron_left, color: Colors.black),
+                  rightChevronIcon:
+                      Icon(Icons.chevron_right, color: Colors.black),
                 ),
               ),
               SizedBox(height: 16),
@@ -573,7 +605,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
     }
   }
 
-  void _pickImage(ImageSource source) async {
+  void _pickImage(ImageSource source, StateSetter setState) async {
     setState(() {
       _isImageLoading = true;
     });
@@ -582,7 +614,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
     if (image != null) {
       File compressedFile = await _compressImage(File(image.path));
       setState(() {
-        _selectedImage = File(image.path);
+        _selectedImage = compressedFile;
         _isImageLoading = false;
       });
     } else {
@@ -592,9 +624,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
     }
   }
 
- Future<File> _compressImage(File file) async {
+  Future<File> _compressImage(File file) async {
     final dir = await getTemporaryDirectory();
-    final targetPath = path.join(dir.path, '${DateTime.now().millisecondsSinceEpoch}.jpg');
+    final targetPath =
+        path.join(dir.path, '${DateTime.now().millisecondsSinceEpoch}.jpg');
 
     var result = await FlutterImageCompress.compressAndGetFile(
       file.absolute.path,
