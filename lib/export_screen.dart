@@ -177,10 +177,10 @@ class _ExportScreenState extends State<ExportScreen> {
       _statusMessage = 'Sending email...';
     });
 
-    final smtpServer = gmail('mtsalikhlasberbahh@gmail.com', 'oxtm hpkh ciiq ppan');
+    final smtpServer = gmail('your_email@gmail.com', 'your_email_password');
 
     final message = Message()
-      ..from = Address('anapanca@gmail.com', 'ANAPANCA admin ')
+      ..from = Address('anapanca@gmail.com', 'ANAPANCA admin')
       ..recipients.add(recipient)
       ..subject = 'Lampiran PDF'
       ..text = 'Silakan temukan lampiran PDF.'
@@ -207,62 +207,62 @@ class _ExportScreenState extends State<ExportScreen> {
   }
 
   Future<String> _generatePdf() async {
-  if (logoData == null) {
-    print('Logo not loaded');
-    return '';
-  }
-
-  final pdf = pw.Document();
-
-  pdf.addPage(
-    pw.MultiPage(
-      build: (context) => [
-        _buildHeader(),
-        pw.SizedBox(height: 20),
-        _buildSummary(),
-        pw.SizedBox(height: 20),
-        _buildDetailedTable(),
-        pw.SizedBox(height: 20),
-        _buildAdditionalInfo(),
-      ],
-    ),
-  );
-
-  try {
-    // Request storage permissions
-    if (await Permission.storage.request().isGranted) {
-      final directoryPath = '/storage/emulated/0/Download';
-
-      final directory = Directory(directoryPath);
-      if (!await directory.exists()) {
-        await directory.create(recursive: true);
-      }
-
-      String fileName = 'Bangunan_${widget.puskesmas}_${DateTime.now().millisecondsSinceEpoch}.pdf';
-
-      final pdfPath = '$directoryPath/$fileName';
-      final pdfFile = File(pdfPath);
-
-      if (await pdfFile.exists()) {
-        await pdfFile.delete();
-        print('Old PDF file deleted.');
-      }
-
-      await pdfFile.writeAsBytes(await pdf.save());
-      print('PDF saved to $pdfPath');
-
-      return pdfPath;
-    } else {
-      print('Permission denied');
-      Fluttertoast.showToast(msg: 'Permission denied to access storage.');
+    if (logoData == null) {
+      print('Logo not loaded');
       return '';
     }
-  } catch (e) {
-    print('Error while generating PDF: $e');
-    Fluttertoast.showToast(msg: 'Failed to generate PDF. Please try again.');
-    return '';
+
+    final pdf = pw.Document();
+
+    pdf.addPage(
+      pw.MultiPage(
+        build: (context) => [
+          _buildHeader(),
+          pw.SizedBox(height: 20),
+          _buildSummary(),
+          pw.SizedBox(height: 20),
+          _buildDetailedTable(),
+          pw.SizedBox(height: 20),
+          _buildAdditionalInfo(),
+        ],
+      ),
+    );
+
+    try {
+      // Request storage permissions
+      if (await Permission.storage.request().isGranted || await Permission.storage.request().isDenied) {
+        final directoryPath = '/storage/emulated/0/Download';
+
+        final directory = Directory(directoryPath);
+        if (!await directory.exists()) {
+          await directory.create(recursive: true);
+        }
+
+        String fileName = 'Bangunan_${widget.puskesmas}_${DateTime.now().millisecondsSinceEpoch}.pdf';
+
+        final pdfPath = '$directoryPath/$fileName';
+        final pdfFile = File(pdfPath);
+
+        if (await pdfFile.exists()) {
+          await pdfFile.delete();
+          print('Old PDF file deleted.');
+        }
+
+        await pdfFile.writeAsBytes(await pdf.save());
+        print('PDF saved to $pdfPath');
+
+        return pdfPath;
+      } else {
+        print('Permission denied');
+        Fluttertoast.showToast(msg: 'Permission denied to access storage.');
+        return '';
+      }
+    } catch (e) {
+      print('Error while generating PDF: $e');
+      Fluttertoast.showToast(msg: 'Failed to generate PDF. Please try again.');
+      return '';
+    }
   }
-}
 
   Future<void> _savePdf() async {
     final pdfPath = await _generatePdf();
@@ -281,7 +281,7 @@ class _ExportScreenState extends State<ExportScreen> {
 
     final pdfPath = await _generatePdf();
     if (pdfPath.isNotEmpty) {
-       await _sendEmail(pdfPath, _emailController.text.trim()); // Trim spasi di awal dan akhir email
+      await _sendEmail(pdfPath, _emailController.text.trim()); // Trim spasi di awal dan akhir email
     }
   }
 
