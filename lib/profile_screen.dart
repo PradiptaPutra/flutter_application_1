@@ -29,6 +29,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _logout() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('userId');
+    await prefs.setBool('isLoggedIn', false); // Clear login state
     Navigator.pushReplacementNamed(context, '/logreg');
   }
 

@@ -34,7 +34,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   tz.initializeTimeZones();
 
-  await _requestPermissions(); // Request permissions
+  await _requestPermissions();
 
   runApp(MyApp());
 }
@@ -54,7 +54,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Health Application',
-      initialRoute: '/splash',
+      home: SplashScreen(),
       routes: {
         '/splash': (context) => FadeAnimation(child: SplashScreen()),
         '/logreg': (context) => FadeAnimation(child: LogregScreen()),
@@ -62,7 +62,7 @@ class MyApp extends StatelessWidget {
         '/register': (context) => FadeAnimation(child: RegistrationScreen()),
         '/profile': (context) => FadeAnimation(child: ProfileScreen(userId: ModalRoute.of(context)!.settings.arguments as int)),
         '/dashboard': (context) => FadeAnimation(child: DashboardScreen(userId: ModalRoute.of(context)!.settings.arguments as int)),
-        '/data_entry': (context) => FadeAnimation(child: DataEntryForm(userId: ModalRoute.of(context)!.settings.arguments as int)),
+        // '/data_entry': (context) => FadeAnimation(child: DataEntryForm(userId: ModalRoute.of(context)!.settings.arguments as int)),
         '/export': (context) => FadeAnimation(child: ExportScreen(
           puskesmas: "",
           sebelum: 0,

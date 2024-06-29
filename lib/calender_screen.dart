@@ -6,6 +6,11 @@ import 'package:timezone/timezone.dart' as tz;
 import 'package:permission_handler/permission_handler.dart';
 import 'database_helper.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
+import 'package:intl/intl.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as path;
 
 class CalendarScreen extends StatefulWidget {
   @override
@@ -17,6 +22,29 @@ class _CalendarScreenState extends State<CalendarScreen> {
   DateTime _selectedDay = DateTime.now();
   DateTime _focusedDay = DateTime.now();
   TextEditingController _timeController = TextEditingController();
+  TextEditingController namaPuskesmasController = TextEditingController();
+  TextEditingController lokasiController = TextEditingController();
+  TextEditingController kelurahanController = TextEditingController();
+  TextEditingController kecamatanController = TextEditingController();
+  DateTime? selectedDate;
+  File? _selectedImage;
+  bool _isImageLoading = false;
+  String dropdownValue = 'Rawat Inap';
+  String? selectedProvinsi = 'Jambi';
+  String? selectedKabupaten;
+  List<String> provinsiList = ['Jambi'];
+  Map<String, List<String>> kabupatenList = {
+    'Jambi': [
+      'Kota Jambi',
+      'Kabupaten Bungo',
+      'Kabupaten Kerinci',
+      'Kabupaten Muaro Jambi',
+      'Kabupaten Sarolangun',
+      'Kabupaten Tanjung Jabung Barat',
+      'Kabupaten Tanjung Jabung Timur',
+      'Kabupaten Tebo'
+    ]
+  };
   late FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
   List<String> _puskesmasNames = [];
   String? _selectedPuskesmas;
@@ -153,39 +181,112 @@ class _CalendarScreenState extends State<CalendarScreen> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('Enter Survey Details'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              DropdownButtonFormField<String>(
-                value: _selectedPuskesmas,
-                items: _puskesmasNames.map((String name) {
-                  return DropdownMenuItem<String>(
-                    value: name,
-                    child: Text(name),
-                  );
-                }).toList(),
-                onChanged: (newValue) {
-                  setState(() {
-                    _selectedPuskesmas = newValue;
-                  });
-                },
-                decoration: InputDecoration(
-                  hintText: "Select Puskesmas",
-                  border: OutlineInputBorder(),
+          title: Text('Enter Puskesmas Details'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: namaPuskesmasController,
+                  decoration: InputDecoration(
+                    labelText: 'Nama Puskesmas',
+                  ),
                 ),
-              ),
-              SizedBox(height: 16),
-              TextField(
-                controller: _timeController,
-                readOnly: true,
-                decoration: InputDecoration(
-                  hintText: "Select Time",
-                  border: OutlineInputBorder(),
+                TextField(
+                  controller: lokasiController,
+                  decoration: InputDecoration(
+                    labelText: 'Alamat Lengkap',
+                  ),
                 ),
-                onTap: () => _selectTime(context),
-              ),
-            ],
+                DropdownButtonFormField<String>(
+                  value: selectedProvinsi,
+                  hint: Text('Pilih Provinsi'),
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      selectedProvinsi = newValue;
+                      selectedKabupaten = null;
+                    });
+                  },
+                  items: provinsiList.map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList(),
+                ),
+                if (selectedProvinsi != null) ...[
+                  DropdownButtonFormField<String>(
+                    value: selectedKabupaten,
+                    hint: Text('Pilih Kabupaten/Kota'),
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        selectedKabupaten = newValue;
+                      });
+                    },
+                    items: kabupatenList[selectedProvinsi!]!.map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
+                  ),
+                  TextField(
+                    controller: kelurahanController,
+                    decoration: InputDecoration(
+                      labelText: 'Kelurahan',
+                    ),
+                  ),
+                  TextField(
+                    controller: kecamatanController,
+                    decoration: InputDecoration(
+                      labelText: 'Kecamatan',
+                    ),
+                  ),
+                ],
+                DropdownButtonFormField<String>(
+                  value: dropdownValue,
+                  decoration: InputDecoration(labelText: 'Jenis Layanan'),
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      dropdownValue = newValue!;
+                    });
+                  },
+                  items: <String>['Rawat Inap', 'Non Rawat Inap']
+                      .map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList(),
+                ),
+                ElevatedButton.icon(
+                  onPressed: () => _pickImage(ImageSource.gallery),
+                  icon: Icon(Icons.photo_library),
+                  label: Text('Ambil dari Galeri'),
+                ),
+                ElevatedButton.icon(
+                  onPressed: () => _pickImage(ImageSource.camera),
+                  icon: Icon(Icons.camera_alt),
+                  label: Text('Ambil Foto'),
+                ),
+                if (_isImageLoading)
+                  CircularProgressIndicator()
+                else if (_selectedImage != null)
+                  Image.file(
+                    _selectedImage!,
+                    height: 200,
+                  ),
+                TextField(
+                  controller: _timeController,
+                  readOnly: true,
+                  decoration: InputDecoration(
+                    hintText: "Select Time",
+                    border: OutlineInputBorder(),
+                  ),
+                  onTap: () => _selectTime(context),
+                ),
+              ],
+            ),
           ),
           actions: [
             TextButton(
@@ -196,45 +297,52 @@ class _CalendarScreenState extends State<CalendarScreen> {
             ),
             ElevatedButton(
               onPressed: () async {
-                if (_selectedPuskesmas != null && _selectedTime != null) {
-                  DateTime scheduledDate = DateTime(
-                    selectedDate.year,
-                    selectedDate.month,
-                    selectedDate.day,
-                    _selectedTime!.hour,
-                    _selectedTime!.minute,
-                  );
-                  if (scheduledDate.isBefore(DateTime.now())) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Scheduled date must be in the future.'),
-                      ),
-                    );
-                    return;
-                  }
-
-                  final dbHelper = DatabaseHelper();
-                  await dbHelper.insertKegiatan({
-                    'nama_puskesmas': _selectedPuskesmas,
-                    'tanggal_kegiatan': scheduledDate.toIso8601String(),
-                  });
-                  await _scheduleNotification(scheduledDate, _selectedPuskesmas!);
+                DateTime scheduledDate = DateTime(
+                  selectedDate.year,
+                  selectedDate.month,
+                  selectedDate.day,
+                  _selectedTime!.hour,
+                  _selectedTime!.minute,
+                );
+                if (scheduledDate.isBefore(DateTime.now())) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text(
-                          'Survey for $_selectedPuskesmas scheduled for $scheduledDate'),
+                      content: Text('Scheduled date must be in the future.'),
                     ),
                   );
-                  _timeController.clear();
-                  await _loadScheduledSurveys(_selectedPuskesmas);
-                  Navigator.of(context).pop();
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Please select both Puskesmas and time.'),
-                    ),
-                  );
+                  return;
                 }
+
+                final dbHelper = DatabaseHelper();
+
+                // Save the new Puskesmas entry
+                final puskesmasId = await dbHelper.insertPuskesmas({
+                  'nama_puskesmas': namaPuskesmasController.text,
+                  'lokasi': lokasiController.text,
+                  'kelurahan': kelurahanController.text,
+                  'kecamatan': kecamatanController.text,
+                  'provinsi': selectedProvinsi,
+                  'kabupaten_kota': selectedKabupaten,
+                  'dropdown_option': dropdownValue,
+                  'foto': _selectedImage != null ? await _saveImage(_selectedImage!) : null,
+                });
+
+                // Schedule the survey
+                await dbHelper.insertKegiatan({
+                  'nama_puskesmas': namaPuskesmasController.text,
+                  'tanggal_kegiatan': scheduledDate.toIso8601String(),
+                });
+
+                await _scheduleNotification(scheduledDate, namaPuskesmasController.text);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Survey for ${namaPuskesmasController.text} scheduled for $scheduledDate'),
+                  ),
+                );
+
+                _clearForm();
+
+                Navigator.of(context).pop();
               },
               child: Text('Save'),
             ),
@@ -244,31 +352,42 @@ class _CalendarScreenState extends State<CalendarScreen> {
     );
   }
 
-  void _onPuskesmasSelected(String? puskesmasName) {
-    if (puskesmasName != null) {
-      _loadScheduledSurveys(puskesmasName);
-    }
+  Future<String> _saveImage(File image) async {
+    final directory = await getApplicationDocumentsDirectory();
+    final imagePath = path.join(directory.path, '${DateTime.now().millisecondsSinceEpoch}.jpg');
+    final savedImage = await image.copy(imagePath);
+    return savedImage.path;
+  }
+
+  void _clearForm() {
+    namaPuskesmasController.clear();
+    lokasiController.clear();
+    kelurahanController.clear();
+    kecamatanController.clear();
+    setState(() {
+      selectedDate = null;
+      selectedProvinsi = 'Jambi';
+      selectedKabupaten = null;
+      _selectedImage = null;
+      _isImageLoading = false;
+      _timeController.clear();
+      _selectedTime = null;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Calendar'),
+        title: Text('Calender'),
         backgroundColor: Colors.white,
         elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-        ),
         actions: [
           IconButton(
             icon: Icon(Icons.refresh, color: Colors.black),
             onPressed: () {
               _loadPuskesmasNames();
-              _loadScheduledSurveys(_selectedPuskesmas);
+              _loadScheduledSurveys();
             },
           ),
         ],
@@ -276,38 +395,12 @@ class _CalendarScreenState extends State<CalendarScreen> {
       body: RefreshIndicator(
         onRefresh: () async {
           await _loadPuskesmasNames();
-          await _loadScheduledSurveys(_selectedPuskesmas);
+          await _loadScheduledSurveys();
         },
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
-              InputDecorator(
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(),
-                  contentPadding: EdgeInsets.symmetric(horizontal: 10),
-                ),
-                child: DropdownButtonHideUnderline(
-                  child: DropdownButton<String>(
-                    hint: Text("Select Puskesmas"),
-                    value: _selectedPuskesmas,
-                    onChanged: (newValue) {
-                      setState(() {
-                        _selectedPuskesmas = newValue;
-                      });
-                      _onPuskesmasSelected(newValue);
-                    },
-                    items: _puskesmasNames.map((String name) {
-                      return DropdownMenuItem<String>(
-                        value: name,
-                        child: Text(name),
-                      );
-                    }).toList(),
-                    isExpanded: true,
-                  ),
-                ),
-              ),
-              SizedBox(height: 16),
               TableCalendar(
                 firstDay: DateTime.utc(2010, 10, 16),
                 lastDay: DateTime.utc(2030, 3, 14),
@@ -405,9 +498,45 @@ class _CalendarScreenState extends State<CalendarScreen> {
     );
   }
 
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: selectedDate ?? DateTime.now(),
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
+    );
+    if (picked != null && picked != selectedDate) {
+      setState(() {
+        selectedDate = picked;
+      });
+    }
+  }
+
+  void _pickImage(ImageSource source) async {
+    setState(() {
+      _isImageLoading = true;
+    });
+    final ImagePicker _picker = ImagePicker();
+    final XFile? image = await _picker.pickImage(source: source);
+    if (image != null) {
+      setState(() {
+        _selectedImage = File(image.path);
+        _isImageLoading = false;
+      });
+    } else {
+      setState(() {
+        _isImageLoading = false;
+      });
+    }
+  }
+
   @override
   void dispose() {
     _timeController.dispose();
+    namaPuskesmasController.dispose();
+    lokasiController.dispose();
+    kelurahanController.dispose();
+    kecamatanController.dispose();
     super.dispose();
   }
 }

@@ -45,6 +45,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
     if (userId != null) {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setInt('userId', userId);
+      await prefs.setBool('isLoggedIn', true);
       
       Navigator.pushReplacement(
         context,

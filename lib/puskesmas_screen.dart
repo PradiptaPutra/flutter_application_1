@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 
 class PuskesmasScreen extends StatefulWidget {
   final int userId;
@@ -248,9 +249,9 @@ class _PuskesmasScreenState extends State<PuskesmasScreen> {
               Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: TextField(
-                  controller: kelurahanController,
+                  controller: kecamatanController,
                   decoration: InputDecoration(
-                    labelText: 'Kelurahan',
+                    labelText: 'Kecamatan',
                   ),
                   onChanged: (value) {
                     _validateInputs();
@@ -260,9 +261,9 @@ class _PuskesmasScreenState extends State<PuskesmasScreen> {
               Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: TextField(
-                  controller: kecamatanController,
+                  controller: kelurahanController,
                   decoration: InputDecoration(
-                    labelText: 'Kecamatan',
+                    labelText: 'Kelurahan',
                   ),
                   onChanged: (value) {
                     _validateInputs();
@@ -349,22 +350,37 @@ class _PuskesmasScreenState extends State<PuskesmasScreen> {
       firstDate: DateTime(1900),
       lastDate: DateTime.now(),
     );
-    if (picked != null && picked != selectedDate)
+    if (picked != null && picked != selectedDate) {
       setState(() {
         selectedDate = picked;
         _validateInputs();
       });
+    }
   }
 
-  void _pickImage(ImageSource source) async {
+  Future<void> _pickImage(ImageSource source) async {
     final ImagePicker _picker = ImagePicker();
     final XFile? image = await _picker.pickImage(source: source);
     if (image != null) {
+      File compressedFile = await _compressImage(File(image.path));
       setState(() {
-        _selectedImage = File(image.path);
+        _selectedImage = compressedFile;
         _validateInputs();
       });
     }
+  }
+
+  Future<File> _compressImage(File file) async {
+    final dir = await getTemporaryDirectory();
+    final targetPath = path.join(dir.path, '${DateTime.now().millisecondsSinceEpoch}.jpg');
+
+    var result = await FlutterImageCompress.compressAndGetFile(
+      file.absolute.path,
+      targetPath,
+      quality: 70,
+    );
+
+    return File(result!.path);
   }
 
   Future<void> _nextStep() async {
@@ -401,7 +417,7 @@ class _PuskesmasScreenState extends State<PuskesmasScreen> {
     // Ensure _selectedImage is not null before accessing its path
     final String imagePath = _selectedImage != null ? _selectedImage!.path : '';
 
-    // Mendapatkan data pengguna yang sedang login
+    //Mendapatkan data pengguna yang sedang login
     Map<String, dynamic>? userData = await DatabaseHelper.instance.getUserData(widget.userId);
 
     if (userData != null) {

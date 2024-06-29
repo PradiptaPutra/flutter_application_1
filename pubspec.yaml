@@ -53,7 +53,7 @@ dependencies:
   camera: ^0.9.4+11  # Versi bisa disesuaikan dengan versi terbaru yang tersedia
   timezone: ^0.9.3
   flutter_timezone: ^1.0.0
-  flutter_image_compress: ^1.1.0
+  flutter_image_compress: ^1.1.2
 
   
 
