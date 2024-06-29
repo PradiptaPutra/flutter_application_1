@@ -261,7 +261,8 @@ Future<void> _fetchAllKegiatan() async {
     if (pdfPath.isNotEmpty) {
       Fluttertoast.showToast(msg: 'PDF saved to $pdfPath');
       
-      _openPdf(pdfPath);
+      await Future.delayed(Duration(seconds: 2));
+_openPdf(pdfPath);
     }
   }
 

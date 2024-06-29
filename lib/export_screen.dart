@@ -177,7 +177,7 @@ class _ExportScreenState extends State<ExportScreen> {
       _statusMessage = 'Sending email...';
     });
 
-    final smtpServer = gmail('your_email@gmail.com', 'your_email_password');
+    final smtpServer = gmail('mtsalikhlasberbahh@gmail.com', 'oxtm hpkh ciiq ppan');
 
     final message = Message()
       ..from = Address('anapanca@gmail.com', 'ANAPANCA admin')
@@ -269,7 +269,8 @@ class _ExportScreenState extends State<ExportScreen> {
     if (pdfPath.isNotEmpty) {
       Fluttertoast.showToast(msg: 'PDF saved to $pdfPath');
       
-      _openPdf(pdfPath);
+      await Future.delayed(Duration(seconds: 2));
+_openPdf(pdfPath);
     }
   }
 
