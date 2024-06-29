@@ -321,10 +321,10 @@ Future<Database> _initDatabase() async {
     );
   }
 
-  Future<int> insertKegiatan(Map<String, dynamic> kegiatan) async {
-    final db = await database;
-    return await db.insert('Kegiatan', kegiatan, conflictAlgorithm: ConflictAlgorithm.replace);
-  }
+  // Future<int> insertKegiatan(Map<String, dynamic> kegiatan) async {
+  //   final db = await database;
+  //   return await db.insert('Kegiatan', kegiatan, conflictAlgorithm: ConflictAlgorithm.replace);
+  // }
    Future<int> insertPuskesmas(Map<String, dynamic> row) async {
     Database db = await instance.database;
     return await db.insert('Kegiatan', row);

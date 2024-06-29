@@ -268,7 +268,7 @@ class _ExportScreenState extends State<ExportScreen> {
     final pdfPath = await _generatePdf();
     if (pdfPath.isNotEmpty) {
       Fluttertoast.showToast(msg: 'PDF saved to $pdfPath');
-      await Future.delayed(Duration(seconds: 2));
+      
       _openPdf(pdfPath);
     }
   }
@@ -281,7 +281,7 @@ class _ExportScreenState extends State<ExportScreen> {
 
     final pdfPath = await _generatePdf();
     if (pdfPath.isNotEmpty) {
-      await _sendEmail(pdfPath, _emailController.text);
+       await _sendEmail(pdfPath, _emailController.text.trim()); // Trim spasi di awal dan akhir email
     }
   }
 

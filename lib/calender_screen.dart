@@ -11,8 +11,12 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 
 class CalendarScreen extends StatefulWidget {
+  final int userId;
+  CalendarScreen({required this.userId});
+
   @override
   _CalendarScreenState createState() => _CalendarScreenState();
 }
@@ -231,15 +235,15 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     }).toList(),
                   ),
                   TextField(
-                    controller: kelurahanController,
-                    decoration: InputDecoration(
-                      labelText: 'Kelurahan',
-                    ),
-                  ),
-                  TextField(
                     controller: kecamatanController,
                     decoration: InputDecoration(
                       labelText: 'Kecamatan',
+                    ),
+                  ),
+                  TextField(
+                    controller: kelurahanController,
+                    decoration: InputDecoration(
+                      labelText: 'Kelurahan',
                     ),
                   ),
                 ],
@@ -272,10 +276,13 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 if (_isImageLoading)
                   CircularProgressIndicator()
                 else if (_selectedImage != null)
-                  Image.file(
-                    _selectedImage!,
-                    height: 200,
-                  ),
+                  Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Image.file(
+                  _selectedImage!,
+                  height: 200,
+                ),
+              ),
                 TextField(
                   controller: _timeController,
                   readOnly: true,
@@ -314,9 +321,17 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 }
 
                 final dbHelper = DatabaseHelper();
-
+                Map<String, dynamic>? userData = await DatabaseHelper.instance.getUserData(widget.userId);
+                if (userData != null) {
+                  String nama = userData['name'];
+                  String jabatan = userData['position'];
+                  String notelp = userData['phone'];
                 // Save the new Puskesmas entry
                 final puskesmasId = await dbHelper.insertPuskesmas({
+                  'user_id': widget.userId,
+                  'nama': nama,
+                  'jabatan': jabatan,
+                  'notelepon': notelp,
                   'nama_puskesmas': namaPuskesmasController.text,
                   'lokasi': lokasiController.text,
                   'kelurahan': kelurahanController.text,
@@ -325,13 +340,16 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   'kabupaten_kota': selectedKabupaten,
                   'dropdown_option': dropdownValue,
                   'foto': _selectedImage != null ? await _saveImage(_selectedImage!) : null,
-                });
-
-                // Schedule the survey
-                await dbHelper.insertKegiatan({
                   'nama_puskesmas': namaPuskesmasController.text,
                   'tanggal_kegiatan': scheduledDate.toIso8601String(),
                 });
+                }
+
+                // // Schedule the survey
+                // await dbHelper.insertPuskesmas({
+                //   'nama_puskesmas': namaPuskesmasController.text,
+                //   'tanggal_kegiatan': scheduledDate.toIso8601String(),
+                // });
 
                 await _scheduleNotification(scheduledDate, namaPuskesmasController.text);
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -353,10 +371,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
   }
 
   Future<String> _saveImage(File image) async {
+    String namaFileFoto = 'foto_${namaPuskesmasController.text.replaceAll(' ', '_').toLowerCase()}.jpg';
     final directory = await getApplicationDocumentsDirectory();
-    final imagePath = path.join(directory.path, '${DateTime.now().millisecondsSinceEpoch}.jpg');
+    final imagePath = path.join(directory.path, 'foto_${namaPuskesmasController.text.replaceAll(' ', '_').toLowerCase()}.jpg');
     final savedImage = await image.copy(imagePath);
-    return savedImage.path;
+    return namaFileFoto;
   }
 
   void _clearForm() {
@@ -519,8 +538,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
     final ImagePicker _picker = ImagePicker();
     final XFile? image = await _picker.pickImage(source: source);
     if (image != null) {
+      File compressedFile = await _compressImage(File(image.path));
       setState(() {
-        _selectedImage = File(image.path);
+        _selectedImage = compressedFile;
         _isImageLoading = false;
       });
     } else {
@@ -530,6 +550,18 @@ class _CalendarScreenState extends State<CalendarScreen> {
     }
   }
 
+ Future<File> _compressImage(File file) async {
+    final dir = await getTemporaryDirectory();
+    final targetPath = path.join(dir.path, '${DateTime.now().millisecondsSinceEpoch}.jpg');
+
+    var result = await FlutterImageCompress.compressAndGetFile(
+      file.absolute.path,
+      targetPath,
+      quality: 70,
+    );
+
+    return File(result!.path);
+  }
   @override
   void dispose() {
     _timeController.dispose();

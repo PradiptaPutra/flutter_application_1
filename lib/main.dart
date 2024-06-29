@@ -223,7 +223,10 @@ class MyApp extends StatelessWidget {
             )),
           );
         } else if (settings.name == '/calendar') {
-          return MaterialPageRoute(builder: (context) => FadeAnimation(child: CalendarScreen()));
+          final args = settings.arguments as Map<String, dynamic>;
+          return MaterialPageRoute(builder: (context) => FadeAnimation(child: CalendarScreen(
+            userId: args['userId'],
+          )));
         } else if (settings.name == '/penilaian_sdm') {
           final args = settings.arguments as Map<String, dynamic>;
           return MaterialPageRoute(

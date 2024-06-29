@@ -36,7 +36,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   List<Widget> _widgetOptions(int userId) => <Widget>[
     HomeContent(userId: userId),
     PuskesmasScreen(userId: userId),
-    CalendarScreen(),
+    CalendarScreen(userId: userId),
     HistoryScreen(userId: userId),
     ProfileScreen(userId: userId),
   ];

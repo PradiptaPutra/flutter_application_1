@@ -248,7 +248,7 @@ Future<void> _fetchAllKegiatan() async {
         await directory.create(recursive: true);
       }
 
-      String fileName = 'KehadiranSDM_${widget.puskesmas}_${DateTime.now().millisecondsSinceEpoch}.pdf';
+      String fileName = 'Program_${widget.puskesmas}_${DateTime.now().millisecondsSinceEpoch}.pdf';
 
       final pdfPath = '$directoryPath/$fileName';
       final pdfFile = File(pdfPath);
@@ -278,7 +278,7 @@ Future<void> _fetchAllKegiatan() async {
     final pdfPath = await _generatePdf();
     if (pdfPath.isNotEmpty) {
       Fluttertoast.showToast(msg: 'PDF saved to $pdfPath');
-      await Future.delayed(Duration(seconds: 2));
+      
       _openPdf(pdfPath);
     }
   }
@@ -291,7 +291,7 @@ Future<void> _fetchAllKegiatan() async {
 
     final pdfPath = await _generatePdf();
     if (pdfPath.isNotEmpty) {
-      await _sendEmail(pdfPath, _emailController.text);
+       await _sendEmail(pdfPath, _emailController.text.trim()); // Trim spasi di awal dan akhir email
     }
   }
 
