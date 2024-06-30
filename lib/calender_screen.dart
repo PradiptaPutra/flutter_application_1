@@ -102,12 +102,12 @@ class _CalendarScreenState extends State<CalendarScreen> {
     }
   }
 
-  Future<void> _loadPuskesmasNames() async {
+    Future<void> _loadPuskesmasNames() async {
     setState(() {
       _isLoading = true;
     });
     final dbHelper = DatabaseHelper();
-    final names = await dbHelper.getUniquePuskesmasNames();
+    final names = await dbHelper.getUniquePuskesmasNames(widget.userId);
     print("Puskesmas Names: $names");
     setState(() {
       _puskesmasNames = names;
@@ -120,7 +120,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
       _isLoading = true;
     });
     final dbHelper = DatabaseHelper();
-    final surveys = await dbHelper.getScheduledSurveys();
+    final surveys = await dbHelper.getScheduledSurveys(widget.userId);
     print("Scheduled Surveys: $surveys");
     setState(() {
       _scheduledSurveys = puskesmasName != null
@@ -470,6 +470,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false, // Add this line
         title: Text('Calendar'),
         backgroundColor: Colors.white,
         elevation: 0,

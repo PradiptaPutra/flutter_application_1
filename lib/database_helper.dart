@@ -382,18 +382,24 @@ Future<Database> _initDatabase() async {
     );
   }
 
-  Future<List<String>> getUniquePuskesmasNames() async {
+ Future<List<String>> getUniquePuskesmasNames(int userId) async {
     final db = await database;
-    final List<Map<String, dynamic>> result =
-        await db.rawQuery('SELECT DISTINCT nama_puskesmas FROM Kegiatan');
-    print('Puskesmas Names Query Result: $result');
-    return result.map((e) => e['nama_puskesmas'] as String).toList();
+    final List<Map<String, dynamic>> result = await db.query(
+      'Kegiatan',
+      columns: ['DISTINCT nama_puskesmas'],
+      where: 'user_id = ?',
+      whereArgs: [userId],
+    );
+    return result.map((row) => row['nama_puskesmas'] as String).toList();
   }
 
-  Future<List<Map<String, dynamic>>> getScheduledSurveys() async {
+  Future<List<Map<String, dynamic>>> getScheduledSurveys(int userId) async {
     final db = await database;
-    final result = await db.query('Kegiatan');
-    print('Scheduled Surveys Query Result: $result');
+    final List<Map<String, dynamic>> result = await db.query(
+      'Kegiatan',
+      where: 'user_id = ?',
+      whereArgs: [userId],
+    );
     return result;
   }
 
