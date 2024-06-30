@@ -145,7 +145,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                       },
                       child: Text(
                         'Forget Password?',
-                        style: TextStyle(color: Colors.orange),
+                        style: TextStyle(color: Color.fromARGB(255, 163, 151, 151)),
                       ),
                     ),
                   ),
@@ -161,7 +161,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                         borderRadius: BorderRadius.circular(30),
                       ),
                       padding: EdgeInsets.symmetric(vertical: 16),
-                      backgroundColor: Colors.orange,
+                      backgroundColor: Color.fromARGB(255, 49, 75, 243),
                     ),
                   ),
                   SizedBox(height: 20),
@@ -192,7 +192,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                           child: Text(
                             'Sign up',
                             style: TextStyle(
-                              color: _isSignUpPressed ? Colors.orangeAccent : Colors.orange,
+                              color: _isSignUpPressed ? Color.fromARGB(255, 49, 75, 243) : Color.fromARGB(255, 49, 75, 243),
                               decoration: _isSignUpPressed ? TextDecoration.underline : TextDecoration.none,
                             ),
                           ),

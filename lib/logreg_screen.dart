@@ -40,7 +40,7 @@ class LogregScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(30),
                       ),
                       padding: EdgeInsets.symmetric(vertical: 16),
-                      backgroundColor: Colors.orange,
+                      backgroundColor: Color.fromARGB(255, 49, 75, 243),
                       elevation: 5,
                     ),
                   ),
@@ -51,10 +51,10 @@ class LogregScreen extends StatelessWidget {
                     },
                     child: Text(
                       'Daftar',
-                      style: TextStyle(color: Colors.orange),
+                      style: TextStyle(color: Color.fromARGB(255, 49, 75, 243)), // Mengganti warna teks menjadi oranye
                     ),
                     style: OutlinedButton.styleFrom(
-                      side: BorderSide(color: Colors.orange, width: 2), // Border color and width
+                      side: BorderSide(color: Color.fromARGB(255, 49, 75, 243), width: 2), // Border color and width
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30),
                       ),
