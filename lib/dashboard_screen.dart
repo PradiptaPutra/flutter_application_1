@@ -147,7 +147,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.orange.withOpacity(0.5),
+                      color: Color.fromARGB(255, 49, 75, 243).withOpacity(0.5),
                       spreadRadius: 5,
                       blurRadius: 15,
                     ),
@@ -161,7 +161,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   });
                 },
                 child: Icon(Icons.add_task, color: Colors.white),
-                backgroundColor: Colors.orange,
+                backgroundColor: Color.fromARGB(255, 49, 75, 243),
               ),
             ],
           ),
@@ -188,13 +188,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
         children: <Widget>[
           Icon(
             icon,
-            color: isSelected ? Colors.orange : Colors.grey,
+            color: isSelected ? const Color.fromARGB(255, 49, 75, 243) : Colors.grey,
           ),
           SizedBox(height: 4),
           Text(
             label,
             style: TextStyle(
-              color: isSelected ? Colors.orange : Colors.grey,
+              color: isSelected ? Color.fromARGB(255, 49, 75, 243) : Colors.grey,
               fontSize: 12,
               fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
             ),

@@ -52,7 +52,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: Text('Profile'),
-        backgroundColor: Color(0xFFF9D5A7), // Light peach color
+        backgroundColor: Color.fromARGB(255, 255, 255, 255), // Light peach color
         elevation: 0, // No shadow for the AppBar
       ),
       body: FutureBuilder<Map<String, dynamic>>(
@@ -73,7 +73,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: Column(
               children: [
                 Container(
-                  color: Color(0xFFF9D5A7), // Light peach color
+                  color: Color.fromARGB(255, 255, 255, 255), // Light peach color
                   padding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
                   child: Column(
                     children: [
