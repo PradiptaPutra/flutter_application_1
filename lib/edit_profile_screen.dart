@@ -49,6 +49,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color.fromARGB(255, 255, 255, 255), 
       appBar: AppBar(
         title: Text('Edit Profile'),
       ),
@@ -116,7 +117,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 onPressed: _saveProfile,
                 child: Text('Save', style: TextStyle(color: Colors.white)),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFFFF7043), // Background color
+                  backgroundColor: Color.fromARGB(255, 49, 75, 243), // Background color
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),

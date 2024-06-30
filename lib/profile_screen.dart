@@ -49,6 +49,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color.fromARGB(255, 255, 255, 255), 
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: Text('Profile'),
@@ -127,7 +128,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
-            color: Color(0xFFFF7043),
+            color: Color.fromARGB(255, 49, 75, 243),
           ),
         ),
         Text(

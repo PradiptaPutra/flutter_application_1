@@ -87,6 +87,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ),
       bottomNavigationBar: BottomAppBar(
         shape: CircularNotchedRectangle(),
+        color: Color.fromARGB(255, 243, 241, 241),
         notchMargin: 6.0,
         elevation: 10.0,
         child: Container(
@@ -97,7 +98,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               BoxShadow(
                 color: Colors.white12,
                 blurRadius: 10,
-                spreadRadius: 2,
+                spreadRadius: 4,
                 offset: Offset(0, -5),
               ),
             ],

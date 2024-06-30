@@ -469,6 +469,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color.fromARGB(255, 255, 255, 255), 
       appBar: AppBar(
         automaticallyImplyLeading: false, // Add this line
         title: Text('Calendar'),
@@ -520,11 +521,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 },
                 calendarStyle: CalendarStyle(
                   todayDecoration: BoxDecoration(
-                    color: Colors.orange,
+                    color: Color.fromARGB(255, 49, 75, 243),
                     shape: BoxShape.circle,
                   ),
                   selectedDecoration: BoxDecoration(
-                    color: Colors.orange,
+                    color: Color.fromARGB(255, 49, 75, 243),
                     shape: BoxShape.circle,
                   ),
                   markersMaxCount: 1,
@@ -561,8 +562,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
                             ),
                             elevation: 3,
                             child: ListTile(
+                              tileColor: Colors.white, // warna latar belakang putih
                               leading: ClipRRect(
-                                borderRadius: BorderRadius.circular(8.0),
+                                borderRadius: BorderRadius.circular(10.0),
                                 child: Image.asset(
                                   'assets/images/logors.jpg',
                                   width: 50,

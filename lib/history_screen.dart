@@ -74,6 +74,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color.fromARGB(255, 255, 255, 255), 
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: Row(
@@ -81,7 +82,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
             Expanded(
               child: Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Colors.white24,
                   borderRadius: BorderRadius.circular(40),
                   border: Border.all(color: const Color.fromARGB(137, 206, 203, 203)),
                 ),
@@ -101,7 +102,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
               ),
             ),
             IconButton(
-              icon: Icon(Icons.search, color: Colors.white),
+              icon: Icon(Icons.search, color: const Color.fromARGB(255, 0, 0, 0)),
               onPressed: () {
                 _searchKegiatan(searchController.text);
               },
@@ -131,7 +132,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 var kegiatan = snapshot.data![index];
                 return ListTile(
                   leading: CircleAvatar(
-                    backgroundColor: Color(0xFFFF7043),
+                    backgroundColor:Color.fromARGB(255, 49, 75, 243),
                     child: Icon(Icons.local_hospital, color: Colors.white),
                   ),
                   title: Text(kegiatan['nama_puskesmas'] ?? 'Unknown'),
