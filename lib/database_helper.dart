@@ -22,15 +22,30 @@ class DatabaseHelper {
     _database = await _initDatabase();
     return _database!;
   }
-Future<Database> _initDatabase() async {
-    String path = join(await getDatabasesPath(), 'puskesmas_database.db');
- print('Database initialized at path: $path');
-    return await openDatabase(
-      path,
-    version: 15, // Meningkatkan nomor versi database
-    onCreate: _createDb,
-    onUpgrade: _upgradeDb,
-    );
+ Future<Database> _initDatabase() async {
+    // Get the path to the database
+    String path = join(await getDatabasesPath(), 'health_app.db');
+    print('Database initialized at path: $path');
+
+    // Check if the database file exists
+    bool exists = await databaseExists(path);
+
+    if (!exists) {
+      // Should happen only the first time the app is run after installation
+      print('Creating new database...');
+      // Copy your database initialization code here
+      _database = await openDatabase(
+        path,
+        version: 16, // Update the version number as needed
+        onCreate: _createDb,
+        onUpgrade: _upgradeDb,
+      );
+    } else {
+      // If the database already exists, open it
+      _database = await openDatabase(path);
+    }
+
+    return _database!;
   }
 //   Future<Database> initializeDatabase() async {
 //   String path = join(await getDatabasesPath(), 'health_app.db');
@@ -54,7 +69,8 @@ Future<Database> _initDatabase() async {
       name TEXT,
       position TEXT,
       phone TEXT,
-      created_at TEXT
+      created_at TEXT,
+      kodeverif TEXT  -- Add new column
     )
   ''');
 
@@ -147,25 +163,30 @@ Future<Database> _initDatabase() async {
 }
 
 
-  Future<void> insertPengguna(Map<String, dynamic> pengguna) async {
-    final db = await database;
-    await db.insert('Pengguna', pengguna, conflictAlgorithm: ConflictAlgorithm.replace);
-  }
+ Future<void> insertPengguna(Map<String, dynamic> pengguna) async {
+  final db = await database;
+  await db.insert(
+    'Pengguna',
+    pengguna,
+    conflictAlgorithm: ConflictAlgorithm.replace,
+  );
+}
 
-  Future<int?> verifyLogin(String username, String password) async {
-    final db = await database;
-    final passwordHash = sha256.convert(utf8.encode(password)).toString();
-    List<Map> results = await db.query(
-      'Pengguna',
-      columns: ['user_id', 'username', 'password_hash'],
-      where: 'username = ? AND password_hash = ?',
-      whereArgs: [username, passwordHash],
-    );
-    if (results.isNotEmpty) {
-      return results.first['user_id'] as int?;
-    }
-    return null;
+  Future<int?> verifyLogin(String username, String password, String verificationCode) async {
+  final db = await database;
+  final passwordHash = sha256.convert(utf8.encode(password)).toString();
+  List<Map> results = await db.query(
+    'Pengguna',
+    columns: ['user_id', 'username', 'password_hash', 'kodeverif'], // Include 'kodeverif' column
+    where: 'username = ? AND password_hash = ? AND kodeverif = ?', // Add 'kodeverif' check
+    whereArgs: [username, passwordHash, verificationCode], // Pass verificationCode as a parameter
+  );
+  if (results.isNotEmpty) {
+    return results.first['user_id'] as int?;
   }
+  return null;
+}
+
 
   Future<String?> getEmailByUserId(int userId) async {
     final db = await database;
@@ -759,6 +780,24 @@ Future<void> updateDataEntry2(Map<String, dynamic> dataEntry) async {
     whereArgs: [kegiatanId],
   );
 }
+
+Future<int?> verifyLoginWithVerificationCode(String username, String password, String verificationCode) async {
+  final db = await database;
+  final List<Map<String, dynamic>> result = await db.query(
+    'Pengguna',
+    where: 'username = ? AND password_hash = ? AND kodeverif = ?',
+    whereArgs: [username, sha256.convert(utf8.encode(password)).toString(), verificationCode],
+  );
+
+  print('Query result: $result'); // Debug print
+
+  if (result.isNotEmpty) {
+    return result.first['id'] as int?;
+  } else {
+    return null;
+  }
+}
+
 
 Future<void> deleteDataEntriesForKegiatan(int kegiatanId) async {
   final db = await database;

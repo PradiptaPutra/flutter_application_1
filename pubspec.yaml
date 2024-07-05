@@ -112,6 +112,8 @@ flutter:
     - assets/images/puskesmasheader.jpeg
     - assets/images/profile_placeholder.png
     - assets/images/logoanapanca.png
+    - assets/images/bgapk.png
+    - assets/images/dangerdisaster.jpg
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

@@ -12,6 +12,7 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStateMixin {
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _verificationCodeController = TextEditingController(); // Add this controller
   bool _isPasswordVisible = false;
   bool _isSignUpPressed = false;
   final DatabaseHelper _dbHelper = DatabaseHelper();
@@ -34,34 +35,58 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
     _controller.dispose();
     _usernameController.dispose();
     _passwordController.dispose();
+    _verificationCodeController.dispose(); // Dispose the verification code controller
     super.dispose();
   }
 
-  Future<void> _login() async {
-    final username = _usernameController.text;
-    final password = _passwordController.text;
+ Future<void> _login() async {
+  final username = _usernameController.text;
+  final password = _passwordController.text;
+  final verificationCode = _verificationCodeController.text;
 
-    final userId = await _dbHelper.verifyLogin(username, password);
-    if (userId != null) {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setInt('userId', userId);
-      await prefs.setBool('isLoggedIn', true);
-      
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => DashboardScreen(userId: userId),
-        ),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Login failed'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
+  if (!_isValidInput(username, password, verificationCode)) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Please enter valid username, password, and verification code'),
+        backgroundColor: Colors.red,
+      ),
+    );
+    return;
   }
+
+  final userId = await _dbHelper.verifyLogin(username, password, verificationCode);
+
+  if (userId != null) {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('userId', userId);
+    await prefs.setBool('isLoggedIn', true);
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => DashboardScreen(userId: userId),
+      ),
+    );
+  } else {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Login failed. Please check your username, password, and verification code.'),
+        backgroundColor: Colors.red,
+      ),
+    );
+  }
+}
+
+
+bool _isValidInput(String username, String password, String verificationCode) {
+  if (username.isEmpty || password.isEmpty || verificationCode.isEmpty) {
+    return false;
+  }
+  return true;
+}
+
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -135,6 +160,20 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                       ),
                     ),
                     obscureText: !_isPasswordVisible,
+                  ),
+                  SizedBox(height: 20),
+                  TextFormField(
+                    controller: _verificationCodeController,
+                    decoration: InputDecoration(
+                      hintText: 'Verification Code',
+                      filled: true,
+                      fillColor: Colors.grey[200],
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30),
+                        borderSide: BorderSide.none,
+                      ),
+                      contentPadding: EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+                    ),
                   ),
                   SizedBox(height: 10),
                   Align(

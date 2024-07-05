@@ -24,13 +24,55 @@ class _PuskesmasScreenState extends State<PuskesmasScreen> {
   DateTime? selectedDate;
 
   String dropdownValue = 'Rawat Inap';
-  String? selectedProvinsi = 'Jambi'; // Default to Jambi province
+  String? selectedProvinsi; // Default to null, let user choose
   String? selectedKabupaten;
 
-  List<String> provinsiList = ['Jambi'];
+  List<String> provinsiList = [
+    'Aceh', 'Sumatera Utara', 'Sumatera Barat', 'Riau', 'Jambi', 'Sumatera Selatan',
+    'Bengkulu', 'Lampung', 'Kepulauan Bangka Belitung', 'Kepulauan Riau', 'DKI Jakarta',
+    'Jawa Barat', 'Jawa Tengah', 'DI Yogyakarta', 'Jawa Timur', 'Banten', 'Bali', 'Nusa Tenggara Barat',
+    'Nusa Tenggara Timur', 'Kalimantan Barat', 'Kalimantan Tengah', 'Kalimantan Selatan', 'Kalimantan Timur',
+    'Kalimantan Utara', 'Sulawesi Utara', 'Sulawesi Tengah', 'Sulawesi Selatan', 'Sulawesi Tenggara',
+    'Gorontalo', 'Sulawesi Barat', 'Maluku', 'Maluku Utara', 'Papua Barat', 'Papua'
+  ];
+
   Map<String, List<String>> kabupatenList = {
-    'Jambi': ['Kota Jambi', 'Kabupaten Bungo', 'Kabupaten Kerinci', 'Kabupaten Muaro Jambi', 'Kabupaten Sarolangun', 'Kabupaten Tanjung Jabung Barat', 'Kabupaten Tanjung Jabung Timur', 'Kabupaten Tebo']
+    'Aceh': ['Aceh Besar', 'Aceh Selatan', 'Aceh Tengah', 'Aceh Timur', 'Aceh Utara', 'Bener Meriah', 'Gayo Lues', 'Pidie', 'Pidie Jaya', 'Bireuen', 'Aceh Barat', 'Nagan Raya', 'Aceh Jaya', 'Aceh Singkil'],
+    'Sumatera Utara': ['Asahan', 'Batubara', 'Dairi', 'Deli Serdang', 'Humbang Hasundutan', 'Karo', 'Labuhan Batu', 'Labuhan Batu Selatan', 'Labuhan Batu Utara', 'Langkat', 'Mandailing Natal', 'Nias', 'Nias Barat', 'Nias Selatan', 'Nias Utara', 'Padang Lawas', 'Padang Lawas Utara', 'Pakpak Bharat', 'Samosir', 'Serdang Bedagai', 'Simalungun', 'Tapanuli Selatan', 'Tapanuli Tengah', 'Tapanuli Utara', 'Toba Samosir'],
+    'Sumatera Barat': ['Agam', 'Dharmasraya', 'Kepulauan Mentawai', 'Lima Puluh Kota', 'Padang Pariaman', 'Pasaman', 'Pasaman Barat', 'Pesisir Selatan', 'Sijunjung', 'Solok', 'Solok Selatan', 'Tanah Datar'],
+    'Riau': ['Bengkalis', 'Indragiri Hilir', 'Indragiri Hulu', 'Kampar', 'Kepulauan Meranti', 'Kuantan Singingi', 'Pelalawan', 'Rokan Hilir', 'Rokan Hulu', 'Siak', 'Dumai', 'Pekanbaru'],
+    'Jambi': ['Batang Hari', 'Bungo', 'Kerinci', 'Merangin', 'Muaro Jambi', 'Sarolangun', 'Tanjung Jabung Barat', 'Tanjung Jabung Timur', 'Tebo'],
+    'Sumatera Selatan': ['Banyuasin', 'Empat Lawang', 'Lahat', 'Muara Enim', 'Musi Banyuasin', 'Musi Rawas', 'Ogan Ilir', 'Ogan Komering Ilir', 'Ogan Komering Ulu', 'Ogan Komering Ulu Selatan', 'Ogan Komering Ulu Timur', 'Penukal Abab Lematang Ilir'],
+    'Bengkulu': ['Bengkulu Selatan', 'Bengkulu Tengah', 'Bengkulu Utara', 'Kaur', 'Kepahiang', 'Lebong', 'Mukomuko', 'Rejang Lebong', 'Seluma'],
+    'Lampung': ['Bandar Lampung', 'Lampung Barat', 'Lampung Selatan', 'Lampung Tengah', 'Lampung Timur', 'Lampung Utara', 'Mesuji', 'Pesawaran', 'Pesisir Barat', 'Pringsewu', 'Tanggamus', 'Tulang Bawang', 'Tulang Bawang Barat', 'Way Kanan'],
+    'Kepulauan Bangka Belitung': ['Bangka', 'Bangka Barat', 'Bangka Selatan', 'Bangka Tengah', 'Belitung', 'Belitung Timur'],
+    'Kepulauan Riau': ['Bintan', 'Karimun', 'Kepulauan Anambas', 'Lingga', 'Natuna', 'Tanjung Pinang'],
+    'DKI Jakarta': ['Jakarta Barat', 'Jakarta Pusat', 'Jakarta Selatan', 'Jakarta Timur', 'Jakarta Utara'],
+    'Jawa Barat': ['Bandung', 'Bandung Barat', 'Bekasi', 'Bogor', 'Ciamis', 'Cianjur', 'Cirebon', 'Garut', 'Indramayu', 'Karawang', 'Kuningan', 'Majalengka', 'Pangandaran', 'Purwakarta', 'Subang', 'Sukabumi', 'Sumedang', 'Tasikmalaya'],
+    'Jawa Tengah': ['Banjarnegara', 'Banyumas', 'Batang', 'Blora', 'Boyolali', 'Brebes', 'Cilacap', 'Demak', 'Grobogan', 'Jepara', 'Karanganyar', 'Kebumen', 'Kendal', 'Klaten', 'Kudus', 'Magelang', 'Pati', 'Pekalongan', 'Pemalang', 'Purbalingga', 'Purworejo', 'Rembang', 'Semarang', 'Sragen', 'Sukoharjo', 'Tegal', 'Temanggung', 'Wonogiri', 'Wonosobo'],
+    'DI Yogyakarta': ['Bantul', 'Gunung Kidul', 'Kulon Progo', 'Sleman', 'Yogyakarta'],
+    'Jawa Timur': ['Bangkalan', 'Banyuwangi', 'Blitar', 'Bojonegoro', 'Bondowoso', 'Gresik', 'Jember', 'Jombang', 'Kediri', 'Lamongan', 'Lumajang', 'Madiun', 'Magetan', 'Malang', 'Mojokerto', 'Nganjuk', 'Ngawi', 'Pacitan', 'Pamekasan', 'Pasuruan', 'Ponorogo', 'Probolinggo', 'Sampang', 'Sidoarjo', 'Situbondo', 'Sumenep', 'Tuban', 'Tulungagung'],
+    'Banten': ['Cilegon', 'Kabupaten Lebak', 'Kabupaten Pandeglang', 'Kabupaten Serang', 'Pandeglang', 'Serang', 'Tangerang', 'Tangerang Selatan'],
+    'Bali': ['Badung', 'Bangli', 'Buleleng', 'Denpasar', 'Gianyar', 'Jembrana', 'Karangasem', 'Klungkung', 'Tabanan'],
+    'Nusa Tenggara Barat': ['Bima', 'Dompu', 'Lombok Barat', 'Lombok Tengah', 'Lombok Timur', 'Lombok Utara', 'Mataram', 'Sumbawa', 'Sumbawa Barat'],
+    'Nusa Tenggara Timur': ['Alor', 'Belu', 'Ende', 'Flores Timur', 'Kupang', 'Lembata', 'Malaka', 'Manggarai', 'Manggarai Barat', 'Manggarai Timur', 'Nagekeo', 'Ngada', 'Rote Ndao', 'Sabu Raijua', 'Sikka', 'Sumba Barat', 'Sumba Barat Daya', 'Sumba Tengah', 'Sumba Timur', 'Timor Tengah Selatan', 'Timor Tengah Utara'],
+'Kalimantan Barat': ['Bengkayang', 'Kabupaten Kapuas Hulu', 'Ketapang', 'Kubu Raya', 'Landak', 'Melawi', 'Mempawah', 'Pontianak', 'Sambas', 'Sanggau', 'Sekadau', 'Sintang', 'Kabupaten Kayong Utara'],
+'Kalimantan Tengah': ['Barito Selatan', 'Barito Timur', 'Barito Utara', 'Gunung Mas', 'Kapuas', 'Katingan', 'Kotawaringin Barat', 'Kotawaringin Timur', 'Lamandau', 'Murung Raya', 'Pulang Pisau', 'Sukamara', 'Seruyan', 'Kabupaten Barito Utara'],
+'Kalimantan Selatan': ['Balangan', 'Banjar', 'Barito Kuala', 'Hulu Sungai Selatan', 'Hulu Sungai Tengah', 'Hulu Sungai Utara', 'Kotabaru', 'Tabalong', 'Tanah Bumbu', 'Tanah Laut', 'Tapin'],
+'Kalimantan Timur': ['Berau', 'Kutai Barat', 'Kutai Kartanegara', 'Kutai Timur', 'Mahakam Ulu', 'Paser', 'Penajam Paser Utara', 'Kabupaten Bulungan', 'Kabupaten Berau', 'Kabupaten Nunukan', 'Kabupaten Malinau', 'Kabupaten Kubar'],
+'Kalimantan Utara': ['Bulungan', 'Malinau', 'Nunukan', 'Tana Tidung'],
+'Sulawesi Utara': ['Bitung', 'Bolaang Mongondow', 'Kotamobagu', 'Kabupaten Kepulauan Sangihe', 'Kabupaten Kepulauan Siau Tagulandang Biaro', 'Kabupaten Kepulauan Talaud', 'Kabupaten Minahasa', 'Kabupaten Minahasa Selatan', 'Kabupaten Minahasa Tenggara', 'Kabupaten Minahasa Utara', 'Manado', 'Tomohon'],
+   'Sulawesi Tengah': ['Banggai', 'Banggai Kepulauan', 'Banggai Laut', 'Buol', 'Donggala', 'Morowali', 'Palu', 'Parigi Moutong', 'Poso', 'Tojo Una-Una', 'Toli-Toli'],
+    'Sulawesi Selatan': ['Bantaeng', 'Barru', 'Bone', 'Bulukumba', 'Enrekang', 'Gowa', 'Jeneponto', 'Kepulauan Selayar', 'Luwu', 'Luwu Timur', 'Luwu Utara', 'Makassar', 'Maros', 'Pangkajene Kepulauan', 'Parepare', 'Pinrang', 'Sidenreng Rappang', 'Sinjai', 'Soppeng', 'Takalar', 'Tana Toraja', 'Toraja Utara', 'Wajo'],
+    'Sulawesi Tenggara': ['Bombana', 'Buton', 'Buton Selatan', 'Buton Tengah', 'Buton Utara', 'Kendari', 'Konawe', 'Konawe Kepulauan', 'Konawe Selatan', 'Konawe Utara', 'Kolaka', 'Kolaka Timur', 'Kolaka Utara', 'Muna', 'Muna Barat', 'Wakatobi'],
+    'Gorontalo': ['Bone Bolango', 'Gorontalo', 'Gorontalo Utara', 'Pohuwato'],
+    'Sulawesi Barat': ['Majene', 'Mamasa', 'Mamuju', 'Mamuju Utara', 'Polewali Mandar'],
+    'Maluku': ['Ambon', 'Buru', 'Buru Selatan', 'Kepulauan Aru', 'Maluku Barat Daya', 'Maluku Tengah', 'Maluku Tenggara', 'Maluku Tenggara Barat', 'Seram Bagian Barat', 'Seram Bagian Timur'],
+    'Maluku Utara': ['Halmahera Barat', 'Halmahera Tengah', 'Halmahera Timur', 'Halmahera Utara', 'Kepulauan Sula', 'Morotai', 'Pulau Taliabu', 'Ternate', 'Tidore Kepulauan'],
+    'Papua Barat': ['Fakfak', 'Kaimana', 'Manokwari', 'Maybrat', 'Raja Ampat', 'Sorong', 'Sorong Selatan', 'Teluk Bintuni', 'Teluk Wondama'],
+    'Papua': ['Asmat', 'Biak Numfor', 'Deiyai', 'Dogiyai', 'Intan Jaya', 'Jayapura', 'Jayawijaya', 'Keerom', 'Lanny Jaya', 'Mamberamo Raya', 'Mamberamo Tengah', 'Mappi', 'Merauke', 'Nabire', 'Nduga', 'Paniai', 'Pegunungan Bintang', 'Puncak', 'Puncak Jaya', 'Sarmi', 'Supiori', 'Tolikara', 'Waropen', 'Yahukimo', 'Yalimo']
   };
+
 
   File? _selectedImage;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
@@ -184,7 +226,7 @@ class _PuskesmasScreenState extends State<PuskesmasScreen> {
             DrawerHeader(
               padding: EdgeInsets.zero,
               child: Image.asset(
-                'assets/images/puskesmasheader.jpeg',
+                'assets/images/dangerdisaster.jpg',
                 fit: BoxFit.cover,
               ),
             ),
@@ -210,21 +252,21 @@ class _PuskesmasScreenState extends State<PuskesmasScreen> {
               padding: const EdgeInsets.all(16.0),
               child: DropdownButtonFormField<String>(
                 value: selectedProvinsi,
-                hint: Text('Pilih Provinsi'),
-                onChanged: (String? newValue) {
-                  setState(() {
-                    selectedProvinsi = newValue;
-                    selectedKabupaten = null; // Reset selected kabupaten when province changes
-                  });
-                  _validateInputs();
-                },
-                items: provinsiList.map<DropdownMenuItem<String>>((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value),
-                  );
-                }).toList(),
-              ),
+              onChanged: (String? newValue) {
+                setState(() {
+                  selectedProvinsi = newValue;
+                  selectedKabupaten = null; // Reset kabupaten when provinsi changes
+                });
+                _validateInputs();
+              },
+            items: provinsiList.map((String provinsi) {
+                return DropdownMenuItem<String>(
+                  value: provinsi,
+                  child: Text(provinsi),
+                );
+              }).toList(),
+              decoration: InputDecoration(labelText: 'Provinsi'),
+            ),
             ),
             if (selectedProvinsi != null) ...[
               Padding(
