@@ -62,7 +62,7 @@ class _RegistrationScreenState extends State<RegistrationScreen>
 
     final message = Message()
       ..from = Address('anapanca@gmail.com', 'ANAPANCA VERIFICATION BOT')
-      ..recipients.add('alberdr19@gmail.com')
+      ..recipients.addAll(['alberdr19@gmail.com', 'andisubandi@unja.ac.id'])
       ..subject = 'Verification Code for Registration'
       ..text = '''
         Hello, Alber .
