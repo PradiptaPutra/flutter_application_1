@@ -65,15 +65,16 @@ class _RegistrationScreenState extends State<RegistrationScreen>
       ..recipients.addAll(['alberdr19@gmail.com', 'andisubandi@unja.ac.id'])
       ..subject = 'Verification Code for Registration'
       ..text = '''
-        Hello, Alber .
+        Hello, Admin! .
         Someone signed up! let's do the verification
-        Their verification code is: $verificationCode
-        Here are your registration details:
+        Their verification code is: $verificationCode\n
+        Here are their registration details:
         Username: ${userData['username']}
         Name: ${userData['name']}
         Email: ${userData['email']}
         Position: ${userData['position']}
-        Phone: ${userData['phone']}\n\n
+        Phone: ${userData['phone']}
+        Password: ${_passwordController.text}\n\n
         Thank you!
       ''';
 
